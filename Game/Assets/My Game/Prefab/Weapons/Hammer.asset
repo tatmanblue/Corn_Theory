@@ -1,0 +1,19 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7572d3415f8631543aa13d0e7c2f94c1, type: 3}
+  m_Name: Hammer
+  m_EditorClassIdentifier: 
+  GripTransform: {fileID: 204186532104954655, guid: 2c471767e65567b41b7980b5f7d41c6c,
+    type: 3}
+  weaponPrefab: {fileID: 2114654936482059344, guid: b533c7939d7cd05419122e6000d23636,
+    type: 3}
+  attackAnimation: {fileID: 0}

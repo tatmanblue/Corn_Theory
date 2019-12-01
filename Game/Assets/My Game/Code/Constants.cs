@@ -19,7 +19,8 @@ namespace TBD
 
         // Scenes 
         public static readonly string MainMenuScene = "Main Menu";
-        public static readonly string MainWorldScene = "3 - Terrain";
+        public static readonly string MainWorldScene = "3 - Main World";
+        public static readonly string MainWorldSceneOld = "3 - Terrain";
         public static readonly string OpenMenuScene = "Main Menu";
         public static readonly string DevPlayArenaScene = "Play Arena";
 

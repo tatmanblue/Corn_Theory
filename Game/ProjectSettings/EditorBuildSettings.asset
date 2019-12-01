@@ -11,4 +11,10 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/My Game/Scenes/Play Arena.unity
     guid: f19b95895725d4645bb5f84752770604
+  - enabled: 1
+    path: Assets/My Game/Scenes/3 - Main World.unity
+    guid: bccac3f681734f748a7fa2cadf5e324c
+  - enabled: 1
+    path: Assets/My Game/Scenes/3 - Terrain.unity
+    guid: b39eff7f26f03694a9a59ae66f13dba0
   m_configObjects: {}
