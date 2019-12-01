@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace TBD.Missions
+namespace CornTheory.Missions
 {
     /// <summary>
     /// This class assists UI with building the missions list

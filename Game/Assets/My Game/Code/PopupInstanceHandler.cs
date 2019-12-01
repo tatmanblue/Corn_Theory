@@ -3,10 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using TBD.Player;
+using CornTheory.Player;
 using UnityEngine;
 
-namespace TBD
+namespace CornTheory
 {
     /// <summary>
     /// Contains code for instantiating popup windows.  These windows stop interaction
@@ -69,7 +69,7 @@ namespace TBD
             if (null != canvas)
                 popup.transform.SetParent(canvas.transform, false);
 
-            popup.GetComponent<TBD.Popup2>().Open();
+            popup.GetComponent<CornTheory.Popup2>().Open();
         }
     }
 }

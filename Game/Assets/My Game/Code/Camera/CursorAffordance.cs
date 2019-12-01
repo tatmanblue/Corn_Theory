@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace TBD.Camera
+namespace CornTheory.Camera
 {
     /// <summary>
     /// purpose is to set the cursor the player sees based on 

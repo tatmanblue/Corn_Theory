@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace TBD.Player
+namespace CornTheory.Player
 {
     /// <summary>
     /// Purpose is to handle keyboard input in the game when not interacting with UI

@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace TBD.Missions
+namespace CornTheory.Missions
 {
     [Serializable]
     public class Mission : IMission

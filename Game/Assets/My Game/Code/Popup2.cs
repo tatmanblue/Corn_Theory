@@ -5,9 +5,9 @@
 using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
-using TBD.Player;
+using CornTheory.Player;
 
-namespace TBD
+namespace CornTheory
 {
     // This class is responsible for popup management. Popups follow the traditional behavior of
     // automatically blocking the input on elements behind it and adding a background texture.

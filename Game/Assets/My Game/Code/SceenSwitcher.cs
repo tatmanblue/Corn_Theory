@@ -1,10 +1,10 @@
 ﻿using UnityEngine;
 using UnityEngine.SceneManagement;
 
-using TBD.Missions;
-using TBD.Player;
+using CornTheory.Missions;
+using CornTheory.Player;
 
-namespace TBD
+namespace CornTheory
 {
     public class SceenSwitcher : MonoBehaviour
     {

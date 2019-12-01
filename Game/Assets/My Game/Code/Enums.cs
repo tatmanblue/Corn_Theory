@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace TBD
+namespace CornTheory
 {
     /// <summary>
     /// identifies where in the UI the game is

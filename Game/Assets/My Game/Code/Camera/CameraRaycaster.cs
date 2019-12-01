@@ -3,7 +3,7 @@ using UnityEngine.EventSystems;
 using System.Linq;
 using System.Collections.Generic;
 
-namespace TBD.Camera
+namespace CornTheory.Camera
 {
     // requires an event system in place
     public class CameraRaycaster : MonoBehaviour

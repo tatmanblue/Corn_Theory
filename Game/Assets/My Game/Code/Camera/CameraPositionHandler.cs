@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 
-namespace TBD.Camera
+namespace CornTheory.Camera
 {
     /// <summary>
     /// currently in camera arm object

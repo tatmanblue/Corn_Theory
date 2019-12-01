@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using UnityStandardAssets.Characters.ThirdPerson;
 
-namespace TBD.NonPlayer
+namespace CornTheory.NonPlayer
 {
 	public class NPC : MonoBehaviour
 	{
@@ -71,11 +71,12 @@ namespace TBD.NonPlayer
 
 		GameObject RequestWeaponAttachPoint()
 		{
-			// DominateHand[] possibleAttachPoints = GetComponentsInChildren<DominateHand>();
-			//if (0 == possibleAttachPoints.Length)
-			//	return null;
+            // DominateHand[] possibleAttachPoints = GetComponentsInChildren<DominateHand>();
+            //if (0 == possibleAttachPoints.Length)
+            //	return null;
 
-			//return possibleAttachPoints[0].gameObject;
+            //return possibleAttachPoints[0].gameObject;
+            return null;
 		}
 
 		void PutWeaponInHand()

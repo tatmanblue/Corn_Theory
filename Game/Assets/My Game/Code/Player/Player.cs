@@ -1,9 +1,9 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
-using TBD.Camera;
+using CornTheory.Camera;
 using UnityEngine;
 
-namespace TBD.Player
+namespace CornTheory.Player
 {
     public class Player : MonoBehaviour
     {

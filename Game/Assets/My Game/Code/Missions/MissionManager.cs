@@ -1,10 +1,10 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
-using TBD.Player;
+using CornTheory.Player;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-namespace TBD.Missions
+namespace CornTheory.Missions
 {
     public class MissionManager : MonoBehaviour, IMissionManager
     {

@@ -270,7 +270,7 @@ GameObject:
   - component: {fileID: 2900878189689936618}
   - component: {fileID: 2900878189689936617}
   - component: {fileID: 2900878189689936616}
-  - component: {fileID: 2900878189689936619}
+  - component: {fileID: 940122610}
   m_Layer: 9
   m_Name: Police Lady
   m_TagString: Untagged
@@ -406,7 +406,7 @@ MonoBehaviour:
   m_MoveSpeedMultiplier: 0.75
   m_AnimSpeedMultiplier: 1
   m_GroundCheckDistance: 0.5
---- !u!114 &2900878189689936619
+--- !u!114 &940122610
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -415,16 +415,17 @@ MonoBehaviour:
   m_GameObject: {fileID: 2900878189689936532}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 301cca2140eacb044b088f163ddccc5a, type: 3}
+  m_Script: {fileID: 11500000, guid: 2901b71e10f2f0d4b8b4a53bd7989a04, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   drawGizmos: 0
-  chaseRadius: 20
+  chaseRadius: 10
+  stoppingRadius: 1
   chasePlayer: 1
   speechRadius: 0
   speechTextId: 0
-  weapon: {fileID: 11400000, guid: 2271aabb817f7814dbab5c978ad1aea6, type: 2}
   weaponAttachPoint: {fileID: 0}
+  missionId: 0
 --- !u!1 &2900878189698889060
 GameObject:
   m_ObjectHideFlags: 0
@@ -2542,7 +2543,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 2900878191349681819}
-  - component: {fileID: 1216820714}
   m_Layer: 9
   m_Name: Hand_L
   m_TagString: Untagged
@@ -2567,18 +2567,6 @@ Transform:
   m_Father: {fileID: 2900878191050495431}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1216820714
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2900878191349681796}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 597df97d71fa8a540b2e343a216e58a7, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!1 &2900878191393774616
 GameObject:
   m_ObjectHideFlags: 0

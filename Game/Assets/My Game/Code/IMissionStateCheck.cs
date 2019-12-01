@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace TBD
+namespace CornTheory
 {
     /// <summary>
     /// implementations are called to check if the mission has completed

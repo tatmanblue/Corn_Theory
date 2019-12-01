@@ -3,10 +3,10 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
 using UnityStandardAssets.Characters.ThirdPerson;
-using TBD.Camera;
+using CornTheory.Camera;
 using UnityStandardAssets.CrossPlatformInput;
 
-namespace TBD.Player
+namespace CornTheory.Player
 {
 
     [RequireComponent(typeof(NavMeshAgent))]

@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using TBD.Missions;
+using CornTheory.Missions;
 using UnityEngine;
 
-namespace TBD.Player
+namespace CornTheory.Player
 {
     public class PlayerState
     {
