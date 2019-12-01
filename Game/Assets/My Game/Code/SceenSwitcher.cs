@@ -16,24 +16,41 @@ namespace CornTheory
         [Header("Scene Change Options")]
         [SerializeField] bool showMissionsSceneStart = false;
         [SerializeField] float showDelay = 0.75f;
+        [SerializeField] Material skyBox = null;
 
         void OnSceneLoaded(Scene scene, LoadSceneMode mode)
         {
             print("scene loaded: " + scene.name);
+            SetSkyBox(scene);
+            InvokeMissionPopup(scene);
+            SetCursor();
+        }
 
-            if ((scene.name == Constants.MainWorldScene && true == showMissionsSceneStart) 
+        private void SetSkyBox(Scene scene)
+        {
+            if (null == skyBox)
+                return;
+
+            RenderSettings.skybox = skyBox;
+        }
+
+        private void InvokeMissionPopup(Scene scene)
+        {
+            if ((scene.name == Constants.MainWorldScene && true == showMissionsSceneStart)
                 || scene.name == Constants.DevPlayArenaScene)
             {
                 PlayerState.Instance.GameState = GameUIState.InWorld;
                 var missionManager = FindObjectOfType<MissionManager>();
                 missionManager.Invoke("SceneOpened", showDelay);
             }
+        }
 
+        private void SetCursor()
+        {
             if (null == defaultCursor)
                 return;
 
             Cursor.SetCursor(defaultCursor, defaultCursorHotspot, CursorMode.Auto);
-
         }
 
         private void Awake()
