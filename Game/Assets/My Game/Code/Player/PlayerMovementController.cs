@@ -19,11 +19,11 @@ namespace TBD.Player
 
         // TODO fix duplicate with CursorAffordance
         // TODO fix issue between const and serializable
-        [SerializeField] const int enemyLayerNumber = 8;
-        [SerializeField] const int npcLayerNumber = 9;
-        [SerializeField] const int walkableLayerNumber = 10;
-        [SerializeField] const int hackableLayerNumber = 11;
-        [SerializeField] const int notWalkableLayerNumber = 12;
+        [SerializeField] const int enemyLayerNumber = 9;
+        [SerializeField] const int npcLayerNumber = 10;
+        [SerializeField] const int walkableLayerNumber = 11;
+        [SerializeField] const int hackableLayerNumber = 12;
+        [SerializeField] const int notWalkableLayerNumber = 13;
         [SerializeField] const int endStopRaycasterId = -1;
 
 

@@ -14,10 +14,10 @@ TagManager:
   - 
   - 
   - PostProcessing
-  - 
-  - 
-  - 
-  - 
+  - Enemy
+  - NPC
+  - Walkable
+  - Hackable
   - 
   - 
   - 

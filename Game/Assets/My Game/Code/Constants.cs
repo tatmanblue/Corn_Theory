@@ -14,6 +14,12 @@ namespace TBD
         public static readonly string MainCamera = "Main Camera";
         public static readonly string MissionMananger = "Mission Manager";
 
+        // skybox - makes materials name
+        public static readonly string SunUpSkyBox = "";
+        public static readonly string SunDownSkyBox = "";
+        public static readonly string DayTimeSkyBox = "Day Sun High CloudsLayer 2";
+        public static readonly string NightTimeSkyBox = "";
+
         // GameObject Tags
         public static readonly string TagMainCamera = "MainCamera";
 
