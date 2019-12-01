@@ -13,7 +13,7 @@ GameObject:
   m_Layer: 0
   m_Name: SceneSwitchController
   m_TagString: Untagged
-  m_Icon: {fileID: 0}
+  m_Icon: {fileID: 2974397684917235467, guid: 0000000000000000d000000000000000, type: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
@@ -43,7 +43,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: edfb64f5359375544867d36a2e23b076, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  defaultCursor: {fileID: 0}
+  defaultCursor: {fileID: 2800000, guid: eb67d01b6ea8f2c47b52d59e1020d13f, type: 3}
   defaultCursorHotspot: {x: 0, y: 0}
   busyCursor: {fileID: 2800000, guid: 1614d32b48332ac429c4f09189aa473a, type: 3}
   busyCursorHotspot: {x: 0, y: 0}

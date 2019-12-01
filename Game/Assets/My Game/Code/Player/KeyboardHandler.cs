@@ -33,12 +33,21 @@ namespace TBD.Player
             if (GameUIState.InWorldUI == PlayerState.Instance.GameState)
                 return;
 
+            /**
+             *  HANDLE keyboard events not for camera control first
+             */
+            if (Input.GetKeyDown(KeyCode.Escape))
+            {
+                print("Keyboardhandler got escape key");
+                popupHandler.ShowQuitConfirm();
+            }
+
             if (null == cameraController)
             {
                 cameraController = GetComponent<ICameraControl>() as ICameraControl;
                 if (null == cameraController)
                 {
-                    print("Error: no ICameraControl found!");
+                    // print("Error: no ICameraControl found!");
                     return;
                 }
             }
@@ -66,12 +75,6 @@ namespace TBD.Player
             if (Input.GetKeyDown(KeyCode.Home))
             {
                 cameraController.GotoHomePosition();
-            }
-
-            if (Input.GetKeyDown(KeyCode.Escape))
-            {
-                print("Keyboardhandler got escape key");
-                popupHandler.ShowQuitConfirm();
             }
         }
     }

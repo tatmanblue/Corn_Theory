@@ -35,8 +35,8 @@ namespace TBD.Player
         // Use this for initialization
         void Start()
         {
-            raycaster = FindObjectOfType<CameraRaycaster>();
-            raycaster.NotifyMouseClickObservers += Raycaster_NotifyMouseClickObservers;
+            // raycaster = FindObjectOfType<CameraRaycaster>();
+            // raycaster.NotifyMouseClickObservers += Raycaster_NotifyMouseClickObservers;
 
             OverrideAnimationController();
         }
