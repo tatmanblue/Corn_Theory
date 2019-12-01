@@ -6,28 +6,21 @@ namespace CornTheory.NonPlayer
 	public class NPC : MonoBehaviour
 	{
 		[SerializeField] bool drawGizmos = false;
-		[SerializeField] float chaseRadius = 0f;
-		[SerializeField] float stoppingRadius = 1f;
-		[SerializeField] bool chasePlayer = true;
-
-		// TODO:  this should be removed now that we have a different system
-		[Header("Speech Enginer - Obsolete")]
-		[SerializeField] float speechRadius = 0f;
-		[SerializeField] int speechTextId = 0;
+		[SerializeField] float chaseRadius = 0f;                    // how close the player must get before NPC chases player
+		[SerializeField] float stoppingRadius = 1f;                 // distance NPC stands next to player
+        [SerializeField] float breakRadius = 1f;                    // distance to break off chasing player and return "home"
+        [SerializeField] bool chasePlayer = true;
 
 		[Header("Weapon")]
 		// [SerializeField] Weapon weapon;
 		[SerializeField] GameObject weaponAttachPoint;
 
 		[Header("Missions")]
-		[SerializeField] int missionId = 0;
+		[SerializeField] int missionId = 0;                         // converstation or other interaction satifies mission
 
-		// INPCSpeechEngine speechEngine = null;
-		ThirdPersonCharacter character = null;
 		AICharacterControl characterControl = null;
 		Vector3 homePosition;
 		GameObject player = null;
-		bool isTalking = false;
 
 		private void OnDrawGizmos()
 		{
@@ -40,18 +33,16 @@ namespace CornTheory.NonPlayer
 				Gizmos.DrawWireSphere(transform.position, chaseRadius);
 			}
 
-			if (0 < speechRadius && 0 < speechTextId)
-			{
-				Gizmos.color = Color.red;
-				Gizmos.DrawWireSphere(transform.position, speechRadius);
-			}
-
+            if (true == chasePlayer && 0 < breakRadius)
+            {
+                Gizmos.color = Color.red;
+                Gizmos.DrawWireSphere(transform.position, breakRadius);
+            }
 		}
 
 		void Start ()
 		{
 			player = GameObject.FindGameObjectWithTag("Player");
-			character = GetComponent<ThirdPersonCharacter>();
 			characterControl = GetComponent<AICharacterControl>();
 			homePosition = transform.position;
 
@@ -60,13 +51,7 @@ namespace CornTheory.NonPlayer
 		
 		void Update ()
 		{
-			//if (null == speechEngine)
-			//{
-			//	speechEngine = GetComponent<INPCSpeechEngine>() as INPCSpeechEngine;
-			//}
-
 			MoveToPlayer();
-			TalkToPlayer();
 		}
 
 		GameObject RequestWeaponAttachPoint()
@@ -116,42 +101,6 @@ namespace CornTheory.NonPlayer
 			else
 				characterControl.target = null;
 		}
-
-		void TalkToPlayer()
-		{
-			if (0 == speechTextId) return;
-
-			float distanceToPlayer = GetDistanceToPlayer();
-
-			if (false == isTalking && distanceToPlayer < speechRadius)
-			{
-				isTalking = true;
-				InvokeRepeating("SaySomethingToPlayer", 0.1f, 2.0F);
-				return;
-			}
-
-			if (true == isTalking && distanceToPlayer >= speechRadius)
-				isTalking = false;
-		}
-
-		private void CancelSaySomethingToPlayer()
-		{
-			CancelInvoke("SaySomethingToPlayer");
-		}
-
-		void SaySomethingToPlayer()
-		{
-			//if (null == speechEngine)
-			//{
-			//	CancelSaySomethingToPlayer();
-			//	isTalking = false;
-			//	return;
-			//}
-
-			//isTalking = true;
-			//speechEngine.PrintTextOnScreen("say something");
-		}
-
 
 	}
 }
