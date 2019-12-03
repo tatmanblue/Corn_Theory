@@ -112,31 +112,6 @@ NavMeshSettings:
     debug:
       m_Flags: 0
   m_NavMeshData: {fileID: 23800000, guid: 3e2177276504eaf4391e669eeab0a340, type: 2}
---- !u!1 &116503126 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 175663365783230004, guid: a2dedb96f69f0b442af0797e2a1e6fc8,
-    type: 3}
-  m_PrefabInstance: {fileID: 175663366436245153}
-  m_PrefabAsset: {fileID: 0}
---- !u!114 &116503127
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 116503126}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 1077351063, guid: f70555f144d8491a825f0804e09c671c, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  m_HorizontalAxis: Horizontal
-  m_VerticalAxis: Vertical
-  m_SubmitButton: Submit
-  m_CancelButton: Cancel
-  m_InputActionsPerSecond: 10
-  m_RepeatDelay: 0.5
-  m_ForceModuleActive: 0
 --- !u!4 &221609436 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 1246653438, guid: 2d444cfc06adde747b226e4101be9755,
@@ -210,11 +185,6 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: 4525549078543105231, guid: 8c12bd7bf169838428246b111f78e6bd,
-        type: 3}
-      propertyPath: defaultCursor
-      value: 
-      objectReference: {fileID: 2800000, guid: eb67d01b6ea8f2c47b52d59e1020d13f, type: 3}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 8c12bd7bf169838428246b111f78e6bd, type: 3}
 --- !u!1001 &940122608
@@ -372,11 +342,6 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Name
       value: Player2
-      objectReference: {fileID: 0}
-    - target: {fileID: 6843355101607306955, guid: 4d0fc4522d39d29429feec0c200f1216,
-        type: 3}
-      propertyPath: m_TagString
-      value: Player
       objectReference: {fileID: 0}
     - target: {fileID: 6843355101607580495, guid: 4d0fc4522d39d29429feec0c200f1216,
         type: 3}

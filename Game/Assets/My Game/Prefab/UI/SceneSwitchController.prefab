@@ -49,3 +49,4 @@ MonoBehaviour:
   busyCursorHotspot: {x: 0, y: 0}
   showMissionsSceneStart: 0
   showDelay: 0.75
+  skyBox: {fileID: 0}

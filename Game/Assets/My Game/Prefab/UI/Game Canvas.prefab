@@ -266,7 +266,8 @@ MonoBehaviour:
   onClicked:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 0}
+      - m_Target: {fileID: 497457692792176, guid: 3a8ffcbbf7e08614d99fae88bca9bbe8,
+          type: 3}
         m_MethodName: ShowInventory
         m_Mode: 1
         m_Arguments:
@@ -1052,7 +1053,8 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
-      - m_Target: {fileID: 0}
+      - m_Target: {fileID: 497457692792176, guid: 3a8ffcbbf7e08614d99fae88bca9bbe8,
+          type: 3}
         m_MethodName: ShowProfile
         m_Mode: 1
         m_Arguments:
@@ -2096,7 +2098,8 @@ MonoBehaviour:
   onClicked:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 0}
+      - m_Target: {fileID: 497457692792176, guid: 3a8ffcbbf7e08614d99fae88bca9bbe8,
+          type: 3}
         m_MethodName: ShowMissions
         m_Mode: 1
         m_Arguments:
