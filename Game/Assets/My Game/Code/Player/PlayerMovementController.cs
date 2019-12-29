@@ -27,14 +27,14 @@ namespace CornTheory.Player
         [SerializeField] const int endStopRaycasterId = -1;
 
 
-        bool isWalkingByKeyboardInput = false;
-        bool isJumping = false;
-        GameObject walkTarget;
-        AICharacterControl aiControl;
-        ThirdPersonCharacter character;
-        CameraRaycaster cameraRaycaster;
-        Vector3 currentDestination;
-        Vector3 clickPoint;
+        private bool isWalkingByKeyboardInput = false;
+        private bool isJumping = false;
+        private GameObject walkTarget;
+        private AICharacterControl aiControl;
+        private ThirdPersonCharacter character;
+        private CameraRaycaster cameraRaycaster;
+        private Vector3 currentDestination;
+        private Vector3 clickPoint;
         private Transform mainCamera;                               // A reference to the main camera in the scenes transform
 
         public void OnDrawGizmos()
