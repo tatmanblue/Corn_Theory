@@ -19,6 +19,7 @@ namespace CornTheory
         [SerializeField] private GameObject profile;
         [SerializeField] private GameObject quitConfirm;
         [SerializeField] private GameObject settings;
+        [SerializeField] private GameObject about;
 
         private GameObject canvas;
 
@@ -45,6 +46,11 @@ namespace CornTheory
         public void ShowSettings()
         {
             ShowPopup(settings);
+        }
+
+        public void ShowAbout()
+        {
+            ShowPopup(about);
         }
 
         public void ReturnControlBackToWorld()

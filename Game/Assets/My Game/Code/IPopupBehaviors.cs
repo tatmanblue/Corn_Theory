@@ -12,7 +12,7 @@ namespace CornTheory
         void ShowProfile();
         void ShowQuitConfirm();
         void ShowSettings();
-
+        void ShowAbout();
         void ReturnControlBackToWorld();
     }
 }

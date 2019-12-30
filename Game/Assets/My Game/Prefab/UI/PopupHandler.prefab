@@ -49,3 +49,4 @@ MonoBehaviour:
   quitConfirm: {fileID: 1000010087709644, guid: 663ce7649283bf64ebd100164916fb84,
     type: 3}
   settings: {fileID: 1000012717699500, guid: 6758a991c1a0a8d4ba5e5a4cde615edb, type: 3}
+  about: {fileID: 1000010087709644, guid: b5abc273eb2f2b94c8c1d428bd20cd73, type: 3}
