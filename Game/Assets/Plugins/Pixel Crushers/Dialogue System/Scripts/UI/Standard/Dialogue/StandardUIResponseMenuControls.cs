@@ -29,6 +29,7 @@ namespace PixelCrushers.DialogueSystem
         protected List<StandardUIMenuPanel> m_builtinPanels = new List<StandardUIMenuPanel>();
         protected StandardUIMenuPanel m_defaultPanel = null;
         protected Dictionary<Transform, StandardUIMenuPanel> m_actorPanelCache = new Dictionary<Transform, StandardUIMenuPanel>();
+        protected Dictionary<int, StandardUIMenuPanel> m_actorIdPanelCache = new Dictionary<int, StandardUIMenuPanel>();
         protected StandardUIMenuPanel m_currentPanel = null;
         protected Sprite m_pcPortraitSprite = null;
         protected string m_pcPortraitName = null;
@@ -51,6 +52,7 @@ namespace PixelCrushers.DialogueSystem
         protected void ClearCache()
         {
             m_actorPanelCache.Clear();
+            m_actorIdPanelCache.Clear();
         }
 
         /// <summary>
@@ -72,6 +74,15 @@ namespace PixelCrushers.DialogueSystem
             m_actorPanelCache[actorTransform] = GetPanelFromNumber(menuPanelNumber, customPanel);
         }
 
+        /// <summary>
+        /// For speakers who do not have a GameObject, this method overrides the actor's default panel.
+        /// </summary>
+        public void OverrideActorMenuPanel(Actor actor, MenuPanelNumber menuPanelNumber, StandardUIMenuPanel customPanel)
+        {
+            if (actor == null) return;
+            m_actorIdPanelCache[actor.id] = GetPanelFromNumber(menuPanelNumber, customPanel);
+        }
+
         protected Transform GetActorTransformFromID(int actorID)
         {
             var actor = DialogueManager.masterDatabase.GetActor(actorID);
@@ -86,7 +97,12 @@ namespace PixelCrushers.DialogueSystem
                 : DialogueManager.currentActor;
             if (playerTransform == null) playerTransform = DialogueManager.currentActor;
 
-            if (playerTransform == null) return m_defaultPanel;
+            if (playerTransform == null)
+            {
+                var actorId = (lastSubtitle != null && lastSubtitle.speakerInfo.isPlayer) ? lastSubtitle.speakerInfo.id : -1;
+                if (m_actorIdPanelCache.ContainsKey(actorId)) return m_actorIdPanelCache[actorId];
+                else return m_defaultPanel;
+            }
             if (m_actorPanelCache.ContainsKey(playerTransform)) return m_actorPanelCache[playerTransform];
             var dialogueActor = DialogueActor.GetDialogueActorComponent(playerTransform);
 
@@ -237,6 +253,15 @@ namespace PixelCrushers.DialogueSystem
             {
                 var panel = kvp.Value;
                 if (panel != null && !m_builtinPanels.Contains(panel)) panel.Close();
+            }
+            if (m_actorIdPanelCache.Count > 0)
+            {
+                var cachedPanels = new List<StandardUIMenuPanel>(m_actorIdPanelCache.Values);
+                foreach (var kvp in m_actorIdPanelCache)
+                {
+                    var panel = kvp.Value;
+                    if (panel != null && !m_builtinPanels.Contains(panel) && !cachedPanels.Contains(panel)) panel.Close();
+                }
             }
             ClearCache();
         }

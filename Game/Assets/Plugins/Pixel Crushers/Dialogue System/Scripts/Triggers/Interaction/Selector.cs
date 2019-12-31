@@ -514,12 +514,12 @@ namespace PixelCrushers.DialogueSystem
             }
 
             // Check for use key or button (only if releasing button on same selection):
-            if ((useKey != KeyCode.None) && Input.GetKeyDown(useKey)) return true;
+            if ((useKey != KeyCode.None) && InputDeviceManager.IsKeyDown(useKey)) return true;
             if (!string.IsNullOrEmpty(useButton))
             {
                 if (DialogueManager.instance != null && DialogueManager.getInputButtonDown == DialogueManager.instance.StandardGetInputButtonDown)
                 {
-                    return Input.GetButtonUp(useButton) && (selection == clickedDownOn);
+                    return InputDeviceManager.IsButtonUp(useButton) && (selection == clickedDownOn);
                 }
                 else
                 {

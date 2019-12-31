@@ -66,6 +66,7 @@ namespace PixelCrushers.DialogueSystem
         /// <summary>
         /// The quest entry number whose state to change.
         /// </summary>
+        [QuestEntryPopup]
         public int questEntryNumber = 1;
 
         /// <summary>

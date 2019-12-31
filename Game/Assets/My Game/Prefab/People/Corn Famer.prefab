@@ -1495,6 +1495,7 @@ GameObject:
   - component: {fileID: 1246653442}
   - component: {fileID: 1246653443}
   - component: {fileID: 221609429}
+  - component: {fileID: 622379510}
   m_Layer: 10
   m_Name: Corn Famer
   m_TagString: Untagged
@@ -1511,7 +1512,7 @@ Transform:
   m_GameObject: {fileID: 1246653439}
   m_LocalRotation: {x: 0, y: 0.7071068, z: 0, w: 0.7071068}
   m_LocalPosition: {x: -1.67, y: 0, z: 2.17}
-  m_LocalScale: {x: 0.8000005, y: 0.9, z: 0.8000005}
+  m_LocalScale: {x: 0.80000097, y: 0.9, z: 0.80000097}
   m_Children:
   - {fileID: 1603663922}
   - {fileID: 1617579691}
@@ -1571,10 +1572,10 @@ CapsuleCollider:
   m_Material: {fileID: 0}
   m_IsTrigger: 0
   m_Enabled: 1
-  m_Radius: 0.5
+  m_Radius: 1
   m_Height: 1
   m_Direction: 1
-  m_Center: {x: 0, y: 0.8, z: 0}
+  m_Center: {x: 0, y: 1.2, z: 0}
 --- !u!195 &1246653440
 NavMeshAgent:
   m_ObjectHideFlags: 0
@@ -1643,13 +1644,79 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   drawGizmos: 1
-  chaseRadius: 5
+  chaseRadius: 7
   stoppingRadius: 1
+  breakRadius: 1
   chasePlayer: 1
-  speechRadius: 0
-  speechTextId: 0
   weaponAttachPoint: {fileID: 0}
   missionId: 0
+--- !u!114 &622379510
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1246653439}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c593457cd8105e148906690e1707c592, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  trigger: 16
+  condition:
+    luaConditions: []
+    questConditions: []
+    acceptedTags: []
+    acceptedGameObjects: []
+    luaWizardIndex: -1
+    lastEvaluationValue: 0
+  setQuestState: 1
+  questName: 
+  questState: 0
+  setQuestEntryState: 0
+  questEntryNumber: 1
+  questEntryState: 0
+  luaCode: 
+  sequence: 
+  sequenceSpeaker: {fileID: 0}
+  sequenceListener: {fileID: 0}
+  waitOneFrameOnStartOrEnable: 1
+  alertMessage: 
+  textTable: {fileID: 0}
+  alertDuration: 0
+  sendMessages: []
+  barkSource: 0
+  barkConversation: 
+  barkText: 
+  barkTextSequence: 
+  barker: {fileID: 0}
+  barkTarget: {fileID: 0}
+  barkOrder: 0
+  allowBarksDuringConversations: 0
+  skipBarkIfNoValidEntries: 0
+  cacheBarkLines: 0
+  conversation: 1.1 Hello you look lost
+  conversationConversant: {fileID: 1246653438}
+  conversationActor: {fileID: 0}
+  startConversationEntryID: -1
+  exclusive: 0
+  skipIfNoValidEntries: 1
+  stopConversationOnTriggerExit: 0
+  stopConversationIfTooFar: 0
+  maxConversationDistance: 5
+  monitorConversationDistanceFrequency: 1
+  showCursorDuringConversation: 0
+  pauseGameDuringConversation: 0
+  setActiveActions: []
+  setEnabledActions: []
+  setAnimatorStateActions: []
+  onExecute:
+    m_PersistentCalls:
+      m_Calls: []
+  useConversationTitlePicker: 1
+  useBarkTitlePicker: 1
+  useQuestNamePicker: 1
+  selectedDatabase: {fileID: 11400000, guid: 8c84873648c7adc4cafae321cf65846f, type: 2}
 --- !u!1 &1284408156
 GameObject:
   m_ObjectHideFlags: 0

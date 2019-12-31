@@ -2,6 +2,7 @@
 
 using System.Collections;
 using System.Collections.Generic;
+using System.Text.RegularExpressions;
 using UnityEngine;
 using UnityEngine.Events;
 
@@ -223,7 +224,7 @@ namespace PixelCrushers.DialogueSystem
             if ((textComponent != null) && (charactersPerSecond > 0))
             {
                 if (waitOneFrameBeforeStarting) yield return null;
-                fromIndex = Tools.StripTextMeshProTags(textComponent.text.Substring(0, fromIndex)).Length;
+                fromIndex = StripRPGMakerCodes(Tools.StripTextMeshProTags(textComponent.text)).Substring(0, fromIndex).Length;
                 ProcessRPGMakerCodes();
                 if (runtimeAudioSource != null) runtimeAudioSource.clip = audioClip;
                 onBegin.Invoke();
@@ -313,6 +314,7 @@ namespace PixelCrushers.DialogueSystem
             var source = textComponent.text;
             var result = string.Empty;
             if (!source.Contains("\\")) return;
+            source = Tools.StripTextMeshProTags(source);
             int safeguard = 0;
             while (!string.IsNullOrEmpty(source) && safeguard < 9999)
             {
@@ -333,7 +335,7 @@ namespace PixelCrushers.DialogueSystem
                     source = source.Remove(0, 1);
                 }
             }
-            textComponent.text = result;
+            textComponent.text = Regex.Replace(textComponent.text, @"\\[\.\,\^\<\>]", string.Empty);
         }
 
         private bool PeelRPGMakerTokenFromFront(ref string source, out RPGMakerTokenType token)
