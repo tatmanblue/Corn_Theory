@@ -22,7 +22,6 @@ namespace CornTheory.Player
             CurrentHealth = 100;
             MaxStamina = 100;
             CurrentStamina = 100;
-            Missions = new MissionList();
         }
 
         public string When { get; private set; }
@@ -32,7 +31,6 @@ namespace CornTheory.Player
         public int MaxStamina { get; private set; }
         public int CurrentStamina { get; private set; }
         public GameUIState GameState { get; set; }
-        public MissionList Missions { get; private set; }
 
         // TODO this should be data driven
         public void LoadMissions()
@@ -40,35 +38,40 @@ namespace CornTheory.Player
             GameObject missionManager = GameObject.Find(Constants.MissionMananger);
             MissionManager instance = missionManager.GetComponent<MissionManager>();
 
-            instance.Missions.Add(new Mission()
+            instance.AddNewMission(new Mission()
             {
                 Id = 1,
-                Name = "Speak to the Farmer",
-                Description = "There is a farmer nearby.  Speak to him.  He might have information to help you.",
+                Name = "This is your first mission.",
+                Description = "Missions earn you coin and other items that help you.   Missions also help you learn new information and skills so that you can succeed. \r\n\r\nFind the farmer working in the corn field and speak to him.",
                 State = MissionState.OnGoing,
                 Parent = -1,
-                Type = MissionType.Main
-            });
+                Type = MissionType.Main,
+                CoinReward = 10
+            }, true);
 
-            instance.Missions.Add(new Mission()
+            instance.AddNewMission(new Mission()
             {
                 Id = 2,
                 Name = "Find the bus stop",
-                Description = "The farmer suggested to get to the bus stop at the top of the hill.  Find the bus stop.",
+                Description = "The farmer suggested to get to the bus stop at the top of the hill.  Find the bus stop and look around.  Maybe you will meet someone that can help you.",
                 State = MissionState.NotStarted,
                 Parent = -1,
-                Type = MissionType.Main
+                Type = MissionType.Main,
+                CoinReward = 10
             });
 
-            instance.Missions.Add(new Mission()
+            instance.AddNewMission(new Mission()
             {
                 Id = 3,
                 Name = "Walk to town.",
                 Description = "Walk across the bridge into town.",
                 State = MissionState.NotStarted,
                 Parent = -1,
-                Type = MissionType.Main
+                Type = MissionType.Main,
+                CoinReward = 10
             });
+
+
 
             IsReady = true;
         }

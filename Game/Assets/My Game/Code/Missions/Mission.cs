@@ -22,6 +22,7 @@ namespace CornTheory.Missions
         // [Newtonsoft.Json.JsonConverter(typeof(Newtonsoft.Json.Converters.StringEnumConverter))]
         public MissionType Type { get; set; }
         public IMissionStateCheck Check { get; set; }
+        public int CoinReward { get; set; }
     }
 
 

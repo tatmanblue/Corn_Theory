@@ -6,11 +6,26 @@ using UnityEngine.SceneManagement;
 
 namespace CornTheory.Missions
 {
+    /// <summary>
+    /// Responsible for managing the missions.  Aka mission manager
+    /// TODO: who handles setting a mission to done?
+    /// </summary>
     public class MissionManager : MonoBehaviour, IMissionManager
     {
         private PopupInstanceHandler popupHandler;
 
         public MissionList Missions { get; private set; }
+        public IMission ActiveMission { get; private set; }
+        public int MaxMissions 
+        { 
+            get
+            {
+                if (null == Missions)
+                    return 0;
+
+                return Missions.Count;
+            } 
+        }
 
         public void ActivateMission(int missionId)
         {
@@ -22,12 +37,18 @@ namespace CornTheory.Missions
 
                 print("activating mission " + missionId);
                 mission.State = MissionState.OnGoing;
+                ActiveMission = mission;
                 popupHandler.Invoke("ShowMissions", Constants.PopupInvokeDelay);
             }
         }
 
-        public void AddNewMission(IMission mission)
+        public void AddNewMission(IMission mission, bool activate = false)
         {
+            if (activate == true)
+            {
+                mission.State = MissionState.OnGoing;
+                ActiveMission = mission;
+            }
             Missions.Add(mission);
         }
 

@@ -21,7 +21,10 @@ namespace CornTheory.Missions
 
             var missionManager = FindObjectOfType<MissionManager>();
             if (null == missionManager)
+            {
+                print("MISSING MissionManager!");
                 return;
+            }
 
             foreach (Mission mission in missionManager.Missions)
             {

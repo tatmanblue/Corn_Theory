@@ -14,12 +14,13 @@ namespace CornTheory
         MissionState State { get; set; }
         MissionType Type { get; set; }
         IMissionStateCheck Check { get; set; }
+        int CoinReward { get; set; }
     }
 
     public interface IMissionManager
     {
         void SceneOpened();
-        void AddNewMission(IMission mission);
+        void AddNewMission(IMission mission, bool activate = false);
 
         // these methods are used by NPCS in the game to 
         // change mission states
