@@ -244,7 +244,7 @@ basis, WITHOUT WARRANTY OF ANY KIND, either express or implied.  See
 the License for the specific language governing rights and limitations
 under the License.
 
-The Original Source Code is "Corn_Theory", released Nov 2019.
+The Original Source Code is "Corn_Theory", released Nov 25, 2019. [repo](https://github.com/tatmanblue/Corn_Theory)
 
 The Original Source Code was developed by Matthew Raffel aka TATMAN GAMES.
 Portions created by TATMAN GAMES are Copyright (C) 2020 TATMAN GAMES. All Rights Reserved.
