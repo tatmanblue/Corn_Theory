@@ -64,11 +64,11 @@ TATMAN GAMES PUBLIC LICENSE
 
 2. Source Code License.
 
-2.1 The Initial Developer Grant The TATMAN GAMES hereby grants USER a
-  world-wide, royalty-free, non-exclusive license, subject to third
-  party intellectual property claims:
+2.1 The Initial Developer Grant TATMAN GAMES hereby grants USER a READ-ONLY access 
+  to all files for corn theory, subject to third party intellectual property claims. 
+  As USER you agree to not redistribute any file part of corn theory in any form.
 
-  (a) to use, reproduce, modify, display, and perform, the Covered
+  (a) No license to use, reproduce, modify, display, and perform, the Covered
   Code (or portions thereof) with or without Modifications, or as part
   of a Larger Work.; and
 
