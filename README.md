@@ -1,5 +1,9 @@
 # Corn Theory
 
+# License
+Please see [LICENSE.md](./LICENSE.md).  
+The source code is provided for your review.  By downloading, copying or otherwise accessing the code, you agree to not redistribute any of the files in the repo in any format, neither compiled, or raw or any other way.
+
 ## Intro
 Karl was good at hacking at all things software and hardware.  But he was bored with himself and school.  On a whim, he decided to apply to the CIA.   The CIA didn’t hesitate to hire Karl.
 
