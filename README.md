@@ -10,4 +10,9 @@ Karl landed just outside a of town.  Karl didn’t know if this was where he was
 ## Format/Platforms
 Unity Game.   RPG/Open world style play in a modern setting.  For Windows, MacOS, Linux
 
-edited: 2019.11.26
+## Status
+On-going/Active
+
+This game is in prototype, early development stage.
+
+edited: 2020.01.07
