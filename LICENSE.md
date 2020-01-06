@@ -1,4 +1,4 @@
-UNIVERSITY OF UTAH RESEARCH FOUNDATION PUBLIC LICENSE
+TATMAN GAMES PUBLIC LICENSE
 	
 1. Definitions
 
@@ -13,8 +13,8 @@ UNIVERSITY OF UTAH RESEARCH FOUNDATION PUBLIC LICENSE
 1.3 "Covered Code" means the Original Source Code, Modifications, or
   the combination of the Original Source Code and Modifications, in
   each case including portions thereof. The Original Source Code,
-  developed by the University of Utah, hereinafter referred to as
-  UNIVERSITY is described in the Source Code notice required by
+  developed by Matthew Raffel aka tatman games, hereinafter referred to as
+  TATMAN GAMES is described in the Source Code notice required by
   Exhibit A.
 
 1.4 "Source Code" means the preferred form of the Covered Code for
@@ -64,7 +64,7 @@ UNIVERSITY OF UTAH RESEARCH FOUNDATION PUBLIC LICENSE
 
 2. Source Code License.
 
-2.1 The Initial Developer Grant The UNIVERSITY hereby grants USER a
+2.1 The Initial Developer Grant The TATMAN GAMES hereby grants USER a
   world-wide, royalty-free, non-exclusive license, subject to third
   party intellectual property claims:
 
@@ -73,7 +73,7 @@ UNIVERSITY OF UTAH RESEARCH FOUNDATION PUBLIC LICENSE
   of a Larger Work.; and
 
   (b) under patents now or hereafter owned or controlled by
-  UNIVERSITY, to make, have made, and use ("Utilize") the Covered
+  TATMAN GAMES, to make, have made, and use ("Utilize") the Covered
   Code(or portions thereof), but solely to the extent that any such
   patent is reasonably necessary to enable USER to Utilize the Covered
   Code (or portions thereof) and not to any greater extent that may be
@@ -82,14 +82,14 @@ UNIVERSITY OF UTAH RESEARCH FOUNDATION PUBLIC LICENSE
   (c) the licenses granted in this Section 2.1(a) and (b) are
   effective on the date the USER first receives Covered Code.
 
-  (d) No License is granted by UNIVERSITY for the Commercial Use of
+  (d) No License is granted by TATMAN GAMES for the Commercial Use of
   Covered Code under this License.
 
-  (e) No License is granted by UNIVERSITY for the distribution of
+  (e) No License is granted by TATMAN GAMES for the distribution of
   Covered Code under this License.
 
 
-2.2. Contributor Grant. Each Contributor hereby grants UNIVERSITY a
+2.2. Contributor Grant. Each Contributor hereby grants TATMAN GAMES a
   world-wide, royalty-free, non-exclusive license, subject to third
   party intellectual property claims:
 
@@ -106,7 +106,7 @@ UNIVERSITY OF UTAH RESEARCH FOUNDATION PUBLIC LICENSE
   Utilize further Modifications or combinations.
 
   (c) the licenses granted in this Section 2.2(a) and (b) are
-  effective on the date the UNIVERSITY first receives the Covered Code
+  effective on the date the TATMAN GAMES first receives the Covered Code
 
 3. Contributor Obligations
 
@@ -115,12 +115,12 @@ UNIVERSITY OF UTAH RESEARCH FOUNDATION PUBLIC LICENSE
   (a) Third Party Claims. If USER has knowledge that a party claims an
   intellectual property right in particular functionality or code (or
   its utilization under this License), USER must include a text file
-  with the source code provided to UNIVERSITY titled "LEGAL" which
+  with the source code provided to TATMAN GAMES titled "LEGAL" which
   describes the claim and the party making the claim in sufficient
-  detail that UNIVERSITY will know whom to contact. If USER obtains
+  detail that TATMAN GAMES will know whom to contact. If USER obtains
   such knowledge after USER makes the Modification available to
-  UNIVERSITY, USER shall promptly modify the LEGAL file in all copies
-  USER makes available thereafter and shall notify UNIVERSITY that new
+  TATMAN GAMES, USER shall promptly modify the LEGAL file in all copies
+  USER makes available thereafter and shall notify TATMAN GAMES that new
   knowledge has been obtained.
 
   (b) Contributor APIs. If Your Modification is an application
@@ -174,7 +174,7 @@ UNIVERSITY OF UTAH RESEARCH FOUNDATION PUBLIC LICENSE
   FREE OF DEFECTS, MERCHANTABLE, FIT FOR A PARTICULAR PURPOSE OR
   NON-INFRINGING. THE ENTIRE RISK AS TO THE QUALITY AND PERFORMANCE OF
   THE COVERED CODE IS WITH USER. SHOULD ANY COVERED CODE PROVE
-  DEFECTIVE IN ANY RESPECT, YOU (NOT THE UNIVERSITY OR ANY OTHER
+  DEFECTIVE IN ANY RESPECT, YOU (NOT THE TATMAN GAMES OR ANY OTHER
   CONTRIBUTOR) ASSUME THE COST OF ANY NECESSARY SERVICING, REPAIR OR
   CORRECTION. THIS DISCLAIMER OF WARRANTY CONSTITUTES AN ESSENTIAL
   PART OF THIS LICENSE. NO USE OF ANY COVERED CODE IS AUTHORIZED
@@ -193,7 +193,7 @@ UNIVERSITY OF UTAH RESEARCH FOUNDATION PUBLIC LICENSE
 
   UNDER NO CIRCUMSTANCES AND UNDER NO LEGAL THEORY, WHETHER TORT
   (INCLUDING NEGLIGENCE), CONTRACT, OR OTHERWISE, SHALL THE
-  UNIVERSITY, ANY OTHER CONTRIBUTOR, OR ANY DISTRIBUTOR OF COVERED
+  TATMAN GAMES, ANY OTHER CONTRIBUTOR, OR ANY DISTRIBUTOR OF COVERED
   CODE, OR ANY SUPPLIER OF ANY OF SUCH PARTIES, BE LIABLE TO USER OR
   ANY OTHER PERSON FOR ANY INDIRECT, SPECIAL, INCIDENTAL, OR
   CONSEQUENTIAL DAMAGES OF ANY CHARACTER INCLUDING, WITHOUT
@@ -235,7 +235,7 @@ UNIVERSITY OF UTAH RESEARCH FOUNDATION PUBLIC LICENSE
 
 EXHIBIT A.
 
-The contents of this file are subject to the University of Utah Public
+The contents of this file are subject to the TATMAN GAMES Public
 License (the "License"); you may not use this file except in
 compliance with the License.
 
@@ -244,8 +244,7 @@ basis, WITHOUT WARRANTY OF ANY KIND, either express or implied.  See
 the License for the specific language governing rights and limitations
 under the License.
 
-The Original Source Code is "teem", released March 23, 2001.
+The Original Source Code is "Corn_Theory", released Nov 2019.
 
-The Original Source Code was developed by the University of Utah.
-Portions created by UNIVERSITY are Copyright (C) 2001, 1998 University
-of Utah. All Rights Reserved.
+The Original Source Code was developed by Matthew Raffel aka TATMAN GAMES.
+Portions created by TATMAN GAMES are Copyright (C) 2020 TATMAN GAMES. All Rights Reserved.
