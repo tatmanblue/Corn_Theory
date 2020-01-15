@@ -6,6 +6,9 @@ using UnityEngine;
 
 namespace CornTheory.Player
 {
+    /// <summary>
+    /// TODO: do we replace PlayerState with ScriptableObject implementation?
+    /// </summary>
     public class PlayerState
     {
         private static PlayerState DATA_INSTANCE = new PlayerState();

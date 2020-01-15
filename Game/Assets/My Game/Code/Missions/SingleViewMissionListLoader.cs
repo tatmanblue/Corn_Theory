@@ -62,6 +62,9 @@ namespace CornTheory.Missions
             SetAll();
         }
 
+        /// <summary>
+        /// assigns the Mission data to the assigned Ui elements
+        /// </summary>
         private void SetAll()
         {
             SetMissionTitle();
