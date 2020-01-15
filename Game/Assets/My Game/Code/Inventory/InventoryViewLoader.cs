@@ -15,9 +15,9 @@ namespace CornTheory.Inventory
 
         private static int COLUMNS = 8;
         private static int START_X = -421;
-        private static int START_Y = 184;
-        private static int HORZ_BUFFER = 40;
-        private static int VERT_BUFFER = 40;
+        private static int START_Y = 167;
+        private static int X_SPACE_BETWEEN_ITEMS = 120;
+        private static int Y_SPACE_BETWEEN_ITEMS = 120;
 
         private int selectedItemIndex = 0;
 
@@ -43,10 +43,21 @@ namespace CornTheory.Inventory
                 return;
             }
 
+            var parentTransform = GameObject.Find("Items Panel").transform;
+
             for (int index = 0; index < Inventory.Container.Length; index ++)
             {
-                var itemPrefab = Instantiate(ItemDisplay, Vector3.zero, Quaternion.identity, transform);
+                var itemPrefab = Instantiate(ItemDisplay, Vector3.zero, Quaternion.identity, parentTransform);
+                itemPrefab.GetComponent<RectTransform>().localPosition = ComputeItemPosition(index);
             }
+        }
+
+        private Vector3 ComputeItemPosition(int index)
+        {
+            float x = START_X + (X_SPACE_BETWEEN_ITEMS * (index % COLUMNS));
+            float y = START_Y + ((Y_SPACE_BETWEEN_ITEMS * -1) * (index / COLUMNS));
+            print(string.Format("{2} places at {0},{1}", x, y, index));
+            return new Vector3(x, y, 0F);
         }
     }
 }
