@@ -17,7 +17,7 @@ namespace CornTheory.Scriptables
     public abstract class InventoryObject : ScriptableObject
     {
         /// <summary>
-        /// this prefab is how the item appears in the player inventory
+        /// this prefab is how the item appears in rectangle of the the player inventory list
         /// </summary>
         public GameObject InventoryDisplay;
         public InventoryObjectTypes InventoryType = InventoryObjectTypes.NotConfigured;

@@ -2,6 +2,10 @@
 
 namespace CornTheory.Missions
 {
+    /// <summary>
+    /// This class is responsible for interactiing with the MissionManager and showing
+    /// the active (and completed) missions on the "Single Mission Dlg" screen.
+    /// </summary>
     public class SingleViewMissionListLoader : MonoBehaviour
     {
         private MissionManager missionManager = null;
@@ -27,12 +31,13 @@ namespace CornTheory.Missions
             }
 
             activeMission = missionManager.ActiveMission;
-
-            SetAll();
         }
 
         // Update is called once per frame
-        void Update() { }
+        void Update() 
+        {
+            SetAll();
+        }
 
         public void ShowNextMission()
         {
