@@ -43,7 +43,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b58f1b3e17a1600408d1bf5efe48e1ca, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  inventory: {fileID: 1000012717699500, guid: ec4e4bf47bd5d1943b3a53f44a10aba5, type: 3}
+  inventory: {fileID: 1000012717699500, guid: 8a93632b454dc7049b1bf60964f425b0, type: 3}
   missions: {fileID: 1000012717699500, guid: 9b1cec04a638d864ebff5ea540f5f4ee, type: 3}
   profile: {fileID: 1000012717699500, guid: 6758a991c1a0a8d4ba5e5a4cde615edb, type: 3}
   quitConfirm: {fileID: 1000010087709644, guid: 663ce7649283bf64ebd100164916fb84,
