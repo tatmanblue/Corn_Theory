@@ -23,6 +23,7 @@ namespace CornTheory.Scriptables
         public InventoryObjectTypes InventoryType = InventoryObjectTypes.NotConfigured;
         [TextArea(15, 20)]
         public string Description;
+        public int Qty = 1;
 
         /// <summary>
         /// by calling the abstract OnAwake in the Awake method, we force derived classes

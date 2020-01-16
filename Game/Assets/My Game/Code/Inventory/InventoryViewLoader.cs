@@ -56,6 +56,9 @@ namespace CornTheory.Inventory
                 var xform = itemPrefab.transform.Find("Item Image");
                 var itemImage = xform.GetComponentInChildren<Image>();
                 itemImage.sprite = inventoryItem.InventoryDisplay;
+                xform = itemPrefab.transform.Find("Quantity");
+                var qtyText = xform.GetComponentInChildren<Text>();
+                qtyText.text = inventoryItem.Qty.ToString();
             }
         }
 
