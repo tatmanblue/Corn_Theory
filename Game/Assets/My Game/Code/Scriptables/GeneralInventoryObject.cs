@@ -1,4 +1,5 @@
 ﻿
+using CornTheory.Inventory;
 using UnityEngine;
 
 namespace CornTheory.Scriptables

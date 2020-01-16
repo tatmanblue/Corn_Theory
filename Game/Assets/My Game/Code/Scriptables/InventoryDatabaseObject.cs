@@ -42,11 +42,13 @@ namespace CornTheory.Scriptables
     /// </summary>
     public class InventorySlot
     {
+        public int ItemId;
         public InventoryObject Item;
         public int Qty = 0;
 
-        public InventorySlot(int qty, InventoryObject item)
+        public InventorySlot(int itemId, int qty, InventoryObject item)
         {
+            ItemId = itemId;
             Qty = qty;
             Item = item;
         }
