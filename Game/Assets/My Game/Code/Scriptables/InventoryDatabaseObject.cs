@@ -10,14 +10,14 @@ namespace CornTheory.Scriptables
     [CreateAssetMenu(fileName = "Inventory DB", menuName = "Corn Theory/Inventory/Inventory Database")]
     public class InventoryDatabaseObject : ScriptableObject, ISerializationCallbackReceiver
     {
-        public InventoryObject[] Container;
-        public Dictionary<int, InventoryObject> AllItems = new Dictionary<int, InventoryObject>();
+        public InventoryDescriptionObject[] Container;
+        public Dictionary<int, InventoryDescriptionObject> AllItems = new Dictionary<int, InventoryDescriptionObject>();
         public string Database;
 
         public void OnAfterDeserialize()
         {   
             if (null == AllItems)
-                AllItems = new Dictionary<int, InventoryObject>();
+                AllItems = new Dictionary<int, InventoryDescriptionObject>();
 
             AllItems.Clear();
 
@@ -43,10 +43,10 @@ namespace CornTheory.Scriptables
     public class InventorySlot
     {
         public int ItemId;
-        public InventoryObject Item;
+        public InventoryDescriptionObject Item;
         public int Qty = 0;
 
-        public InventorySlot(int itemId, int qty, InventoryObject item)
+        public InventorySlot(int itemId, int qty, InventoryDescriptionObject item)
         {
             ItemId = itemId;
             Qty = qty;

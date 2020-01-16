@@ -13,7 +13,7 @@ namespace CornTheory.Scriptables
     /// It does not describe what the player or NPC has (aka qty) as that is an "Inventory Slot"
     /// Why?  You can have 0 to many in the inventory but you only need one description of the item
     /// </summary>
-    public abstract class InventoryObject : ScriptableObject
+    public abstract class InventoryDescriptionObject : ScriptableObject
     {
         /// <summary>
         /// this prefab is how the item appears in rectangle of the the player inventory list
