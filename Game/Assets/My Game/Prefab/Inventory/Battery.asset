@@ -10,9 +10,9 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: c9e2d72400eb5634fb93466bb09e59ec, type: 3}
-  m_Name: USB Cable
+  m_Name: Battery
   m_EditorClassIdentifier: 
-  InventoryDisplay: {fileID: 21300000, guid: bde8a4970b20b0f43af538e2b1dc5aee, type: 3}
+  InventoryDisplay: {fileID: 0}
   InventoryType: 1
-  Description: USB cables can be used to charge phones and connect to networks.  Extra
-    cables can be sold when cash is in short supply.
+  Description: Cell phone batteries are necessary to operate your cell phone.  They
+    can also be sold for cash, if you are short on funds.

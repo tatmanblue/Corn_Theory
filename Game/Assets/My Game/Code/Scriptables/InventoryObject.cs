@@ -19,16 +19,23 @@ namespace CornTheory.Scriptables
         /// <summary>
         /// this prefab is how the item appears in rectangle of the the player inventory list
         /// </summary>
-        public GameObject InventoryDisplay;
+        public Sprite InventoryDisplay;
         public InventoryObjectTypes InventoryType = InventoryObjectTypes.NotConfigured;
         [TextArea(15, 20)]
         public string Description;
 
+        /// <summary>
+        /// by calling the abstract OnAwake in the Awake method, we force derived classes
+        /// to implement OnAwake.
+        /// </summary>
         public void Awake()
         {
             OnAwake();
         }
 
+        /// <summary>
+        /// the expection is derived classes implement OnAwake to self initialize
+        /// </summary>
         public abstract void OnAwake();
     }
 }

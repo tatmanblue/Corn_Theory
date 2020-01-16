@@ -1,6 +1,7 @@
 ﻿
 using CornTheory.Scriptables;
 using UnityEngine;
+using UnityEngine.UI;
 
 namespace CornTheory.Inventory
 {
@@ -47,8 +48,14 @@ namespace CornTheory.Inventory
 
             for (int index = 0; index < Inventory.Container.Length; index ++)
             {
+                var inventoryItem = Inventory.Container[index];
+
                 var itemPrefab = Instantiate(ItemDisplay, Vector3.zero, Quaternion.identity, parentTransform);
                 itemPrefab.GetComponent<RectTransform>().localPosition = ComputeItemPosition(index);
+
+                var xform = itemPrefab.transform.Find("Item Image");
+                var itemImage = xform.GetComponentInChildren<Image>();
+                itemImage.sprite = inventoryItem.InventoryDisplay;
             }
         }
 
