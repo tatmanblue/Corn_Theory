@@ -1,18 +1,17 @@
-﻿using System.Collections;
+﻿using CornTheory.Inventory;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
 
 namespace CornTheory.Scriptables
 {
-    public enum InventoryObjectTypes
-    {
-        NotConfigured,  // This is an error and should never be a value seen at runtime
-        General,        // Sellable but no other value
-    }
 
     /// <summary>
     /// TODO: should public data members be properties
+    /// This describes an object that can be held in player or NPC inventories
+    /// It does not describe what the player or NPC has (aka qty) as that is an "Inventory Slot"
+    /// Why?  You can have 0 to many in the inventory but you only need one description of the item
     /// </summary>
     public abstract class InventoryObject : ScriptableObject
     {
