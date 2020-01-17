@@ -16,3 +16,5 @@ MonoBehaviour:
   InventoryType: 1
   Description: Cell phone batteries are necessary to operate your cell phone.  They
     can also be sold for cash, if you are short on funds.
+  Id: 100
+  Qty: 1

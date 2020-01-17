@@ -16,3 +16,5 @@ MonoBehaviour:
   InventoryType: 1
   Description: USB cables can be used to charge phones and connect to networks.  Extra
     cables can be sold when cash is in short supply.
+  Id: 102
+  Qty: 1

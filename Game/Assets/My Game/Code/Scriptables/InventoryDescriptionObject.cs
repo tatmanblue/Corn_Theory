@@ -8,8 +8,9 @@ namespace CornTheory.Scriptables
 {
 
     /// <summary>
-    /// TODO: should public data members be properties
-    /// This describes an object that can be held in player or NPC inventories
+    /// TODO: should public data members be properties?
+    /// 
+    /// InventoryDescriptionObject describes an object that can be held in player or NPC inventories
     /// It does not describe what the player or NPC has (aka qty) as that is an "Inventory Slot"
     /// Why?  You can have 0 to many in the inventory but you only need one description of the item
     /// </summary>
@@ -22,7 +23,9 @@ namespace CornTheory.Scriptables
         public InventoryObjectTypes InventoryType = InventoryObjectTypes.NotConfigured;
         [TextArea(15, 20)]
         public string Description;
-        public int Qty = 1;
+        // TODO: make this system generated
+        public int Id = 0;
+
 
         /// <summary>
         /// by calling the abstract OnAwake in the Awake method, we force derived classes

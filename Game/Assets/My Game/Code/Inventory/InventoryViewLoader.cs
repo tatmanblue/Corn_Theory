@@ -1,5 +1,6 @@
 ﻿
 using CornTheory.Scriptables;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -45,20 +46,25 @@ namespace CornTheory.Inventory
             }
 
             var parentTransform = GameObject.Find("Items Panel").transform;
-
-            for (int index = 0; index < Inventory.Container.Length; index ++)
+            int index = 0;
+            foreach(KeyValuePair<int, InventorySlot> item in Inventory.CharactorInventory)
             {
-                var inventoryItem = Inventory.Container[index];
+                var inventoryItem = item.Value;
 
                 var itemPrefab = Instantiate(ItemDisplay, Vector3.zero, Quaternion.identity, parentTransform);
                 itemPrefab.GetComponent<RectTransform>().localPosition = ComputeItemPosition(index);
 
                 var xform = itemPrefab.transform.Find("Item Image");
                 var itemImage = xform.GetComponentInChildren<Image>();
-                itemImage.sprite = inventoryItem.InventoryDisplay;
+                itemImage.sprite = inventoryItem.Item.InventoryDisplay;
                 xform = itemPrefab.transform.Find("Quantity");
                 var qtyText = xform.GetComponentInChildren<Text>();
                 qtyText.text = inventoryItem.Qty.ToString();
+
+                // TODO: set selected item
+
+                // finally dont forget to increment this
+                index++;
             }
         }
 

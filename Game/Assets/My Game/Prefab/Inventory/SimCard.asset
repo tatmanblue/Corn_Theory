@@ -15,4 +15,5 @@ MonoBehaviour:
   InventoryDisplay: {fileID: 21300000, guid: e7b485d1887b1f64a971821094aef0e4, type: 3}
   InventoryType: 1
   Description: Generic sim card that gets a cell phone on the network
+  Id: 101
   Qty: 1
