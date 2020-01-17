@@ -13,6 +13,7 @@ namespace CornTheory
         public static readonly string CameraArm = "CameraArm";
         public static readonly string MainCamera = "Main Camera";
         public static readonly string MissionMananger = "Mission Manager";
+        public static readonly string Player = "Player2";
 
         // skybox - makes materials name
         public static readonly string SunUpSkyBox = "";

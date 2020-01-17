@@ -1,12 +1,20 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using CornTheory.Camera;
+using CornTheory.Scriptables;
 using UnityEngine;
 
 namespace CornTheory.Player
 {
+    /// <summary>
+    /// Represents Cam, the player object
+    /// TODO: Need to think through some things:  Player object should be about the state of the GameObject
+    /// and PlayerState should be about attributes that affect the Player game object
+    /// TODO: any public methods should be part of an interface so that consumers reference by interface
+    /// </summary>
     public class Player : MonoBehaviour
     {
+        [SerializeField] InventoryDatabaseObject inventoryDB;
         [SerializeField] int hackableLayerId = 11;          // TODO: need to make the value constant
         // [SerializeField] Weapon weapon;
         [SerializeField] AnimatorOverrideController animationOverride;
@@ -27,13 +35,27 @@ namespace CornTheory.Player
             }
         }
 
+        // -----------------------------------------------------------
+        // public methods
+        // -----------------------------------------------------------
+        public void AddInventoryItem(InventoryDescriptionObject item, int qty)
+        {
+            if (null == inventoryDB)
+                return;
+
+            inventoryDB.AddInventoryItem(item, qty);
+        }
+
+        // -----------------------------------------------------------
+        // Unity MonoBehavior Overrides
+        // -----------------------------------------------------------
         private void Awake()
         {
             print("Player State staleness is " + PlayerState.Instance.When);
         }
 
         // Use this for initialization
-        void Start()
+        private void Start()
         {
             // raycaster = FindObjectOfType<CameraRaycaster>();
             // raycaster.NotifyMouseClickObservers += Raycaster_NotifyMouseClickObservers;
@@ -42,7 +64,7 @@ namespace CornTheory.Player
         }
 
         // Update is called once per frame
-        void Update() { }
+        private void Update() { }
 
         private void OverrideAnimationController()
         {

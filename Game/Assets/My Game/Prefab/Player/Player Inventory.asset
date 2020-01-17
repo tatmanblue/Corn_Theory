@@ -12,5 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 60ce20eee0c76ed43867b8e9471703eb, type: 3}
   m_Name: Player Inventory
   m_EditorClassIdentifier: 
-  AllItems: []
+  AllItems:
+  - {fileID: 11400000, guid: 661bd16eef3809d468e22618844f3bae, type: 2}
+  - {fileID: 11400000, guid: efbbe6be727a8f2469f9dd5201e4d3d3, type: 2}
+  - {fileID: 11400000, guid: 4c89f807e12c67d4194f0b44b022a15c, type: 2}
   CharacterInventoryFile: PlayerCam
