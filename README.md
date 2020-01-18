@@ -20,4 +20,4 @@ On-going/Active
 
 This game is in prototype, early development stage.
 
-edited: 2020.01.07
+edited: 2020.01.16
