@@ -19,6 +19,14 @@ namespace CornTheory.Inventory
         private int currentProgress = 0;
 
         public event Action<float> OnProgressChanged = delegate { };
+        public int MaxProgress
+        {
+            get { return maxProgress; }
+        }
+        public int CurrentProgress
+        {
+            get { return currentProgress; }
+        }
 
         public void Reset()
         {
