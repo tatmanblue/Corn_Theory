@@ -21,10 +21,14 @@ namespace CornTheory.Inventory
 
             if (0 == other.gameObject.name.CompareTo(Constants.Player))
             {
-                Player.Player player = other.gameObject.transform.GetComponent<Player.Player>();
-                player.AddInventoryItem(Item, GiveQuanity);
-                HasGivenItem = true;
+                GiveItem(other.gameObject.transform.GetComponent<Player.Player>());
             }
+        }
+
+        private void GiveItem(Player.Player player)
+        {
+            HasGivenItem = true;
+            player.AddInventoryItem(Item, GiveQuanity);
         }
     }
 }
