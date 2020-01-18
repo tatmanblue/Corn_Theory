@@ -11,8 +11,10 @@ namespace CornTheory.Inventory
         [SerializeField] float clickDurationMS;
         [SerializeField] bool HasGivenItem;
 
-        private float startTime = 0F;
-        private float endTime = 0F;
+        private readonly static float NOT_SET = -1F;
+
+        private float startTime = InventoryItemSearchHandler.NOT_SET;
+        private float endTime = InventoryItemSearchHandler.NOT_SET;
 
         private void Update()
         {
@@ -45,16 +47,20 @@ namespace CornTheory.Inventory
 
             if (Input.GetMouseButtonUp(0))
             {
-                print("InventoryItemSearchHandler mouse up");
-                endTime = Time.time;
-                print(string.Format("duration {0}", endTime - startTime));
+                // only care about this if startTime was set
+                if (InventoryItemSearchHandler.NOT_SET < startTime)
+                {
+                    print("InventoryItemSearchHandler mouse up");
+                    endTime = Time.time;
+                    print(string.Format("duration {0}", endTime - startTime));
+                }
             }
 
             if (endTime - startTime > (clickDurationMS / 1000))
             {
                 HasGivenItem = true;
-                endTime = 0F;
-                startTime = 0F;
+                endTime = InventoryItemSearchHandler.NOT_SET;
+                startTime = InventoryItemSearchHandler.NOT_SET;
 
                 Player.Player player = GameObject.FindGameObjectWithTag("Player").transform.GetComponent<Player.Player>();
                 GiveItem(player);
