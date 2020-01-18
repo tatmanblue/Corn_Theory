@@ -31,6 +31,7 @@ namespace CornTheory.Inventory
         public void Reset()
         {
             currentProgress = 0;
+            OnProgressChanged(0);
         }
 
         public void ModifyProgress(int amount)

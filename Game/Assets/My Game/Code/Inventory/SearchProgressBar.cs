@@ -20,6 +20,11 @@ namespace CornTheory.Inventory
         [SerializeField] private Image foreGroundImage;
         [SerializeField] private float updateSpeedSeconds = 0.2F;
 
+        public void Reset()
+        {
+            foreGroundImage.fillAmount = 0;
+        }
+
         private void Awake()
         {
             GetComponentInParent<SearchProgressBarProgress>().OnProgressChanged += OnProgressChanged;

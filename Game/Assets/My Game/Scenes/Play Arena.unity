@@ -1849,6 +1849,7 @@ GameObject:
   - component: {fileID: 1269797839}
   - component: {fileID: 1269797838}
   - component: {fileID: 1269797841}
+  - component: {fileID: 1269797842}
   m_Layer: 0
   m_Name: IndicatorCanvas
   m_TagString: Untagged
@@ -1951,6 +1952,19 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   foreGroundImage: {fileID: 1718495550}
   updateSpeedSeconds: 0.5
+--- !u!114 &1269797842
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1269797836}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 97f5c6438c2811847ba0ad442ab10ee0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  maxProgress: 1500
 --- !u!1001 &1455339371
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -2371,6 +2385,20 @@ MonoBehaviour:
   GiveQuanity: 3
   clickDurationMS: 1250
   HasGivenItem: 0
+--- !u!64 &1878798576
+MeshCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1878798574}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Convex: 0
+  m_CookingOptions: 14
+  m_Mesh: {fileID: 0}
 --- !u!1001 &1999988043
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -2502,7 +2530,6 @@ GameObject:
   - component: {fileID: 2035896127}
   - component: {fileID: 2035896126}
   - component: {fileID: 2035896125}
-  - component: {fileID: 2035896130}
   m_Layer: 0
   m_Name: Sphere
   m_TagString: Untagged
@@ -2524,7 +2551,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   Item: {fileID: 11400000, guid: 4c89f807e12c67d4194f0b44b022a15c, type: 2}
   GiveQuanity: 1
-  clickDurationMS: 500
+  clickDurationMS: 1500
   HasGivenItem: 0
 --- !u!135 &2035896126
 SphereCollider:
@@ -2592,27 +2619,13 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2035896124}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 77.61, y: 30.586, z: 44.92}
+  m_LocalPosition: {x: 78.131, y: 30.586, z: 46.873}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 1269797837}
   m_Father: {fileID: 0}
   m_RootOrder: 16
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!64 &2035896130
-MeshCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2035896124}
-  m_Material: {fileID: 0}
-  m_IsTrigger: 0
-  m_Enabled: 1
-  serializedVersion: 3
-  m_Convex: 0
-  m_CookingOptions: 14
-  m_Mesh: {fileID: 10207, guid: 0000000000000000e000000000000000, type: 0}
 --- !u!1001 &175663366436245153
 PrefabInstance:
   m_ObjectHideFlags: 0

@@ -17,6 +17,7 @@ namespace CornTheory.Inventory
         private float endTime = InventoryItemSearchHandler.NOT_SET;
         private bool isMouseDown = false;
         private SearchProgressBarProgress progressHandler = null;
+        private Player.Player player = null;
 
         private void GiveItem(Player.Player player)
         {
@@ -41,6 +42,25 @@ namespace CornTheory.Inventory
                     return true;
 
             return false;
+        }
+        
+        private Player.Player GetPlayerInstance()
+        {
+            if (null == player)
+            {
+                player = GameObject.FindGameObjectWithTag("Player").transform.GetComponent<Player.Player>();
+            }
+            return player;
+        }
+
+        private SearchProgressBarProgress GetProgressHandler()
+        {
+            if (null == progressHandler)
+            {
+                progressHandler = GetComponentInChildren<SearchProgressBarProgress>();
+            }
+
+            return progressHandler;
         }
 
         private void Update()
@@ -82,6 +102,20 @@ namespace CornTheory.Inventory
                     if (true == mouseIsOnSelf)
                     {
                         endTime = Time.time;
+                        print(string.Format("done with mouse down {0} {1} {2}", endTime, startTime, (endTime - startTime > (clickDurationMS / 1000.0F))));
+                        if (endTime - startTime > (clickDurationMS / 1000.0F))
+                        {
+                            HasGivenItem = true;
+                            endTime = InventoryItemSearchHandler.NOT_SET;
+                            startTime = InventoryItemSearchHandler.NOT_SET;
+                            
+                            GiveItem(GetPlayerInstance());
+                            print(string.Format("{0} gave inventory item {1}", transform.name, Item.name));
+                        }
+                        else
+                        {
+                            GetProgressHandler().Reset();
+                        }
                     }
                     else
                     {
@@ -91,27 +125,25 @@ namespace CornTheory.Inventory
                 }
             }
 
-            if (endTime - startTime > (clickDurationMS / 1000.0F))
-            {
-                HasGivenItem = true;
-                endTime = InventoryItemSearchHandler.NOT_SET;
-                startTime = InventoryItemSearchHandler.NOT_SET;
-
-                Player.Player player = GameObject.FindGameObjectWithTag("Player").transform.GetComponent<Player.Player>();
-                GiveItem(player);
-                print(string.Format("{0} gave inventory item {1}", transform.name, Item.name));
-            }
-            else if (true == isMouseDown && true == mouseIsOnSelf)
+            if (true == isMouseDown && true == mouseIsOnSelf)
             {                
+
                 if (null == progressHandler)
                 {
-                    progressHandler = GetComponentInChildren<SearchProgressBarProgress>();
+                    progressHandler = GetProgressHandler();
                 }
 
                 if (progressHandler.CurrentProgress < progressHandler.MaxProgress)
                 {
-                    float stepsPerMS = progressHandler.MaxProgress / clickDurationMS;
-                    float duration = (Time.time * 1000F) - (startTime * 100F);
+                    // This math is wrong
+
+                    // how many units between 0 and progressHandler.MaxProgress do we go up per millisecond
+                    float stepsPerMS = progressHandler.MaxProgress / 1000F;
+
+                    // how long has it been since started holding down mouse button
+                    float duration = (Time.time * 1000F) - (startTime * 1000F);
+
+                    // increment
                     int amount = (int)(stepsPerMS * duration);
                     progressHandler.ModifyProgress(amount);
                 }
