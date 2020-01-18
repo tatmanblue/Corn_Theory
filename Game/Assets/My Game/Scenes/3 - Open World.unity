@@ -1699,16 +1699,6 @@ PrefabInstance:
       propertyPath: onClicked.m_PersistentCalls.m_Calls.Array.data[0].m_Target
       value: 
       objectReference: {fileID: 1661756292}
-    - target: {fileID: 114255554759649750, guid: 8405b3ec08eb3904092b64e14f1ae5f7,
-        type: 3}
-      propertyPath: m_UiScaleMode
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 114255554759649750, guid: 8405b3ec08eb3904092b64e14f1ae5f7,
-        type: 3}
-      propertyPath: m_ScreenMatchMode
-      value: 1
-      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 8405b3ec08eb3904092b64e14f1ae5f7, type: 3}
 --- !u!4 &2113854943 stripped

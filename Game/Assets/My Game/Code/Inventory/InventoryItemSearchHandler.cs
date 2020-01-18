@@ -30,8 +30,17 @@ namespace CornTheory.Inventory
 
             if (Input.GetMouseButtonDown(0))
             {
-                print("InventoryItemSearchHandler mouse down");
-                startTime = Time.time;
+                Ray ray = UnityEngine.Camera.main.ScreenPointToRay(Input.mousePosition);
+                RaycastHit hit;
+
+                if (Physics.Raycast(ray, out hit))
+                {
+                    if (0 == hit.transform.name.CompareTo(transform.name))
+                    {
+                        print("InventoryItemSearchHandler mouse down");
+                        startTime = Time.time;
+                    }
+                }
             }
 
             if (Input.GetMouseButtonUp(0))
