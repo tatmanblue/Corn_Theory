@@ -11,6 +11,7 @@ GameObject:
   - component: {fileID: 465076495}
   - component: {fileID: 465076494}
   - component: {fileID: 465076493}
+  - component: {fileID: 193997522}
   m_Layer: 0
   m_Name: Camera
   m_TagString: MainCamera
@@ -82,6 +83,22 @@ AudioListener:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 465076492}
   m_Enabled: 1
+--- !u!114 &193997522
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 465076492}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: -768656878, guid: f70555f144d8491a825f0804e09c671c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_EventMask:
+    serializedVersion: 2
+    m_Bits: 0
+  m_MaxRayIntersections: 0
 --- !u!65 &325589189
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -93,8 +110,8 @@ BoxCollider:
   m_IsTrigger: 1
   m_Enabled: 1
   serializedVersion: 2
-  m_Size: {x: 2, y: 1, z: 2}
-  m_Center: {x: 0, y: 1, z: 0}
+  m_Size: {x: 1.25, y: 0.35, z: 2}
+  m_Center: {x: 0, y: 0.72, z: 0}
 --- !u!114 &325589190
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -187,9 +204,9 @@ MonoBehaviour:
   _movingTurnSpeed: 360
   _stationaryTurnSpeed: 180
   _jumpPower: 6
-  _gravityMultiplier: 1
+  _gravityMultiplier: 2
   _runCycleLegOffset: 0.2
-  _moveSpeedMultiplier: 1
+  _moveSpeedMultiplier: 2
   _animSpeedMultiplier: 1
   _groundCheckDistance: 0.3
 --- !u!114 &597852188
@@ -221,27 +238,27 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 408730, guid: 7737647c22c1fc64a88d5cd030c352ce, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 75.115456
+      value: 28.15
       objectReference: {fileID: 0}
     - target: {fileID: 408730, guid: 7737647c22c1fc64a88d5cd030c352ce, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 30.00824
+      value: 100
       objectReference: {fileID: 0}
     - target: {fileID: 408730, guid: 7737647c22c1fc64a88d5cd030c352ce, type: 3}
       propertyPath: m_LocalPosition.z
-      value: 42.04656
+      value: -62.67
       objectReference: {fileID: 0}
     - target: {fileID: 408730, guid: 7737647c22c1fc64a88d5cd030c352ce, type: 3}
       propertyPath: m_LocalRotation.x
-      value: 0
+      value: -0
       objectReference: {fileID: 0}
     - target: {fileID: 408730, guid: 7737647c22c1fc64a88d5cd030c352ce, type: 3}
       propertyPath: m_LocalRotation.y
-      value: 0
+      value: -0
       objectReference: {fileID: 0}
     - target: {fileID: 408730, guid: 7737647c22c1fc64a88d5cd030c352ce, type: 3}
       propertyPath: m_LocalRotation.z
-      value: 0
+      value: -0
       objectReference: {fileID: 0}
     - target: {fileID: 408730, guid: 7737647c22c1fc64a88d5cd030c352ce, type: 3}
       propertyPath: m_LocalRotation.w
