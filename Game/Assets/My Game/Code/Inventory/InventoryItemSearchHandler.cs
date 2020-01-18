@@ -1,9 +1,11 @@
 ﻿using UnityEngine;
+using UnityEngine.EventSystems;
 using CornTheory.Scriptables;
+
 
 namespace CornTheory.Inventory
 {
-    public class InventoryItemSearchHandler : MonoBehaviour
+    public class InventoryItemSearchHandler : MonoBehaviour, IPointerClickHandler
     {
         [SerializeField] InventoryDescriptionObject Item;
         [SerializeField] int GiveQuanity;
@@ -48,7 +50,7 @@ namespace CornTheory.Inventory
                     print(string.Format("HIT DATA: {0}", hit.transform.name));
                     if (0 == hit.transform.name.CompareTo(transform.name))
                     {
-                        print("InventoryItemSearchHandler mouse down");
+                        print(string.Format("InventoryItemSearchHandler mouse down for {0}", transform.name));
                         startTime = Time.time;
                         endTime = InventoryItemSearchHandler.NOT_SET;
                     }
@@ -60,7 +62,7 @@ namespace CornTheory.Inventory
                 // only care about this if startTime was set
                 if (InventoryItemSearchHandler.NOT_SET < startTime)
                 {
-                    print("InventoryItemSearchHandler mouse up");
+                    print(string.Format("InventoryItemSearchHandler mouse up for {0}", transform.name));
                     endTime = Time.time;
                     print(string.Format("duration {0}", endTime - startTime));
                 }
@@ -76,6 +78,11 @@ namespace CornTheory.Inventory
                 GiveItem(player);
                 print("given inventory");
             }
+        }
+
+        public void OnPointerClick(PointerEventData eventData)
+        {
+            print(string.Format("I got the click {0}", transform.name));
         }
     }
 }
