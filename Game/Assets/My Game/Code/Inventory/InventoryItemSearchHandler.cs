@@ -1,6 +1,5 @@
-﻿using CornTheory.Scriptables;
-using System;
-using UnityEngine;
+﻿using UnityEngine;
+using CornTheory.Scriptables;
 
 namespace CornTheory.Inventory
 {
@@ -15,6 +14,15 @@ namespace CornTheory.Inventory
 
         private float startTime = InventoryItemSearchHandler.NOT_SET;
         private float endTime = InventoryItemSearchHandler.NOT_SET;
+
+        private void GiveItem(Player.Player player)
+        {
+            if (null == player)
+                print("player is null!!!!");
+
+            HasGivenItem = true;
+            player.AddInventoryItem(Item, GiveQuanity);
+        }
 
         private void Update()
         {
@@ -37,10 +45,12 @@ namespace CornTheory.Inventory
 
                 if (Physics.Raycast(ray, out hit))
                 {
+                    print(string.Format("HIT DATA: {0}", hit.transform.name));
                     if (0 == hit.transform.name.CompareTo(transform.name))
                     {
                         print("InventoryItemSearchHandler mouse down");
                         startTime = Time.time;
+                        endTime = InventoryItemSearchHandler.NOT_SET;
                     }
                 }
             }
@@ -66,16 +76,6 @@ namespace CornTheory.Inventory
                 GiveItem(player);
                 print("given inventory");
             }
-        }
-
-
-        private void GiveItem(Player.Player player)
-        {
-            if (null == player)
-                print("player is null!!!!");
-
-            HasGivenItem = true;
-            player.AddInventoryItem(Item, GiveQuanity);
         }
     }
 }
