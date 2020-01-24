@@ -388,11 +388,6 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 93907912}
     m_Modifications:
-    - target: {fileID: 4525549078543105229, guid: 8c12bd7bf169838428246b111f78e6bd,
-        type: 3}
-      propertyPath: m_Name
-      value: SceneSwitchController
-      objectReference: {fileID: 0}
     - target: {fileID: 4525549078543105228, guid: 8c12bd7bf169838428246b111f78e6bd,
         type: 3}
       propertyPath: m_LocalPosition.x
@@ -457,6 +452,11 @@ PrefabInstance:
         type: 3}
       propertyPath: showMissionsSceneStart
       value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4525549078543105229, guid: 8c12bd7bf169838428246b111f78e6bd,
+        type: 3}
+      propertyPath: m_Name
+      value: SceneSwitchController
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 8c12bd7bf169838428246b111f78e6bd, type: 3}
