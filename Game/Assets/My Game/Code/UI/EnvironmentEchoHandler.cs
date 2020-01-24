@@ -9,7 +9,12 @@ namespace CornTheory.UI
     /// </summary>
     public class EnvironmentEchoHandler : MonoBehaviour, IEnvironmentEchoHandler
     {
-        [SerializeField] GameObject textOnScreen;
+        [SerializeField] GameObject contentList;
+        private int count = 0;
+
+        private void Awake()
+        {
+        }
 
         public void ProcessEnvironmentMessage(string message)
         {
@@ -19,6 +24,13 @@ namespace CornTheory.UI
         public void ProcessActorMessage(string actor, string message)
         {
             print(string.Format("ProcessEnvironmentMessage got {0} said {1}", actor, message));
+
+            count++;
+            GameObject textInstance = new GameObject(string.Format("Text-{0}", count));
+            textInstance.transform.SetParent(contentList.transform);
+            UnityEngine.UI.Text textBodyInstance = textInstance.AddComponent<UnityEngine.UI.Text>();
+            textBodyInstance.text = string.Format("{0} said {1}", actor, message);
         }
+
     }
 }
