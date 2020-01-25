@@ -9,8 +9,12 @@ namespace CornTheory.UI
     /// </summary>
     public class EnvironmentEchoHandler : MonoBehaviour, IEnvironmentEchoHandler
     {
-        [SerializeField] GameObject contentList;
-        private int count = 0;
+        [SerializeField] private Transform spawnPoint;
+        [SerializeField] private GameObject item;
+        [SerializeField] private RectTransform content;
+        [SerializeField] private int numberOfItems = 0;
+        public string[] itemNames = null;
+        public Sprite[] itemImages = null;
 
         private void Awake()
         {
@@ -24,12 +28,19 @@ namespace CornTheory.UI
         public void ProcessActorMessage(string actor, string message)
         {
             print(string.Format("ProcessEnvironmentMessage got {0} said {1}", actor, message));
+            numberOfItems += 1;
+            content.sizeDelta = new Vector2(0, numberOfItems * 60);
 
-            count++;
-            GameObject textInstance = new GameObject(string.Format("Text-{0}", count));
-            textInstance.transform.SetParent(contentList.transform);
-            UnityEngine.UI.Text textBodyInstance = textInstance.AddComponent<UnityEngine.UI.Text>();
-            textBodyInstance.text = string.Format("{0} said {1}", actor, message);
+            // TODO:  height of item should not be hard coded?
+            float spawnY = numberOfItems * 60;
+
+            // taken from https://www.codeneuron.com/creating-a-dynamic-scrollable-list-in-unity/
+            // one difference is we are setting x to 0, always.  not sure why that has to be different
+            Vector3 pos = new Vector3(0, -spawnY, spawnPoint.position.z);
+            GameObject spawnedItem = Instantiate(item, pos, spawnPoint.rotation);
+            spawnedItem.transform.SetParent(spawnPoint, false);
+            ConversationItemDetail itemDetails = spawnedItem.GetComponent<ConversationItemDetail>();
+            itemDetails.Text.text = actor;
         }
 
     }

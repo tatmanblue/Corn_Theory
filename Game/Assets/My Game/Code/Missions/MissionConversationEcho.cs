@@ -13,12 +13,11 @@ namespace CornTheory.Missions
 
         private void Awake()
         {
-            echoHandler = GameObject.Find(Constants.Canvas).GetComponent<IEnvironmentEchoHandler>();
+            echoHandler = GameObject.Find(Constants.Canvas).GetComponentInChildren<IEnvironmentEchoHandler>();
         }
 
         private void OnConversationLine(Subtitle subtitle)
         {
-            // print(string.Format("{0} : {1} {2}", subtitle.speakerInfo.Name, subtitle.formattedText.text, echoHandler == null));
             if (null == echoHandler) return;
 
             echoHandler.ProcessActorMessage(subtitle.speakerInfo.Name, subtitle.formattedText.text);
