@@ -4,7 +4,8 @@ using CornTheory;
 namespace CornTheory.UI
 {
     /// <summary>
-    /// This class belongs in the UI.  It provides a public method to publish readable information on screen
+    /// This class belongs in the UI. It adds readable information to a scroll view. 
+    /// There is a public method to publish readable information on screen
     /// about the environment.  Examples: conversation, item gives, etc
     /// </summary>
     public class EnvironmentEchoHandler : MonoBehaviour, IEnvironmentEchoHandler
@@ -12,9 +13,7 @@ namespace CornTheory.UI
         [SerializeField] private Transform spawnPoint;
         [SerializeField] private GameObject item;
         [SerializeField] private RectTransform content;
-        [SerializeField] private int numberOfItems = 0;
-        public string[] itemNames = null;
-        public Sprite[] itemImages = null;
+        private int numberOfItems = 0;
 
         private void Awake()
         {
@@ -27,7 +26,10 @@ namespace CornTheory.UI
 
         public void ProcessActorMessage(string actor, string message)
         {
-            print(string.Format("ProcessEnvironmentMessage got {0} said {1}", actor, message));
+            if (actor.Length == 0 || message.Length == 0)
+                return;
+
+            print(string.Format("ProcessActorMessage got {0} said {1}", actor, message));
             numberOfItems += 1;
             content.sizeDelta = new Vector2(0, numberOfItems * 60);
 
@@ -40,7 +42,7 @@ namespace CornTheory.UI
             GameObject spawnedItem = Instantiate(item, pos, spawnPoint.rotation);
             spawnedItem.transform.SetParent(spawnPoint, false);
             ConversationItemDetail itemDetails = spawnedItem.GetComponent<ConversationItemDetail>();
-            itemDetails.Text.text = actor;
+            itemDetails.Text.text = string.Format("{0} said '{1}'", actor, message);
         }
 
     }
