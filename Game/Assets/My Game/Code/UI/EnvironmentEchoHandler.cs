@@ -29,8 +29,6 @@ namespace CornTheory.UI
             if (actor.Length == 0 || message.Length == 0)
                 return;
 
-            print(string.Format("ProcessActorMessage got {0} said {1}", actor, message));
-            numberOfItems += 1;
             content.sizeDelta = new Vector2(0, numberOfItems * 60);
 
             // TODO:  height of item should not be hard coded?
@@ -43,6 +41,9 @@ namespace CornTheory.UI
             spawnedItem.transform.SetParent(spawnPoint, false);
             ConversationItemDetail itemDetails = spawnedItem.GetComponent<ConversationItemDetail>();
             itemDetails.Text.text = string.Format("{0} said '{1}'", actor, message);
+
+            numberOfItems += 1;
+
         }
 
     }
