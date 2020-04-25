@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace JLC
 {
-	[CreateAssetMenu(fileName = "Actor Aliases", menuName = "JLC/Actor Aliases", order = 1)]
+	[CreateAssetMenu(fileName = "Actor Aliases", menuName = "Pixel Crushers/JLC/Actor Aliases", order = 1)]
 	public class ActorAliases : ScriptableObject 
 	{
 		[System.Serializable]

@@ -13,7 +13,7 @@ namespace JLC
 	public class DialogueConverterWindow : EditorWindow {
 
 
-		[MenuItem("JLC/Dialogue/Dialogue Converter", false, 0)]
+		[MenuItem("Tools/Pixel Crushers/JLC/Dialogue/Dialogue Converter", false, 0)]
 		public static void OpenJLCDialogueConverterWindow() {
 			EditorWindow.GetWindow(typeof(DialogueConverterWindow), false, "Dialogue Converter");
 		}
