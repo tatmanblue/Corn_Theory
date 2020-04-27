@@ -1,0 +1,101 @@
+#1 1.1 Hello you look lost
+
+Farmer: Hey! Hey, there boy! 
+Farmer: You look lost, out of place.  Can I help you? 
+Cam: Ummm...yeah is this the farm? 
+Farmer: Yeah.  Its farm.  Look around you.  And Its MY FARM. 
+Farmer: Are you dense? I'm thinking you don't belong here. 
+Cam: umm....I mean that farm where I getting my training. 
+Farmer: Look, son.  You are acting suspicious. Those kinds of things can get you in trouble here. 
+Cam: Ummm...ok.  So, what is this place? 
+Farmer: This is [var=GameWorldName].  We don't take well to having strangers around.  Can I give you a piece of advise? 
+
+	[]
+	Cam: Ummm...sure 
+	Farmer: Stay quiet and don't cause any trouble until you can figure out what you need to do. 
+	Farmer: If you need a place to hide, you can stay in my fields as long as you don't ruin my crops....or I will have no choice to call the authorities. 
+	Farmer: [var=GameWorldName] is pretty hi-tech, so use that cell phone of yours too. 
+	Farmer: Just bec careful.  They are watching you. 
+	[]
+
+	[]
+	Cam: Naw. I got this. 
+	Farmer: Ok then.  Get outta here! Leave my farm alone. 
+	[]
+
+Farmer: Head up the dirt road and get to town....you'll be doing yourself a favor. 
+Cam: Bye 
+
+#2 1.2.2 Search for Batteries
+
+
+	[]
+	Adult Female: I was digging in that dumpster over there and found all of these fully charged batteries. 
+	[]
+
+	[]
+	Adult Female: One time I found an upgrade for my phone 
+	[]
+
+	[]
+	Adult Female: Searching everwhere.  I find things in the least expected places. 
+	[]
+
+
+#3 1.2.1 Bus stop
+
+
+	[]
+	Hey Dude: This bus stop can get me to town quicker.  
+	[]
+
+	[]
+	Hey Dude: I need money. I could go into town to sell things to vendors. 
+	[]
+
+	[]
+	Hey Dude: I would like to go to the bigger city instead if I had the money. 
+	[]
+
+
+#4 1.2.3 Sandwhich
+
+Shop Keeper: I search anything that looks like it might have something.  I found a ham sandwich once! 
+
+// Hey dude introduces himself //
+
+#5 1.2.4 Hey Dude
+
+Hey Dude: Hey man.  wassup? 
+Cam: Sup 
+Hey Dude: Didn't I see you at the bus stop earlier? 
+Cam: Yeah.  That was like 2 minutes ago. 
+Hey Dude: Oh yeah.  Right on man. 
+Hey Dude: Everything ok, man?  You are looking rather confused. 
+Cam: Im not sure where I am. 
+Hey Dude: Oh yeah.  That happens to me, dude.  It sucks.   
+Hey Dude: I should probably lay off the weed. 
+Cam: You got weed? 
+Hey Dude: Shhhhh.   No man.  There's none of that here.  We are all law abiding citizens.  Catch my drift, man? 
+Cam: <laughs> 
+Cam: So, I have this cell phone.  Its not mine and it doesn't seem to work. 
+Hey Dude: Awe dude, that sucks. 
+Hey Dude: You probably need a usb cable and battery, from the looks of it. 
+Hey Dude: Here, have this usb cable.  I got a spare. 
+Cam: Cool. Cool. 
+Cam: Do you know where I can get a battery? 
+Hey Dude: You got coin? 
+Cam: Naw. I don't even have my wallet. 
+Hey Dude: Shhhhh.  Dude.  You can't be walking about without your ID.  They will throw you in the slammer for that. 
+Cam: Shit. 
+Hey Dude: Dude! You gotta lay low.  Be a bum, man. Be a bum. 
+Cam: Be a bum? 
+Hey Dude: Yeah, man.  Go digging in trash. Either sell stuff you find or maybe you will find that battery you need. 
+Hey Dude: Becareful who you beg from, man.  They don't like that around here. 
+Hey Dude: And keep a low profile. 
+Cam: Ok.  Thanks man. 
+Hey Dude: Stay chill, man. 
+
+
+#6 1.3
+Cam: Man this sucks.

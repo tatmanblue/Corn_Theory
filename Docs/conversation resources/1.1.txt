@@ -1,0 +1,27 @@
+#1 1.1 Hello you look lost
+
+Farmer: Hey! Hey, there boy! 
+Farmer: You look lost, out of place.  Can I help you? 
+Cam: Ummm...yeah is this the farm? 
+Farmer: Yeah.  Its farm.  Look around you.  And Its MY FARM. 
+Farmer: Are you dense? I'm thinking you don't belong here. 
+Cam: umm....I mean that farm where I getting my training. 
+Farmer: Look, son.  You are acting suspicious. Those kinds of things can get you in trouble here. 
+Cam: Ummm...ok.  So, what is this place? 
+Farmer: This is [var=GameWorldName].  We don't take well to having strangers around.  Can I give you a piece of advise? 
+
+	[]
+	Cam: Ummm...sure 
+	Farmer: Stay quiet and don't cause any trouble until you can figure out what you need to do. 
+	Farmer: If you need a place to hide, you can stay in my fields as long as you don't ruin my crops....or I will have no choice to call the authorities. 
+	Farmer: [var=GameWorldName] is pretty hi-tech, so use that cell phone of yours too. 
+	Farmer: Just bec careful.  They are watching you. 
+	[]
+
+	[]
+	Cam: Naw. I got this. 
+	Farmer: Ok then.  Get outta here! Leave my farm alone. 
+	[]
+
+Farmer: Head up the dirt road and get to town....you'll be doing yourself a favor. 
+Cam: Bye 

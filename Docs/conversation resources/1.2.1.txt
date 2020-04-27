@@ -1,0 +1,14 @@
+#3 1.2.1 Bus stop
+
+
+	[]
+	Hey Dude: This bus stop can get me to town quicker.  
+	[]
+
+	[]
+	Hey Dude: I need money. I could go into town to sell things to vendors. 
+	[]
+
+	[]
+	Hey Dude: I would like to go to the bigger city instead if I had the money. 
+	[]
