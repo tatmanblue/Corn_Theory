@@ -1142,7 +1142,7 @@ PrefabInstance:
     - target: {fileID: 11426072, guid: 58ac37417e60e534f91138088a3e6f70, type: 3}
       propertyPath: displaySettings.dialogueUI
       value: 
-      objectReference: {fileID: 192052, guid: 905691f5a1de8214b8881fc22182f1d5, type: 3}
+      objectReference: {fileID: 164380, guid: 56ffcbf3ec243dc49af6b656b4c192bb, type: 3}
     - target: {fileID: 11426072, guid: 58ac37417e60e534f91138088a3e6f70, type: 3}
       propertyPath: debugLevel
       value: 3
@@ -1688,7 +1688,7 @@ PrefabInstance:
     - target: {fileID: 8992009304218050590, guid: 8405b3ec08eb3904092b64e14f1ae5f7,
         type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: 0.000035193698
+      value: 0.000041541804
       objectReference: {fileID: 0}
     - target: {fileID: 1632672355543859749, guid: 8405b3ec08eb3904092b64e14f1ae5f7,
         type: 3}
