@@ -70,6 +70,9 @@ namespace CornTheory
             Destroy(gameObject);
         }
 
+        /// <summary>
+        /// This adds shading to the rest of the screen to make it looked somewhat greyed out
+        /// </summary>
         private void AddBackground()
         {
             var bgTex = new Texture2D(1, 1);
@@ -94,6 +97,9 @@ namespace CornTheory
             m_background.transform.SetSiblingIndex(transform.GetSiblingIndex());
         }
 
+        /// <summary>
+        /// inverse of AddBackground()
+        /// </summary>
         private void RemoveBackground()
         {
             var image = m_background.GetComponent<Image>();
