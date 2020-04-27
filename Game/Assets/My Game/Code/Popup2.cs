@@ -102,6 +102,9 @@ namespace CornTheory
         /// </summary>
         private void RemoveBackground()
         {
+            if (null == m_background)
+                return;
+
             var image = m_background.GetComponent<Image>();
             if (image != null)
                 image.CrossFadeAlpha(0.0f, 0.2f, false);
