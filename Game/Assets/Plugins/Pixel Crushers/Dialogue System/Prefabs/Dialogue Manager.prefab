@@ -88,6 +88,7 @@ GameObject:
   - component: {fileID: 11471062}
   - component: {fileID: 11424616}
   - component: {fileID: 1585257106}
+  - component: {fileID: 5373740767319569956}
   m_Layer: 0
   m_Name: Dialogue Manager
   m_TagString: Untagged
@@ -142,7 +143,7 @@ MonoBehaviour:
       alwaysForceResponseMenu: 1
       includeInvalidEntries: 0
       responseTimeout: 0
-    dialogueUI: {fileID: 192052, guid: 905691f5a1de8214b8881fc22182f1d5, type: 3}
+    dialogueUI: {fileID: 164380, guid: 56ffcbf3ec243dc49af6b656b4c192bb, type: 3}
     localizationSettings:
       language: 
       useSystemLanguage: 0
@@ -272,6 +273,18 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls: []
 --- !u!114 &1585257106
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 125852}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f0d1029750dc5fd4f9cfd8989db6e0fe, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &5373740767319569956
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
