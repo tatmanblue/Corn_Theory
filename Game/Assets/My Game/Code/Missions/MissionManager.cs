@@ -69,7 +69,8 @@ namespace CornTheory.Missions
         {
             var scene = SceneManager.GetActiveScene();
             print("MissionManager.SceneOpened() called in scene " + scene.name);
-            if (scene.name == Constants.MainWorldScene || scene.name == Constants.DevPlayArenaScene)
+            // TODO:  this is hooky when playing around
+            if (scene.name == Constants.MainWorldScene || scene.name == Constants.DevPlayArenaScene || scene.name == Constants.MainWorldSceneExperimental)
             {
                 PlayerState.Instance.LoadMissions();
                 popupHandler.Invoke("ShowMissions", 0f);

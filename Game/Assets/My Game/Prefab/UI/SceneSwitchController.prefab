@@ -47,6 +47,6 @@ MonoBehaviour:
   defaultCursorHotspot: {x: 0, y: 0}
   busyCursor: {fileID: 2800000, guid: 1614d32b48332ac429c4f09189aa473a, type: 3}
   busyCursorHotspot: {x: 0, y: 0}
-  showMissionsSceneStart: 0
+  showMissionsSceneStart: 1
   showDelay: 0.75
   skyBox: {fileID: 0}

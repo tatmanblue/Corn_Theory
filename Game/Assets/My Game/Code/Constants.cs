@@ -28,6 +28,7 @@ namespace CornTheory
         public static readonly string MainMenuScene = "Main Menu";
         public static readonly string MainWorldScene = "3 - Open World";
         public static readonly string MainWorldSceneOld = "3 - Terrain";
+        public static readonly string MainWorldSceneExperimental = "3.1 - Terrain";
         public static readonly string OpenMenuScene = "Main Menu";
         public static readonly string DevPlayArenaScene = "Play Arena";
 

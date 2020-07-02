@@ -36,7 +36,12 @@ namespace CornTheory
 
         private void InvokeMissionPopup(Scene scene)
         {
+            print(string.Format("scene name found: {0}", scene.name));
+            print(string.Format("Is scene {0} = {1}", Constants.MainWorldScene, scene.name == Constants.MainWorldScene));
+            print(string.Format("Is scene {0} = {1}", Constants.MainWorldSceneExperimental, scene.name == Constants.MainWorldSceneExperimental));
+            // TODO:  this is hooky when playing around
             if ((scene.name == Constants.MainWorldScene && true == showMissionsSceneStart)
+                || (scene.name == Constants.MainWorldSceneExperimental && true == showMissionsSceneStart)
                 || scene.name == Constants.DevPlayArenaScene)
             {
                 PlayerState.Instance.GameState = GameUIState.InWorld;
