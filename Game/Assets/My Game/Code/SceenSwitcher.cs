@@ -95,6 +95,11 @@ namespace CornTheory
             SceneManager.LoadScene(Constants.DevPlayArenaScene);
         }
 
+        public void GotoOpenWorldPrototype()
+        {
+            SceneManager.LoadScene(Constants.MainWorldSceneExperimental);
+        }
+
         public void Quit()
         {
             Cursor.SetCursor(busyCursor, busyCursorHotspot, CursorMode.Auto);

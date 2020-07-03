@@ -17,4 +17,7 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/My Game/Scenes/3 - Open World.unity
     guid: 91413bace1461ca429925510b56ede5a
+  - enabled: 1
+    path: Assets/My Game/Scenes/3.1 - Terrain.unity
+    guid: dad83924bdad67e4aab9ed2e9ed7ab22
   m_configObjects: {}

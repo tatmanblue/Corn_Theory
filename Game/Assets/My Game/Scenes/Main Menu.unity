@@ -2909,8 +2909,8 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
-      - m_Target: {fileID: 158916407}
-        m_MethodName: PerformTransition
+      - m_Target: {fileID: 1888451398}
+        m_MethodName: GotoOpenWorldPrototype
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
