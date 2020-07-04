@@ -5,6 +5,16 @@
 [Bb]uilds/
 Assets/AssetStoreTools*
 
+# stuff from assets
+_TerrainAutoUpgrade.meta
+game/*.pdf
+game/*.pdf.meta
+game/*.psd
+game/*.psd.meta
+_TerrainAutoUpgrade/
+VegetationStudioDemo/
+
+
 # Visual Studio cache directory
 .vs/
 
