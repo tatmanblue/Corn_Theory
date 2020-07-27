@@ -1,0 +1,24 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d1187c6f5a2aa584084ba67ab2162dbf, type: 3}
+  m_Name: Default Vegetation
+  m_EditorClassIdentifier: 
+  PackageName: No name
+  VegetationInfoList: []
+  UseTerrainTextures: 0
+  TerrainTextureList: []
+  TextureMaskList: []
+  TerrainTextureCount: 0
+  MaxCurveHeight: 0
+  AutomaticMaxCurveHeight: 1
+  TerrainTextureSettingsList: []
+  MaxVegetationItemHeight: 0

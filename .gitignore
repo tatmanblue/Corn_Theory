@@ -13,7 +13,7 @@ game/*.psd
 game/*.psd.meta
 _TerrainAutoUpgrade/
 VegetationStudioDemo/
-
+game/LandscapeBuilder/Undo/*
 
 # Visual Studio cache directory
 .vs/
@@ -44,3 +44,5 @@ sysinfo.txt
 # Builds
 *.apk
 *.unitypackage
+*.pdf
+*.meta
