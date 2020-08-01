@@ -14,6 +14,7 @@ namespace LandscapeBuilder
         private GUIStyle sizeLabel;
         private Vector3 sizeLabelOffset;
         private Vector3 sizeHandleScale = Vector3.one;
+        private Vector3 prevScale = Vector3.one;
 
         void Awake()
         {
@@ -46,8 +47,24 @@ namespace LandscapeBuilder
                     sizeHandleScale.x = areaRect.width;
                     sizeHandleScale.z = areaRect.height;
 
+                    prevScale = sizeHandleScale;
+
                     // Display the scale / resizing handles
                     sizeHandleScale = Handles.ScaleHandle(sizeHandleScale, handlePos, Quaternion.identity, HandleUtility.GetHandleSize(handlePos));
+
+                    float deltaX = sizeHandleScale.x - prevScale.x;
+                    float deltaY = sizeHandleScale.y - prevScale.y;
+                    float deltaZ = sizeHandleScale.z - prevScale.z;
+
+                    // Is the scale-all axes component of the handle being used?
+                    if (deltaX != 0f && deltaY != 0f && deltaZ != 0f)
+                    {
+                        // Seems to be bug or at least change of behaviour in U2019.3+
+                        // scaling all axes produces very large numbers.
+                        #if UNITY_2019_3_OR_NEWER
+                        sizeHandleScale = prevScale;
+                        #endif
+                    }
 
                     areaRect.width = Mathf.Clamp(sizeHandleScale.x, 2f, 10000f);
                     areaRect.height = Mathf.Clamp(sizeHandleScale.z, 2f, 10000f);

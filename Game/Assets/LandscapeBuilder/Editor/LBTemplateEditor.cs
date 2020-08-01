@@ -1,4 +1,4 @@
-﻿// Landscape Builder. Copyright (c) 2016-2019 SCSM Pty Ltd. All rights reserved.
+﻿// Landscape Builder. Copyright (c) 2016-2020 SCSM Pty Ltd. All rights reserved.
 using UnityEngine;
 using UnityEditor;
 using System.Collections;
@@ -220,7 +220,7 @@ namespace LandscapeBuilder
             EditorGUILayout.PropertyField(isPopulateLandscapeProp, new GUIContent(""), GUILayout.Width(30));
             EditorGUILayout.EndHorizontal();
 
-            if (GUILayout.Button("Create New unpopulated Landscape from Template"))
+            if (GUILayout.Button("Create New " + (isPopulateLandscapeProp.boolValue ? "" : "unpopulated ") + "Landscape from Template"))
             {
                 if (lbTemplate == null) { Debug.LogWarning("LBTemplateEditor - create landscape - template not defined. Please Report"); }
                 else if (string.IsNullOrEmpty(UnityEditor.SceneManagement.EditorSceneManager.GetActiveScene().name))

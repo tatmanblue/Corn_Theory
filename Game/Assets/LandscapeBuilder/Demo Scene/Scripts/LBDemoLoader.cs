@@ -1,4 +1,4 @@
-﻿// Landscape Builder. Copyright (c) 2016-2019 SCSM Pty Ltd. All rights reserved.
+﻿// Landscape Builder. Copyright (c) 2016-2020 SCSM Pty Ltd. All rights reserved.
 using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
@@ -294,11 +294,14 @@ namespace LandscapeBuilder
         /// <summary>
         /// Load a template but delay short period of time after updating
         /// the infoPanel text to force it to be displayed
+        /// For URP/LWRP/HDRP all trees will be forced to be billboarded
+        /// as currently we are only using built-in SRP trees.
         /// </summary>
         /// <param name="templateNumber"></param>
         /// <returns></returns>
         IEnumerator LoadTemplateWithUIDelay(int templateNumber)
         {
+            bool showSRPWarning = false;
             if (lbTemplates != null)
             {
                 int numTemplates = lbTemplates.Length;
@@ -362,11 +365,15 @@ namespace LandscapeBuilder
                             int numTerrains = (lbLandscape.landscapeTerrains == null ? 0 : lbLandscape.landscapeTerrains.Length);
                             if (numTerrains > 0)
                             {
+                                // Our older templates don't use GPU for Topography and Path. If it is fully capable
+                                // of using the GPU, list it here.
+                                bool isModernTemplate = lbTemplate.name.StartsWith("DemoStoneCottage");
+
                                 // Override the template GPU settings
-                                lbLandscape.useGPUTopography = false;
+                                lbLandscape.useGPUTopography = isModernTemplate ? enableGPU : false;
                                 lbLandscape.useGPUTexturing = enableGPU;
                                 lbLandscape.useGPUGrass = enableGPU;
-                                lbLandscape.useGPUPath = false;
+                                lbLandscape.useGPUPath = isModernTemplate ? enableGPU : false;
 
                                 // Check for URP/LWRP/HDRP or do we need to create a default material for U2019.2.0 or newer
                                 if (isURP || isLWRP || isHDRP || is201920Plus)
@@ -379,11 +386,21 @@ namespace LandscapeBuilder
                                     {
                                         terrain = lbLandscape.landscapeTerrains[tIdx];
                                         lbLandscape.SetTerrainMaterial(terrain, tIdx, (tIdx == numTerrains - 1), terrain.terrainData.size.x, ref pixelError, terrainMaterialType);
+
+                                        // For URP/LWRP/HDRP all trees will be forced to be billboarded
+                                        // as currently we are only using built-in SRP trees.
+                                        if (isURP || isLWRP || isHDRP)
+                                        {
+                                            // Force all trees to be billboards
+                                            terrain.treeBillboardDistance = 0f;
+                                            terrain.treeMaximumFullLODCount = 0;
+                                            showSRPWarning = true;
+                                        }
                                     }
                                 }
 
                                 // These are the cut-down versions without progress bars and minimal validation
-                                infoText += "Building Topography... ";
+                                infoText += "Building Topography" + (lbLandscape.useGPUTopography ? " (GPU)..." : "...");
                                 SetInfoText(infoText);
                                 yield return new WaitForSeconds(0.1f);
                                 lbLandscape.ApplyTopography(true, true);
@@ -405,6 +422,14 @@ namespace LandscapeBuilder
                                 infoText += "DONE\n\n";
                                 SetInfoText(infoText);
                                 yield return new WaitForSeconds(0.1f);
+
+                                if (lbLandscape.lbGroupList != null && lbLandscape.lbGroupList.Count > 0)
+                                {
+                                    infoText += "Placing Groups" + (lbLandscape.useGPUTopography ? " (GPU)..." : "...");
+                                    SetInfoText(infoText);
+                                    yield return new WaitForSeconds(0.1f);
+                                    lbLandscape.ApplyGroups(false, false);
+                                }
 
                                 // Apply lighting last as it needs the Camera Paths (and Animator camera to set up WeatherFX)
                                 if (lbTemplate.isLBLightingIncluded)
@@ -463,6 +488,12 @@ namespace LandscapeBuilder
                                             lbCameraAnimator.animateSpeed = false;
                                         }
                                     }
+                                    else if (lbTemplate.name.StartsWith("DemoStoneCottage"))
+                                    {
+                                        lbCameraAnimator.minMoveSpeed = 1f;
+                                        lbCameraAnimator.maxMoveSpeed = 3f;
+                                        lbCameraAnimator.animateSpeed = true;
+                                    }
                                     else
                                     {
                                         lbCameraAnimator.animateSpeed = true;
@@ -499,7 +530,14 @@ namespace LandscapeBuilder
                     }
                 }
             }
-            DisplayInfoPanel(false);
+
+            if (showSRPWarning)
+            {
+                SetInfoTitle("SRP WARNING");
+                SetInfoText("This demo scene is designed for the built-in RP.\n\nSee SRP folder for into on URP and HDRP");
+            }
+            else { DisplayInfoPanel(false); }
+            
             DisplayBackgroundPanel(false);
         }
 

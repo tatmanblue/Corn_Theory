@@ -209,9 +209,12 @@ namespace LandscapeBuilder
         // After importing, setting this enabled a user to adjust the values
         public bool isBelowSeaLevelDataIncluded;
 
-        // Added 1.4.4 Beta 2
         public bool modifierAddInvert;
         public bool modifierUseBlending;
+        // The amount of the centre of the Image Modifier that is preserved during blending with the surrounds.
+        [Range(0f, 0.9f)] public float modifierBlendingCentreSize;
+        // The amount the corners are filled with the modifier when it is blended with the surrounds.
+        [Range(0f, 1f)] public float modifierBlendingFillCorners;
         public float areaRectRotation;
         public LayerModifierMode modifierMode;
         public LBRaw modifierRAWFile;
@@ -320,6 +323,9 @@ namespace LandscapeBuilder
             this.modifierSourceFileType = LBRaw.SourceFileType.RAW;
             this.modifierAddInvert = false;
             this.modifierUseBlending = false;
+            // Blending values match pre-2.2.6 behaviour
+            this.modifierBlendingCentreSize = 0.71f;
+            this.modifierBlendingFillCorners = 0f;
             this.modifierUseWater = false;
             this.modifierLBWater = null;
             this.modifierWaterLBMesh = null;
@@ -414,6 +420,8 @@ namespace LandscapeBuilder
             // Modifier variables
             this.modifierAddInvert = lbLayer.modifierAddInvert;
             this.modifierUseBlending = lbLayer.modifierUseBlending;
+            this.modifierBlendingCentreSize = lbLayer.modifierBlendingCentreSize;
+            this.modifierBlendingFillCorners = lbLayer.modifierBlendingFillCorners;
             this.modifierRAWFile = lbLayer.modifierRAWFile;
             this.modifierLandformCategory = lbLayer.modifierLandformCategory;
             this.modifierSourceFileType = lbLayer.modifierSourceFileType;
@@ -1002,6 +1010,10 @@ namespace LandscapeBuilder
             areaRectRotation = 0f;
             floorOffsetY = 0f;
             modifierUseBlending = false;
+            // Default blending values match pre-2.2.6 settings
+            modifierBlendingCentreSize = 0.71f;
+            modifierBlendingFillCorners = 0f;
+
             modifierWaterIsMeshLandscapeUV = false;
             modifierWaterMeshUVTileScale = Vector2.one;
             if (modifierLBWater != null)
@@ -1199,6 +1211,8 @@ namespace LandscapeBuilder
             sb.Append("\t" + layerInst + ".modifierMode = LBLayer.LayerModifierMode." + modifierMode + "; " + eol);
             sb.Append("\t" + layerInst + ".modifierAddInvert = " + modifierAddInvert.ToString().ToLower() + "; " + eol);
             sb.Append("\t" + layerInst + ".modifierUseBlending = " + modifierUseBlending.ToString().ToLower() + "; " + eol);
+            sb.Append("\t" + layerInst + ".modifierBlendingCentreSize = " + modifierBlendingCentreSize + "f; " + eol);
+            sb.Append("\t" + layerInst + ".modifierBlendingFillCorners = " + modifierBlendingFillCorners + "f; " + eol);
             sb.Append("\t" + layerInst + ".areaRectRotation = " + areaRectRotation + "f; " + eol);
             sb.Append("\t" + layerInst + ".modifierLandformCategory = LBModifierOperations.ModifierLandformCategory." + modifierLandformCategory.ToString() + "; " + eol);
             sb.Append("\t" + layerInst + ".modifierSourceFileType = LBRaw.SourceFileType." + modifierSourceFileType.ToString() + "; " + eol);

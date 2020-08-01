@@ -1,4 +1,4 @@
-﻿// Landscape Builder. Copyright (c) 2016-2019 SCSM Pty Ltd. All rights reserved.
+﻿// Landscape Builder. Copyright (c) 2016-2020 SCSM Pty Ltd. All rights reserved.
 using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
@@ -11,6 +11,9 @@ using System;
 
 namespace LandscapeBuilder
 {
+    /// <summary>
+    /// Dependencies include LBImageFX, LBCelestials
+    /// </summary>
     [AddComponentMenu("Landscape Builder/Lighting")]
     public class LBLighting : MonoBehaviour
     {
@@ -2409,7 +2412,6 @@ namespace LandscapeBuilder
                                     screenClockText = screenClockTextGameObject.AddComponent<Text>();
                                     if (screenClockText != null)
                                     {
-                                        // Configure the UI Text
                                         screenClockText.raycastTarget = false;
                                         screenClockText.resizeTextForBestFit = true;
                                         screenClockText.alignment = TextAnchor.MiddleRight;

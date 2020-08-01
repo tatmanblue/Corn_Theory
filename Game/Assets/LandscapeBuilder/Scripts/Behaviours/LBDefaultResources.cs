@@ -1,4 +1,5 @@
 ﻿#if UNITY_EDITOR
+// Landscape Builder. Copyright (c) 2016-2020 SCSM Pty Ltd. All rights reserved.
 using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
@@ -6,6 +7,16 @@ using UnityEditor;
 
 namespace LandscapeBuilder
 {
+    /// <summary>
+    /// [INTERNAL USE ONLY]
+    /// To change:
+    /// 1. drag into scene
+    /// 2. open prefab
+    /// 3. make changes
+    /// 4. overrides - apply all
+    /// 5. delete from scene
+    /// TODO - convert to properties
+    /// </summary>
     [ExecuteInEditMode]
     public class LBDefaultResources : MonoBehaviour
     {
@@ -77,6 +88,8 @@ namespace LandscapeBuilder
         private int arrayInt;
         private int temp;
 
+        private bool isSaveRequired = false;
+
         // This function overides what is normally seen in the inspector window
         // This allows stuff like buttons to be drawn there
         public override void OnInspectorGUI()
@@ -94,6 +107,8 @@ namespace LandscapeBuilder
             selectedTabInt = GUILayout.SelectionGrid(selectedTabInt, tabTexts, 3);
             EditorGUILayout.Space();
 
+            isSaveRequired = false;
+
             #region Texturing
             if (selectedTabInt == 0)
             {
@@ -105,6 +120,7 @@ namespace LandscapeBuilder
                 newTexturingPresetName = EditorGUILayout.TextField("New Preset Name", newTexturingPresetName);
                 if (!resourcesScript.texturingPresetNameList.Contains(newTexturingPresetName))
                 {
+                    EditorGUILayout.Space();
                     if (GUILayout.Button("Add Texturing Preset"))
                     {
                         resourcesScript.texturingPresetNameList.Add(newTexturingPresetName);
@@ -118,11 +134,13 @@ namespace LandscapeBuilder
 
                 if (resourcesScript.texturingPresetNameList.Count > 0)
                 {
+                    EditorGUILayout.Space();
                     selectedTexturingPreset = EditorGUILayout.Popup("Preset", selectedTexturingPreset, resourcesScript.texturingPresetNameList.ToArray());
                 }
 
                 if (resourcesScript.texturingPresetList.Count > selectedTexturingPreset)
                 {
+                    EditorGUILayout.Space();
                     if (GUILayout.Button("Remove Texturing Preset"))
                     {
                         if (EditorUtility.DisplayDialog("Remove Preset?", "This action cannot be undone.", "Remove", "Cancel"))
@@ -133,6 +151,7 @@ namespace LandscapeBuilder
                     }
                     else
                     {
+                        EditorGUILayout.Space();
                         List<LBTerrainTexture> terrainTexturesList = resourcesScript.texturingPresetList[selectedTexturingPreset].terrainTextureList;
                         // This code simulates the unity default array functionality, which editorgui can't do
                         arrayInt = terrainTexturesList.Count;
@@ -165,6 +184,7 @@ namespace LandscapeBuilder
                             // Show the elements of the list
                             EditorGUILayout.Space();
                             EditorGUILayout.Space();
+                            EditorGUI.BeginChangeCheck();
                             EditorGUILayout.LabelField("<color=black><b>Texture " + (index + 1) + "</b></color>", labelFieldRichText);
                             terrainTexturesList[index].texture = (Texture2D)EditorGUILayout.ObjectField("Texture" + GetTextureName(terrainTexturesList[index].texture), terrainTexturesList[index].texture, typeof(Texture2D), false);
                             terrainTexturesList[index].normalMap = (Texture2D)EditorGUILayout.ObjectField("Normal Map" + GetTextureName(terrainTexturesList[index].normalMap), terrainTexturesList[index].normalMap, typeof(Texture2D), false);
@@ -220,6 +240,8 @@ namespace LandscapeBuilder
                             }
 
                             terrainTexturesList[index].strength = EditorGUILayout.Slider(new GUIContent("Strength", "Strength of the texture in the splatmap"), terrainTexturesList[index].strength, 0f, 2f);
+
+                            if (EditorGUI.EndChangeCheck()) { isSaveRequired = true; }
                         }
 
                         resourcesScript.texturingPresetList[selectedTexturingPreset].terrainTextureList = terrainTexturesList;
@@ -254,11 +276,13 @@ namespace LandscapeBuilder
 
                 if (resourcesScript.treePresetNameList.Count > 0)
                 {
+                    EditorGUILayout.Space();
                     selectedTreePreset = EditorGUILayout.Popup("Preset", selectedTreePreset, resourcesScript.treePresetNameList.ToArray());
                 }
 
                 if (resourcesScript.treePresetList.Count > selectedTreePreset)
                 {
+                    EditorGUILayout.Space();
                     if (GUILayout.Button("Remove Tree Preset"))
                     {
                         if (EditorUtility.DisplayDialog("Remove Preset?", "This action cannot be undone.", "Remove", "Cancel"))
@@ -269,6 +293,7 @@ namespace LandscapeBuilder
                     }
                     else
                     {
+                        EditorGUILayout.Space();
                         List<LBTerrainTree> terrainTreesList = resourcesScript.treePresetList[selectedTreePreset].terrainTreeList;
                         // This code simulates the unity default array functionality, which editorgui can't do
                         arrayInt = terrainTreesList.Count;
@@ -296,11 +321,13 @@ namespace LandscapeBuilder
                                 terrainTreesList.RemoveAt(terrainTreesList.Count - 1);
                             }
                         }
+
                         for (index = 0; index < terrainTreesList.Count; index++)
                         {
                             // Show the elements of the list
                             EditorGUILayout.Space();
                             EditorGUILayout.Space();
+                            EditorGUI.BeginChangeCheck();
                             EditorGUILayout.LabelField("<color=black><b>Tree Type " + (index + 1) + "</b></color>", labelFieldRichText);
                             terrainTreesList[index].prefab = (GameObject)EditorGUILayout.ObjectField(new GUIContent("Prefab", "Tree prefab to use"), terrainTreesList[index].prefab, typeof(GameObject), false);
                             terrainTreesList[index].bendFactor = EditorGUILayout.Slider(new GUIContent("Bend Factor", "Bend factor of the tree - must be non-zero for it to be affected by a wind zone"), terrainTreesList[index].bendFactor, 0f, 1f);
@@ -358,6 +385,8 @@ namespace LandscapeBuilder
                                 terrainTreesList[index].noiseTileSize = EditorGUILayout.Slider(new GUIContent("Noise Tile Size", "Scaling of the noise on the x-z plane"), terrainTreesList[index].noiseTileSize, 100f, 10000f);
                                 terrainTreesList[index].treePlacementCutoff = EditorGUILayout.Slider(new GUIContent("Tree Placement Cutoff", "The noise cutoff value for tree placement. Increasing this value will mean more trees are placed"), terrainTreesList[index].treePlacementCutoff, 0.1f, 1f);
                             }
+
+                            if (EditorGUI.EndChangeCheck()) { isSaveRequired = true; }
                         }
 
                         resourcesScript.treePresetList[selectedTreePreset].terrainTreeList = terrainTreesList;
@@ -379,6 +408,7 @@ namespace LandscapeBuilder
                 newGrassPresetName = EditorGUILayout.TextField("New Preset Name", newGrassPresetName);
                 if (!resourcesScript.grassPresetNameList.Contains(newGrassPresetName))
                 {
+                    EditorGUILayout.Space();
                     if (GUILayout.Button("Add Grass Preset"))
                     {
                         resourcesScript.grassPresetNameList.Add(newGrassPresetName);
@@ -392,11 +422,13 @@ namespace LandscapeBuilder
 
                 if (resourcesScript.grassPresetNameList.Count > 0)
                 {
+                    EditorGUILayout.Space();
                     selectedGrassPreset = EditorGUILayout.Popup("Preset", selectedGrassPreset, resourcesScript.grassPresetNameList.ToArray());
                 }
 
                 if (resourcesScript.grassPresetList.Count > selectedGrassPreset)
                 {
+                    EditorGUILayout.Space();
                     if (GUILayout.Button("Remove Grass Preset"))
                     {
                         if (EditorUtility.DisplayDialog("Remove Preset?", "This action cannot be undone.", "Remove", "Cancel"))
@@ -407,6 +439,7 @@ namespace LandscapeBuilder
                     }
                     else
                     {
+                        EditorGUILayout.Space();
                         List<LBTerrainGrass> terrainGrassList = resourcesScript.grassPresetList[selectedGrassPreset].terrainGrassList;
                         // This code simulates the unity default array functionality, which editorgui can't do
                         arrayInt = terrainGrassList.Count;
@@ -456,6 +489,7 @@ namespace LandscapeBuilder
                             // Show the elements of the list
                             EditorGUILayout.Space();
                             EditorGUILayout.Space();
+                            EditorGUI.BeginChangeCheck();
                             EditorGUILayout.LabelField("<color=black><b>Grass Type " + (index + 1) + "</b></color>", labelFieldRichText);
 
                             terrainGrassList[index].texture = (Texture2D)EditorGUILayout.ObjectField("Texture" + GetTextureName(terrainGrassList[index].texture), terrainGrassList[index].texture, typeof(Texture2D), false);
@@ -516,6 +550,8 @@ namespace LandscapeBuilder
                                 terrainGrassList[index].mapTolerance = EditorGUILayout.IntSlider(new GUIContent("Tolerance", "Colour tolerance on the map to allow for blended edges"), terrainGrassList[index].mapTolerance, 0, 20);
                                 terrainGrassList[index].mapInverse = EditorGUILayout.Toggle(new GUIContent("Inverse", "Grass will not appear in the map areas"), terrainGrassList[index].mapInverse);
                             }
+
+                            if (EditorGUI.EndChangeCheck()) { isSaveRequired = true; }
                         }
 
                         resourcesScript.grassPresetList[selectedGrassPreset].terrainGrassList = terrainGrassList;
@@ -525,6 +561,12 @@ namespace LandscapeBuilder
                 }
             }
             #endregion
+
+            if (isSaveRequired && !Application.isPlaying)
+            {
+                PrefabUtility.RecordPrefabInstancePropertyModifications(resourcesScript);
+                //Debug.Log("[DEBUG] Saving default resources " + Time.time);
+            }
         }
 
         private string GetTextureName(Texture2D texture)

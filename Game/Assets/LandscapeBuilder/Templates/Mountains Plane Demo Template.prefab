@@ -1,22 +1,12 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
---- !u!1001 &100100000
-Prefab:
-  m_ObjectHideFlags: 1
-  serializedVersion: 2
-  m_Modification:
-    m_TransformParent: {fileID: 0}
-    m_Modifications: []
-    m_RemovedComponents: []
-  m_ParentPrefab: {fileID: 0}
-  m_RootGameObject: {fileID: 1000013628444570}
-  m_IsPrefabParent: 1
 --- !u!1 &1000013628444570
 GameObject:
   m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 100100000}
-  serializedVersion: 5
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
   m_Component:
   - component: {fileID: 4000012573421134}
   - component: {fileID: 114000013892694442}
@@ -29,9 +19,10 @@ GameObject:
   m_IsActive: 1
 --- !u!4 &4000012573421134
 Transform:
-  m_ObjectHideFlags: 1
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 100100000}
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1000013628444570}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
@@ -42,9 +33,10 @@ Transform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &114000013892694442
 MonoBehaviour:
-  m_ObjectHideFlags: 1
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 100100000}
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1000013628444570}
   m_Enabled: 1
   m_EditorHideFlags: 0
@@ -391,6 +383,8 @@ MonoBehaviour:
     isBelowSeaLevelDataIncluded: 0
     modifierAddInvert: 0
     modifierUseBlending: 0
+    modifierBlendingCentreSize: 0.71
+    modifierBlendingFillCorners: 0
     areaRectRotation: 0
     modifierMode: 5
     modifierRAWFile:
@@ -533,6 +527,7 @@ MonoBehaviour:
     filterList: []
     lbTerrainDataList: []
     GUID: 6dbfe698-6430-4857-9a8e-297ceeae2c93
+    blendCurveMode: 1
   - texture: {fileID: 2800000, guid: ffb0ca6483707412c8ae9a605865ccb0, type: 3}
     normalMap: {fileID: 2800000, guid: 16415104bc3ec4fab96df2d2a686b017, type: 3}
     heightMap: {fileID: 0}
@@ -615,6 +610,7 @@ MonoBehaviour:
     filterList: []
     lbTerrainDataList: []
     GUID: 48b13466-af56-424d-8215-6fb8c89ec62b
+    blendCurveMode: 1
   - texture: {fileID: 2800000, guid: 44b3f5b19e24542a3ac407370453ae04, type: 3}
     normalMap: {fileID: 2800000, guid: 80b16f255d78c45d791fb91d3559bcdf, type: 3}
     heightMap: {fileID: 0}
@@ -697,6 +693,7 @@ MonoBehaviour:
     filterList: []
     lbTerrainDataList: []
     GUID: 21b3f353-8bd7-4bc7-ac8b-f5b81433d7d1
+    blendCurveMode: 1
   - texture: {fileID: 2800000, guid: dabfeb402b245491b8fd9d955b48981d, type: 3}
     normalMap: {fileID: 2800000, guid: 5caa61bde6c354219a496147337bf357, type: 3}
     heightMap: {fileID: 0}
@@ -779,6 +776,7 @@ MonoBehaviour:
     filterList: []
     lbTerrainDataList: []
     GUID: f602ba40-5665-472b-8478-52a2b020a57e
+    blendCurveMode: 1
   - texture: {fileID: 2800000, guid: eae0dd8fd58ef4f42a4508e1733c5ab4, type: 3}
     normalMap: {fileID: 0}
     heightMap: {fileID: 0}
@@ -852,10 +850,11 @@ MonoBehaviour:
     filterList: []
     lbTerrainDataList: []
     GUID: fd54de24-1cfb-4aee-a6e8-6ab6d1a9d34e
+    blendCurveMode: 1
   terrainTreesList:
   - maxTreesPerSqrKm: 150
     bendFactor: 0.5
-    prefab: {fileID: 100000, guid: 151e43d75940047beadd42a7a05fb47f, type: 2}
+    prefab: {fileID: 100000, guid: 151e43d75940047beadd42a7a05fb47f, type: 3}
     minScale: 2
     maxScale: 3
     treeScalingMode: 0
@@ -919,12 +918,12 @@ MonoBehaviour:
     maxTintStrength: 0.2
     tintColour: {r: 0, g: 1, b: 0, a: 1}
     lbTerrainDataList: []
-    prefabName: 
+    prefabName: ScotsPineTypeA Col
     showPrefabPreview: 0
     GUID: e4245593-f5db-4b27-bd70-bcfb04c2e82b
   - maxTreesPerSqrKm: 150
     bendFactor: 0.5
-    prefab: {fileID: 100000, guid: db111a59811f641e294b96b003a12050, type: 2}
+    prefab: {fileID: 100000, guid: db111a59811f641e294b96b003a12050, type: 3}
     minScale: 2
     maxScale: 3
     treeScalingMode: 0
@@ -988,7 +987,7 @@ MonoBehaviour:
     maxTintStrength: 0.2
     tintColour: {r: 0, g: 1, b: 0, a: 1}
     lbTerrainDataList: []
-    prefabName: 
+    prefabName: ScotsPineTypeB Col
     showPrefabPreview: 0
     GUID: 6262295a-da9c-41cc-a3cd-d24ca691b464
   terrainGrassList: []
@@ -1491,9 +1490,9 @@ MonoBehaviour:
   useWeather: 1
   isHDREnabled: 0
   rainParticleSystemPrefab: {fileID: 477038, guid: 8c029d12358244f03b3dfa1109063299,
-    type: 2}
+    type: 3}
   hailParticleSystemPrefab: {fileID: 477038, guid: 7dd6a849919e96546ba5e68662ff65ce,
-    type: 2}
+    type: 3}
   snowParticleSystemPrefab: {fileID: 0}
   useClouds: 1
   use3DNoise: 0
@@ -4094,6 +4093,7 @@ MonoBehaviour:
   autoRefreshGroupDesigner: 1
   useVegetationSystem: 0
   useVegetationSystemTextures: 0
+  useCTS2019: 0
   useLandscapeExtension: 0
   lbLandscapeExtension:
     heightOffset: 0

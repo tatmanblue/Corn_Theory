@@ -8,11 +8,18 @@ namespace LandscapeBuilder
     [ExecuteInEditMode]
     public class LBVolumeHighlight : MonoBehaviour
     {
+        #region Public Properties
+        //public Color MeshColour { get { return gizmoColour; } set { gizmoColour = value; } }
+
+        #endregion
+
         #region Private Variables
         private Vector3 landscapePos;
         private Vector3 currentPosition = Vector3.zero;
         private float currentYRotation = 0f;
         private Vector3 currentScale = Vector3.one;
+        private Vector3 prevScale = Vector3.one;
+        private Vector3 newScale = Vector3.one;
         private bool volumeRectSet = false;
         private Mesh volumePreviewMesh;
         private bool volumePreviewMeshSet = false;
@@ -22,20 +29,23 @@ namespace LandscapeBuilder
         private Vector3 maxClampPosition = Vector3.one;
         private Vector3 minClampScale = Vector3.zero;
         private Vector3 maxClampScale = Vector3.one;
+
+        // Draw the full mesh rather than the default wire mesh
+        private bool isDrawFullMesh = false;
+        private Color gizmoColour;
         #endregion
 
         #region Event Methods
 
         private void OnDrawGizmos()
         {
-            //Color gizmoColour = new Color(190f/255f, 90f/255f, 45f/255f, 1f);
-            Color gizmoColour = new Color(204f / 255f, 68f / 255f, 11f / 255f, 0.5f);
             Gizmos.color = gizmoColour;
             if (volumePreviewMesh != null)
             {
                 // Draw the preview mesh
                 Quaternion previewRot = Quaternion.Euler(0f, currentYRotation, 0f);
-                Gizmos.DrawWireMesh(volumePreviewMesh, currentPosition, previewRot, currentScale);
+                if (isDrawFullMesh) { Gizmos.DrawMesh(volumePreviewMesh, currentPosition, previewRot, currentScale); }
+                else { Gizmos.DrawWireMesh(volumePreviewMesh, currentPosition, previewRot, currentScale); }
             }
             else
             {
@@ -55,14 +65,45 @@ namespace LandscapeBuilder
             // Let user change size of area in scene view using the Scaling tool
             if (Tools.current == Tool.Scale)
             {
+                prevScale = currentScale;
+
                 // Display the scale / resizing handles
-                currentScale = Handles.ScaleHandle(currentScale, handlePos, handleRotation, HandleUtility.GetHandleSize(handlePos));
+                newScale = Handles.ScaleHandle(currentScale, handlePos, handleRotation, HandleUtility.GetHandleSize(handlePos));
+
+                float deltaX = newScale.x - prevScale.x;
+                float deltaY = newScale.y - prevScale.y;
+                float deltaZ = newScale.z - prevScale.z;
+
+                // Is the scale-all axes component of the handle being used?
+                if (deltaX != 0f && deltaY != 0f && deltaZ != 0f)
+                {
+                    // Seem to be bug or at least change of behaviour in U2019.3+
+                    // scaling all axes produces very large numbers.
+                    #if UNITY_2019_3_OR_NEWER
+                    newScale = prevScale;
+                    #endif
+
+                    //Debug.Log("[DEBUG] x: " + deltaX + "z: " + deltaZ / prevScale.z);
+
+                    //deltaX /= prevScale.x;
+                    //deltaY /= prevScale.y;
+                    //deltaZ /= prevScale.z;
+
+                    //newScale.x = prevScale.x + deltaX;
+                    //newScale.y = prevScale.y + deltaY;
+                    //newScale.z = prevScale.z + deltaZ;
+                }
+
                 // Limit scales if specified
                 if (clampScales)
                 {
-                    currentScale.x = Mathf.Clamp(currentScale.x, minClampScale.x, maxClampScale.x);
-                    currentScale.y = Mathf.Clamp(currentScale.y, minClampScale.y, maxClampScale.y);
-                    currentScale.z = Mathf.Clamp(currentScale.z, minClampScale.z, maxClampScale.z);
+                    currentScale.x = Mathf.Clamp(newScale.x, minClampScale.x, maxClampScale.x);
+                    currentScale.y = Mathf.Clamp(newScale.y, minClampScale.y, maxClampScale.y);
+                    currentScale.z = Mathf.Clamp(newScale.z, minClampScale.z, maxClampScale.z);
+                }
+                else
+                {
+                    currentScale = newScale;
                 }
             }
             else if (Tools.current == Tool.Rotate)
@@ -189,6 +230,35 @@ namespace LandscapeBuilder
 
             GameObject th = new GameObject("Volume Highlight");
             highLighter = th.AddComponent<LBVolumeHighlight>();
+
+            if (highLighter != null)
+            {
+                highLighter.gizmoColour = LBLandscape.GetDefaultMeshVolumeHighlighterColour();
+                highLighter.isDrawFullMesh = false;
+            }
+
+            return highLighter;
+        }
+
+        /// <summary>
+        /// Create a new volume highlighter and return a reference to the LBVolumeHighlight
+        /// script attached to the gameobject.
+        /// </summary>
+        /// <param name="isDrawFullMesh"></param>
+        /// <param name="meshColour"></param>
+        /// <returns></returns>
+        public static LBVolumeHighlight CreateVolumeHighLighter(bool isDrawFullMesh, Color meshColour)
+        {
+            LBVolumeHighlight highLighter = null;
+
+            GameObject th = new GameObject("Volume Highlight");
+            highLighter = th.AddComponent<LBVolumeHighlight>();
+
+            if (highLighter != null)
+            {
+                highLighter.gizmoColour = meshColour;
+                highLighter.isDrawFullMesh = isDrawFullMesh;
+            }
 
             return highLighter;
         }

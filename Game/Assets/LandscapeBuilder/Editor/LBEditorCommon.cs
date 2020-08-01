@@ -1,4 +1,4 @@
-﻿// Landscape Builder. Copyright (c) 2016-2019 SCSM Pty Ltd. All rights reserved.
+﻿// Landscape Builder. Copyright (c) 2016-2020 SCSM Pty Ltd. All rights reserved.
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor;
@@ -13,7 +13,7 @@ namespace LandscapeBuilder
     {
         #region Public static Variables and properties
 
-        public static string LBVersion { get { return "2.2.3"; } }
+        public static string LBVersion { get { return "2.3.1"; } }
         public static string LBBetaVersion { get { return ""; } }
 
         public static LBLandscape currentLandscape;
@@ -93,6 +93,22 @@ namespace LandscapeBuilder
 
         #region Common Editor methods - Templates
 
+        /// <summary>
+        /// Save a template file.
+        /// NOTE: There is currently no option to save Unity Terrain topography layers.
+        /// </summary>
+        /// <param name="landscape"></param>
+        /// <param name="LBEditorVersion"></param>
+        /// <param name="landscapeTemplateName"></param>
+        /// <param name="isSceneSaveRequired"></param>
+        /// <param name="createTemplatePackage"></param>
+        /// <param name="addMapTexturesToTemplatePackage"></param>
+        /// <param name="addLayerHeightmapTexturesToTemplatePackage"></param>
+        /// <param name="addLBLightingToTemplate"></param>
+        /// <param name="addPathsToTemplate"></param>
+        /// <param name="addStencilsToTemplate"></param>
+        /// <param name="addPathMeshMaterialsToTemplate"></param>
+        /// <returns></returns>
         public static bool SaveTemplate
         (
             LBLandscape landscape,
@@ -337,6 +353,9 @@ namespace LandscapeBuilder
                     // Vegetation Integration variables
                     lbTemplate.useVegetationSystem = landscape.useVegetationSystem;
                     lbTemplate.useVegetationSystemTextures = landscape.useVegetationSystemTextures;
+
+                    // CTS
+                    lbTemplate.useCTS2019 = landscape.useCTS2019;
 
                     // Landscape Extension
                     lbTemplate.useLandscapeExtension = landscape.useLandscapeExtension;

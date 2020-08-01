@@ -8,6 +8,7 @@ using AwesomeTechnologies.VegetationSystem;
 using AwesomeTechnologies.Vegetation.PersistentStorage;
 #endif
 
+// Landscape Builder. Copyright (c) 2016-2020 SCSM Pty Ltd. All rights reserved.
 namespace LandscapeBuilder
 {
     public class LBIntegration : MonoBehaviour
@@ -782,6 +783,12 @@ namespace LandscapeBuilder
             else if (landscape.landscapeTerrains == null) { if (showErrors) { Debug.LogWarning("ERROR: " + methodName + " - landscape.landscapeTerrains cannot be null"); } }
             else
             {
+                #if UNITY_EDITOR
+                // This is the same as vegetationSystem.SetSleepMode(false) called for each VS system below,
+                // but for some reason is required here in VS 1.5.3.
+                vegetationStudioManager.WakeUpVegetationSystems();
+                #endif
+
                 AwesomeTechnologies.VegetationItemInfo vegetationItemInfo = null;
                 // Users can specify 0, 1 or multiple cameras to use with Vegetation Studio.
                 if (landscape.vegetationStudioCameraList == null) { landscape.vegetationStudioCameraList = new List<Camera>(); }
@@ -947,6 +954,8 @@ namespace LandscapeBuilder
                                 persistentVegetationStoragePackage = GetVegetationPersistentStoragePackage(landscape, tIdx, ref isExistingPersistentStoragePackage, showErrors);
 
                                 if (persistentVegetationStoragePackage == null) { if (showErrors) { Debug.LogWarning("ERROR: " + methodName + " - could not create PersistentVegetationStoragePackage in project folder"); } }
+                                else if (persistentVegetationStorage == null) { if (showErrors) { Debug.LogWarning("ERROR: " + methodName + " could not get PersistentVegetationStorage " + vsIdx + " PLEASE REPORT"); } }
+                                else
                                 {
                                     persistentVegetationStorage.SetPersistentVegetationStoragePackage(persistentVegetationStoragePackage);
                                 }
@@ -1215,9 +1224,14 @@ namespace LandscapeBuilder
                         for (int vsIdx = 0; vsIdx < numVS; vsIdx++)
                         {
                             vegetationSystem = vegetationSystemList[vsIdx];
+                            vegetationSystem.RefreshVegetationPackage();
                             vegetationSystem.LoadUnityTerrainDetails = (numLBGrass > 0);
                         }
                     }
+
+                    #if UNITY_EDITOR
+                    UnityEditor.EditorUtility.SetDirty(vegetationPackage);
+                    #endif
 
                     #endregion
 
@@ -3418,6 +3432,103 @@ namespace LandscapeBuilder
             else { if (showErrors) { Debug.LogWarning("LBIntegration.IsRiverAutoMaterialInstalled - River Auto Material does not seem to be installed in this project"); } }
 
             return isInstalled;
+        }
+
+        /// <summary>
+        /// Import RAM Spline (control) points into an existing Group Object Path.
+        /// Has been tested with original River Auto Material (RAM).
+        /// Currently doesn't import rotation
+        /// </summary>
+        /// <param name="landscape"></param>
+        /// <param name="lbObjPath"></param>
+        /// <param name="gameObject"></param>
+        /// <param name="showErrors"></param>
+        /// <returns></returns>
+        public static bool GetRAMSplinePoints(LBLandscape landscape, LBObjPath lbObjPath, GameObject gameObject, bool showErrors)
+        {
+            bool isSuccessful = false;
+
+            if (gameObject != null)
+            {
+                System.Type ramSplineType = GetClassTypeFromFullName("RamSpline, Assembly-CSharp, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null", showErrors);
+
+                if (ramSplineType != null)
+                {
+                    Component ramSplineComponent = gameObject.GetComponent(ramSplineType);
+                    if (ramSplineComponent == null)
+                    {
+                        #if UNITY_EDITOR
+                        if (showErrors) { Debug.LogWarning("LBIntegration.GetRAMSplinePoints - could not find RAMSpline component on gameobject"); }
+                        #endif
+                    }
+                    else
+                    {
+                        try
+                        {
+                            // Get the controlPoints and their widths from the spline
+                            List<Vector4> splinePointsToImport = (List<Vector4>)ramSplineType.InvokeMember("controlPoints", System.Reflection.BindingFlags.GetField, null, ramSplineComponent, new object[] { });
+                            //List<float> splinePointWidthsToImport = (List<float>)ramSplineType.InvokeMember("widths", System.Reflection.BindingFlags.GetField, null, ramSplineComponent, new object[] { });
+                            int numPointsToImport = splinePointsToImport == null ? 0 : splinePointsToImport.Count;
+
+                            if (numPointsToImport < 1)
+                            {
+                                #if UNITY_EDITOR
+                                if (showErrors) { Debug.LogWarning("LBIntegration.GetRAMSplinePoints - no spline points to import from " + gameObject.name); }
+                                #endif
+                            }
+                            else
+                            {
+                                // Clear out the old points data
+                                lbObjPath.showPathInScene = false;                                
+                                lbObjPath.selectedList.Clear();
+                                lbObjPath.positionList.Clear();
+                                lbObjPath.pathPointList.Clear();
+
+                                // Create or clear width-related lists
+                                if (lbObjPath.widthList == null) { lbObjPath.widthList = new List<float>(numPointsToImport); } else { lbObjPath.widthList.Clear(); }
+                                if (lbObjPath.positionListLeftEdge == null) { lbObjPath.positionListLeftEdge = new List<Vector3>(numPointsToImport); } else { lbObjPath.positionListLeftEdge.Clear(); }
+                                if (lbObjPath.positionListRightEdge == null) { lbObjPath.positionListRightEdge = new List<Vector3>(numPointsToImport); } else { lbObjPath.positionListRightEdge.Clear(); }
+
+                                // Snap to terrain should off by default so we preserve the height of points being imported
+                                lbObjPath.snapToTerrain = false;
+                                lbObjPath.useWidth = true;
+
+                                // this is edtitor only and won't work in a build...
+                                //lbObjPath.EnablePathWidth(true, true);
+                               
+                                for (int pIdx = 0; pIdx < numPointsToImport; pIdx++)
+                                {                                   
+                                    // controlPoint.w is truncated as we don't use for position. It is used to populate width.
+                                    lbObjPath.positionList.Add(splinePointsToImport[pIdx]);
+                                    lbObjPath.pathPointList.Add(new LBPathPoint());
+                                    lbObjPath.widthList.Add(splinePointsToImport[pIdx].w);
+                                    lbObjPath.positionListLeftEdge.Add(Vector3.zero);
+                                    lbObjPath.positionListRightEdge.Add(Vector3.zero);
+                                }
+
+                                // Refresh everything
+                                lbObjPath.isSplinesCached2 = false;
+                                lbObjPath.RefreshObjPathPositions(lbObjPath.showSurroundingInScene, false);
+                                lbObjPath.showPathInScene = true;
+
+                                #if UNITY_EDITOR
+                                Debug.Log("INFO: " + numPointsToImport + " path points imported from " + gameObject.name);
+                                #endif
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            #if UNITY_EDITOR
+                            if (showErrors) { Debug.LogWarning("LBIntegration.GetRAMSplinePoints - could not import RAMSpline points. " + ex.Message); }
+                            #else
+                            if (ex != null) { }
+                            #endif
+                        }
+                    }
+                }
+            }
+
+            return isSuccessful;
         }
 
         #endregion
@@ -5635,25 +5746,29 @@ namespace LandscapeBuilder
                         if (showErrors) { Debug.LogWarning("ERROR: " + methodName + " could not add MicroSplat Terrain component to terrain: " + terrain.name); }
                     }
                     // User is switching back to an existing MicroSplat terrain material
+                    #if UNITY_2019_2_OR_NEWER
+                    else if (microSplatMaterial != null && microSplatMaterial.shader.name.Contains("MicroSplat"))
+                    #else
                     else if (microSplatMaterial != null && terrain.materialType != Terrain.MaterialType.Custom && microSplatMaterial.shader.name.Contains("MicroSplat"))
+                    #endif
                     {
                         isSuccessful = MicroSplatUpdateMaterial(landscape, terrain, microSplatMaterial, showErrors);
                         //Debug.Log("[DEBUG] added MicroSplatTerrain component. Shader: " + microSplatMaterial.shader.name);
                     }
                     // typical scenario where a new MicroSplat material needs to be created with LB Initialise button
-                    else { isSuccessful = true; }
+                    else { landscape.isMicroSplatMaterialInitRequired = true; isSuccessful = true; }
                 }
                 else
                 {
                     // If it has been previously enabled, check if the material needs updating
                     // landscape custom material should not be null if previously setup, but this caters for an edge case
-                    string shaderName = (landscape.terrainCustomMaterial == null ? "" : landscape.terrainCustomMaterial.shader.name);
+                    string shaderName = landscape.terrainCustomMaterial == null ? "" : landscape.terrainCustomMaterial.shader.name;
 
-                    //if (landscape.terrainCustomMaterial == null || (landscape.terrainCustomMaterial != null && landscape.terrainCustomMaterial.shader.name.Contains("MicroSplat")))
                     if (landscape.terrainCustomMaterial == null || shaderName.Contains("MicroSplat"))
                     {
                         // Only update the material if this is the first time OR the shader name hasn't been fixed yet in the LB Editor window (terrain settings)
-                        if (string.IsNullOrEmpty(shaderName) || shaderName.Contains("LandscapeTerrain0"))
+                        // The Shader needs to have a unique name (like the landscape). Imported terrains will have custom terrain names.
+                        if (string.IsNullOrEmpty(shaderName) || shaderName.Contains("LandscapeTerrain0") || !shaderName.Contains(landscape.name))
                         {
                             //Debug.Log("[DEBUG] updating terrain material shaderName: " + shaderName);
 
@@ -5674,6 +5789,7 @@ namespace LandscapeBuilder
             {
                 // De-select the custom material
                 landscape.terrainCustomMaterial = null;
+                landscape.isMicroSplatMaterialInitRequired = false;
 
                 // Reset terrain settings back to default LB values
                 terrain.heightmapPixelError = 1;
@@ -5774,7 +5890,9 @@ namespace LandscapeBuilder
                 if (microSplatTerrain != null)
                 {
                     terrain.materialTemplate = newTerrainCustomMaterial;
+                    #if !UNITY_2019_2_OR_NEWER
                     terrain.materialType = Terrain.MaterialType.Custom;
+                    #endif
                     microSplatTerrain.templateMaterial = newTerrainCustomMaterial;
                     
                     #if UNITY_EDITOR
@@ -5795,6 +5913,7 @@ namespace LandscapeBuilder
                     //microSplatTerrain.Sync();
 
                     // This is per landscape, but we still update it here
+                    landscape.isMicroSplatMaterialInitRequired = false;
                     landscape.terrainCustomMaterial = newTerrainCustomMaterial;
 
                     isSuccessful = true;
@@ -5806,6 +5925,95 @@ namespace LandscapeBuilder
             return isSuccessful;
         }
 
+        #endregion
+
+        #region CTS 2019
+        #if CTS_PRESENT
+
+        // Setup instructions (assuming 1 landsape in the scene)
+        // 1. Window > Procedural Worlds > CTS > Add CTS To All Terrains
+        // 2. Window > Procedural Worlds > CTS > Create and Apply Profile
+
+        /// <summary>
+        /// Return the CTS component from the first terrain.
+        /// Assumes landscape.SetLandscapeTerrains(true) has already been run.
+        /// </summary>
+        /// <param name="landscape"></param>
+        /// <param name="showErrors"></param>
+        /// <returns></returns>
+        public static CTS.CompleteTerrainShader GetCTSComponent(LBLandscape landscape, bool showErrors)
+        {
+            string methodName = "LBIntegration.GetCTSComponent";
+            CTS.CompleteTerrainShader completeTerrainShader = null;
+
+            if (landscape == null) { if (showErrors) { Debug.LogWarning("ERROR: " + methodName + " - landscape cannot be null"); } }
+            else if (landscape.landscapeTerrains == null) { if (showErrors) { Debug.LogWarning("ERROR: " + methodName + " - landscape.landscapeTerrains cannot be null"); } }
+            else if (landscape.landscapeTerrains.Length > 0)
+            {
+                completeTerrainShader = landscape.landscapeTerrains[0].GetComponent<CTS.CompleteTerrainShader>();
+            }
+
+            return completeTerrainShader;
+        }
+
+        /// <summary>
+        /// Get the CTSProfile from the first terrain in the landscape
+        /// </summary>
+        /// <param name="landscape"></param>
+        /// <param name="showErrors"></param>
+        /// <returns></returns>
+        public static CTS.CTSProfile GetCTSProfile(LBLandscape landscape, bool showErrors)
+        {
+            string methodName = "LBIntegration.GetCTSProfile";
+            CTS.CTSProfile ctsProfile = null;
+
+            if (landscape == null) { if (showErrors) { Debug.LogWarning("ERROR: " + methodName + " - landscape cannot be null"); } }
+            else
+            {
+                CTS.CompleteTerrainShader completeTerrainShader = GetCTSComponent(landscape, showErrors);
+                if (completeTerrainShader != null)
+                {
+                    ctsProfile = completeTerrainShader.Profile;
+                }
+            }
+
+            return ctsProfile;
+        }
+
+        /// <summary>
+        /// Copy current terrain texture layers into CTS 2019.
+        /// </summary>
+        /// <param name="landscape"></param>
+        /// <param name="showErrors"></param>
+        /// <returns></returns>
+        public static bool CTSUpdateTextures(LBLandscape landscape, bool showErrors)
+        {
+            bool isSuccessful = false;
+
+            try
+            {
+                CTS.CTSProfile ctsProfile = GetCTSProfile(landscape, showErrors);
+                if (ctsProfile != null && CTS.CTSTerrainManager.Instance != null)
+                {
+                    CTS.CTSTerrainManager.Instance.BroadcastShaderSetup(ctsProfile);
+                }
+                else if (showErrors)
+                {
+                    Debug.LogWarning("ERROR: CTSUpdateTextures - could not apply textures from LandscapeBuilder to CTS2019");
+                }
+            }
+            catch (Exception ex)
+            {
+                #if UNITY_EDITOR
+                if (showErrors) { Debug.LogWarning("ERROR: CTSUpdateTextures - could not apply textures LandscapeBuilder to CTS2019. " + ex.Message);  }
+                #else
+                if (ex != null) { }
+                #endif
+            }
+            return isSuccessful;
+        }
+
+        #endif
         #endregion
 
         #region General Utils

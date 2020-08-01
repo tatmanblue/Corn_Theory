@@ -16,10 +16,10 @@ MonoBehaviour:
   VegetationInfoList:
   - Name: Broadleaf_Desktop_Optimised
     VegetationItemID: 34f928cf-679d-48b2-af0e-56bc76a0b78b
-    EnableRuntimeSpawn: 0
+    EnableRuntimeSpawn: 1
     PrefabType: 0
     ShaderType: 2
-    VegetationPrefab: {fileID: 122034, guid: 89115865b9bfb4eca8ac51eef4a50fea, type: 3}
+    VegetationPrefab: {fileID: 100000, guid: 1e84b98fc4c200c4aa16e1ec38895673, type: 3}
     VegetationGuid: 89115865b9bfb4eca8ac51eef4a50fea
     VegetationTexture: {fileID: 0}
     VegetationTextureGuid: 
@@ -32,7 +32,7 @@ MonoBehaviour:
     MaxVectorScale: {x: 1.2, y: 1.2, z: 1.2}
     UseAutomaticDensityScale: 0
     LodIndex: 2
-    Seed: 24
+    Seed: 74
     LODFactor: 1
     DisableLOD: 0
     DisableShadows: 0
@@ -78,7 +78,7 @@ MonoBehaviour:
     TextureCutoff: 0.2
     YScale: 1
     SampleDistance: 14.323351
-    Density: 1
+    Density: 0.25
     UseCollisionDetection: 0
     VegetationSteepnessType: 0
     VegetationHeightType: 0
@@ -681,28 +681,28 @@ MonoBehaviour:
     IncludeDetailMaskRuleList: []
     IncludeDetailLayer: 0
     Bounds:
-      m_Center: {x: 0, y: 8.846896, z: 0}
-      m_Extent: {x: 12.537034, y: 10.779641, z: 12.537034}
-    Volume: 13554.513
+      m_Center: {x: 0, y: 9.084348, z: 0.10427189}
+      m_Extent: {x: 8.017627, y: 10.011367, z: 8.121899}
+    Volume: 5215.3896
   - Name: Corn_Stalk_Desktop_Cluster
-    VegetationItemID: e0bb6984-5074-4557-820e-dae88c50db83
-    EnableRuntimeSpawn: 0
+    VegetationItemID: cc7c3f1a-7471-4f7c-8ae3-149bc78be86b
+    EnableRuntimeSpawn: 1
     PrefabType: 0
     ShaderType: 2
     VegetationPrefab: {fileID: 100010, guid: 4433740c79ce6e74eb1cdfdb4d88ffbc, type: 3}
     VegetationGuid: 4433740c79ce6e74eb1cdfdb4d88ffbc
     VegetationTexture: {fileID: 0}
     VegetationTextureGuid: 
-    VegetationType: 2
+    VegetationType: 1
     VegetationRenderType: 0
     VegetationScaleType: 0
     MinScale: 0.8
-    MaxScale: 1.2
+    MaxScale: 1
     MinVectorScale: {x: 0.8, y: 0.8, z: 0.8}
     MaxVectorScale: {x: 1.2, y: 1.2, z: 1.2}
     UseAutomaticDensityScale: 0
     LodIndex: 2
-    Seed: 37
+    Seed: 98
     LODFactor: 1
     DisableLOD: 0
     DisableShadows: 0
@@ -725,14 +725,13 @@ MonoBehaviour:
     NavMeshObstacleCarve: 1
     UseTouchReact: 0
     UseBillboards: 1
-    BillboardQuality: 1
-    BillboardTexture: {fileID: 2800000, guid: 5e9141081e0dbb24bb7aeac54974413b, type: 3}
+    BillboardQuality: 0
+    BillboardTexture: {fileID: 0}
     BillboardTextureGuid: 
-    BillboardNormalTexture: {fileID: 2800000, guid: 3491773bb35aae245a34490d7b43b1c4,
-      type: 3}
+    BillboardNormalTexture: {fileID: 0}
     BillboardNormalTextureGuid: 
     BillboardLodIndex: 2
-    BillboardColorSpace: 0
+    BillboardColorSpace: -1
     BillboardBrightness: 1
     BillboardCutoff: 0.2
     BillboardTintColor: {r: 1, g: 1, b: 1, a: 1}
@@ -747,13 +746,13 @@ MonoBehaviour:
     Hue: {r: 1, g: 0.5, b: 0, a: 0.09765625}
     TextureCutoff: 0.2
     YScale: 1
-    SampleDistance: 5.4885035
-    Density: 1
+    SampleDistance: 1.8807437
+    Density: 0.5
     UseCollisionDetection: 0
     VegetationSteepnessType: 0
     VegetationHeightType: 0
     MinimumSteepness: 0
-    MaximumSteepness: 25
+    MaximumSteepness: 35
     SteepnessCurve:
       serializedVersion: 2
       m_Curve:
@@ -1329,9 +1328,9 @@ MonoBehaviour:
     RotationOffset: {x: -0, y: 0, z: 0}
     Rotation: 0
     UsePerlinMask: 1
-    PerlinCutoff: 0.5688727
-    PerlinScale: 6
-    InversePerlinMask: 1
+    PerlinCutoff: 0.58871627
+    PerlinScale: 4
+    InversePerlinMask: 0
     PerlinOffset: {x: 0, y: 0}
     UseExcludeTextueMask: 0
     ExcludeTextureMaskList: []
@@ -1356,7 +1355,7 @@ MonoBehaviour:
     Volume: 34.528072
   UseTerrainTextures: 0
   TerrainTextureList:
-  - Texture: {fileID: 2800000, guid: a228b58789ac349b68417eb5aecf6edd, type: 3}
+  - Texture: {fileID: 2800000, guid: f6a9ffae476cc114c8c1f9a9ba29e054, type: 3}
     TextureGUID: 
     TextureNormals: {fileID: 2800000, guid: d514aabbca730458b9ef7aca670552f0, type: 3}
     TextureNormalsGUID: 
@@ -1400,7 +1399,7 @@ MonoBehaviour:
     TileSize: {x: 25, y: 25}
     offset: {x: 0, y: 0}
     TerrainLayer: {fileID: 0}
-  - Texture: {fileID: 2800000, guid: 77a66c298c529401dbf41c0b6b694904, type: 3}
+  - Texture: {fileID: 2800000, guid: f48dca121c5df6f43aab564de14c7a94, type: 3}
     TextureGUID: 
     TextureNormals: {fileID: 2800000, guid: c58fc0c31702751479f41d9a7b63a115, type: 3}
     TextureNormalsGUID: 
@@ -1408,18 +1407,18 @@ MonoBehaviour:
     TextureOcclusionGUID: 
     TextureHeightMap: {fileID: 0}
     TextureHeightMapGUID: 
-    TileSize: {x: 5, y: 5}
+    TileSize: {x: 15, y: 15}
     offset: {x: 0, y: 0}
     TerrainLayer: {fileID: 0}
-  - Texture: {fileID: 2800000, guid: 9094edcf722b9e945a30556b7b3c2267, type: 3}
+  - Texture: {fileID: 2800000, guid: 9f0b7a1d5e527a74d95bc61cb3a7deb5, type: 3}
     TextureGUID: 
-    TextureNormals: {fileID: 2800000, guid: 76009dac73d240246aa8d95e1737bc1d, type: 3}
+    TextureNormals: {fileID: 2800000, guid: c58fc0c31702751479f41d9a7b63a115, type: 3}
     TextureNormalsGUID: 
     TextureOcclusion: {fileID: 0}
     TextureOcclusionGUID: 
     TextureHeightMap: {fileID: 0}
     TextureHeightMapGUID: 
-    TileSize: {x: 10, y: 10}
+    TileSize: {x: 25, y: 25}
     offset: {x: 0, y: 0}
     TerrainLayer: {fileID: 0}
   - Texture: {fileID: 2800000, guid: 76a07bcaabfcbc540827c83b89b5d443, type: 3}
@@ -1522,7 +1521,7 @@ MonoBehaviour:
         inWeight: 0.33333334
         outWeight: 0.33333334
       - serializedVersion: 3
-        time: 0.026777778
+        time: 0.015666667
         value: 0
         inSlope: 499.9999
         outSlope: 499.9999
@@ -1531,7 +1530,7 @@ MonoBehaviour:
         inWeight: 0.33333334
         outWeight: 0.33333334
       - serializedVersion: 3
-        time: 0.027777778
+        time: 0.016666668
         value: 1
         inSlope: 499.9999
         outSlope: 499.9999
@@ -1981,7 +1980,7 @@ MonoBehaviour:
       m_RotationOrder: 4
     TextureUseNoise: 1
     TextureNoiseScale: 100
-    TextureWeight: 1
+    TextureWeight: 0.8
     TextureLayer: 4
     Enabled: 0
   - TextureHeightCurve:
@@ -1989,7 +1988,7 @@ MonoBehaviour:
       m_Curve:
       - serializedVersion: 3
         time: 0
-        value: 0.5
+        value: 0
         inSlope: 0
         outSlope: 0
         tangentMode: 0
@@ -1997,8 +1996,44 @@ MonoBehaviour:
         inWeight: 0.33333334
         outWeight: 0.33333334
       - serializedVersion: 3
+        time: 0.1325
+        value: 0
+        inSlope: 499.999
+        outSlope: 499.999
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
+      - serializedVersion: 3
+        time: 0.1335
+        value: 1
+        inSlope: 499.999
+        outSlope: 499.999
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
+      - serializedVersion: 3
+        time: 0.75
+        value: 1
+        inSlope: -500.00644
+        outSlope: -500.00644
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
+      - serializedVersion: 3
+        time: 0.751
+        value: 0
+        inSlope: -500.00644
+        outSlope: -500.00644
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
+      - serializedVersion: 3
         time: 1
-        value: 0.5
+        value: 0
         inSlope: 0
         outSlope: 0
         tangentMode: 0
@@ -2013,7 +2048,7 @@ MonoBehaviour:
       m_Curve:
       - serializedVersion: 3
         time: 0
-        value: 0.5
+        value: 1
         inSlope: 0
         outSlope: 0
         tangentMode: 0
@@ -2021,8 +2056,26 @@ MonoBehaviour:
         inWeight: 0.33333334
         outWeight: 0.33333334
       - serializedVersion: 3
+        time: 0.04111111
+        value: 1
+        inSlope: -500.00085
+        outSlope: -500.00085
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
+      - serializedVersion: 3
+        time: 0.04211111
+        value: 0
+        inSlope: -500.00085
+        outSlope: -500.00085
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
+      - serializedVersion: 3
         time: 1
-        value: 0.5
+        value: 0
         inSlope: 0
         outSlope: 0
         tangentMode: 0
@@ -2032,9 +2085,9 @@ MonoBehaviour:
       m_PreInfinity: 2
       m_PostInfinity: 2
       m_RotationOrder: 4
-    TextureUseNoise: 0
-    TextureNoiseScale: 5
-    TextureWeight: 0
+    TextureUseNoise: 1
+    TextureNoiseScale: 100
+    TextureWeight: 0.4
     TextureLayer: 5
     Enabled: 0
   - TextureHeightCurve:
@@ -2143,4 +2196,4 @@ MonoBehaviour:
     TextureWeight: 0
     TextureLayer: 7
     Enabled: 0
-  MaxVegetationItemHeight: 25.87114
+  MaxVegetationItemHeight: 24.02728

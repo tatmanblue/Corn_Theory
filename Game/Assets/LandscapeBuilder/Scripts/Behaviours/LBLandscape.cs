@@ -1,4 +1,4 @@
-﻿// Landscape Builder. Copyright (c) 2016-2019 SCSM Pty Ltd. All rights reserved.
+﻿// Landscape Builder. Copyright (c) 2016-2020 SCSM Pty Ltd. All rights reserved.
 using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
@@ -56,9 +56,9 @@ public class LBSavedData
     public string pathHQPhotographicTexturesVol2;
     public string pathRusticGrass;
 
-    public static string GetHQPhotographicTexturesVol1DefaultPath { get { return "HQ Photographic Textures Grass Pack Vol.1"; } }
-    public static string GetHQPhotographicTexturesVol2DefaultPath { get { return "HQ Photographic Textures Grass Pack Vol.2"; } }
-    public static string GetRusticGrassDefaultPath { get { return "RUSTIC Grass"; } }
+    public static string GetHQPhotographicTexturesVol1DefaultPath { get { return "Turboscalpeur/HQ Photographic Textures Grass Pack Vol.1"; } }
+    public static string GetHQPhotographicTexturesVol2DefaultPath { get { return "Turboscalpeur/HQ Photographic Textures Grass Pack Vol.2"; } }
+    public static string GetRusticGrassDefaultPath { get { return "Turboscalpeur/RUSTIC Grass"; } }
 
     public static string GetHQPhotographicTexturesVol1SourceName { get { return "HQ Photographic Textures Grass Pack Vol.1"; } }
     public static string GetHQPhotographicTexturesVol2SourceName { get { return "HQ Photographic Textures Grass Pack Vol.2"; } }
@@ -72,6 +72,13 @@ public class LBSavedData
     public bool isNonSquareTerrainsEnabled;
     public bool isLegacyNoiseOffset;
 
+    // Added v2.2.6
+    public bool isMeshVolHighlighterDrawMesh;
+    public float meshVolColourR;
+    public float meshVolColourG;
+    public float meshVolColourB;
+    public float meshVolColourA;
+
     // Constructor
     public LBSavedData()
     {
@@ -84,6 +91,12 @@ public class LBSavedData
         megaSplatAutoClosePainter = true;
         isNonSquareTerrainsEnabled = false;
         isLegacyNoiseOffset = false;
+
+        isMeshVolHighlighterDrawMesh = false;
+        meshVolColourR = 204f / 255f;
+        meshVolColourG = 68f / 255f;
+        meshVolColourB = 11f / 255f;
+        meshVolColourA = 0.5f;
     }
     #endif
 }
@@ -104,6 +117,7 @@ namespace LandscapeBuilder
             BuiltInLegacyDiffuse = 1,
             BuiltInLegacySpecular = 2,
             LBStandard = 3,
+            CTS = 5,
             MegaSplat = 7,
             MicroSplat = 8,
             ReliefTerrainPack = 10,
@@ -277,6 +291,12 @@ namespace LandscapeBuilder
         [HideInInspector] public bool useVegetationSystemTextures = false;  // Will LB textures be applied using Vegetation System?
         [HideInInspector] public List<Camera> vegetationStudioCameraList;   // List of cameras used for assigning to Vegetation System scripts for each terrain
 
+        // CTS 2019 added 2.2.4
+        [HideInInspector] public bool useCTS2019 = false;
+
+        // MicroSplat Integration added 2.2.5 for U2019.2+
+        [System.NonSerialized] public bool isMicroSplatMaterialInitRequired = false;
+
         // Landscape Extension - a plane under the landscape that extends towards horizon
         [HideInInspector] public bool useLandscapeExtension = false;
         [HideInInspector] public LBLandscapeExtension lbLandscapeExtension;
@@ -295,7 +315,7 @@ namespace LandscapeBuilder
         [HideInInspector] public List<TerrainLayer> activeTerrainLayerList;
         #endif
 
-        // GPU Acceleration (Experimental)
+        // GPU Acceleration
         [HideInInspector] public bool useGPUTexturing = false;
         [HideInInspector] public bool useGPUTopography = false;
         [HideInInspector] public bool useGPUGrass = false;
@@ -1682,19 +1702,93 @@ namespace LandscapeBuilder
         }
 
         #endregion
-    
-        #endif
+
+#endif
 
 
         #endregion
 
+        #region Mesh Volume Highlighter option (Editor Only)
+#if UNITY_EDITOR
+
+        /// <summary>
+        /// Get or retrieve Topography Layer Image Modifier volume highlighter options from LBSaveFile.dat.
+        /// </summary>
+        /// <param name="isDrawMesh"></param>
+        /// <param name="meshColour"></param>
+        public static void GetMeshVolumeHighlighterOptions(ref bool isDrawMesh, ref UnityEngine.Color meshColour)
+	    {
+		    lbSavedData = RetrieveSavedData ();
+		    tempLBSavedData = null;
+		    if (lbSavedData != null)
+            {
+                isDrawMesh = lbSavedData.isMeshVolHighlighterDrawMesh;
+                meshColour.r = lbSavedData.meshVolColourR;
+                meshColour.g = lbSavedData.meshVolColourG;
+                meshColour.b = lbSavedData.meshVolColourB;
+                meshColour.a = lbSavedData.meshVolColourA;
+            }
+		    else { Debug.LogWarning("ERROR: Landscape GetMeshVolumeHighlighterOptions could not retrieve saved data"); }
+	    }
+
+        /// <summary>
+        /// Return the default volume hightlighter colour.
+        /// </summary>
+        /// <returns></returns>
+        public static UnityEngine.Color GetDefaultMeshVolumeHighlighterColour()
+        {
+            return new Color(204f / 255f, 68f / 255f, 11f / 255f, 0.5f);
+        }
+
+        /// <summary>
+        /// Save Topography Layer Image Modifier volume highlighter options to LBSaveFile.dat.
+        /// </summary>
+        /// <param name="isDrawMesh"></param>
+        /// <param name="meshColour"></param>
+        public static void SetMeshVolumeHighlighterOptions(bool isDrawMesh, UnityEngine.Color meshColour)
+        {
+            lbSavedData = GetSavedData();
+		    if (lbSavedData != null)
+		    {
+			    // Attempt to save the saved data to disk
+			    BinaryFormatter binaryFormatter = null;
+			    FileStream fs = null;
+			    try
+			    {
+				    binaryFormatter = new BinaryFormatter();
+				    fs = File.Open("LandscapeBuilder/LBSaveFile.dat", FileMode.OpenOrCreate);
+				    lbSavedData.isMeshVolHighlighterDrawMesh = isDrawMesh;
+                    lbSavedData.meshVolColourR = meshColour.r;
+                    lbSavedData.meshVolColourG = meshColour.g;
+                    lbSavedData.meshVolColourB = meshColour.b;
+                    lbSavedData.meshVolColourA = meshColour.a;
+				    binaryFormatter.Serialize(fs, lbSavedData);
+				    fs.Close();
+			    }
+			    catch (Exception ex)
+			    {
+				    Debug.LogWarning("ERROR: Landscape SetMeshVolumeHighlighterOptions Exception - " + ex.Message);
+			    }
+			    finally
+			    {
+				    // Cleanup
+				    if (binaryFormatter != null) { binaryFormatter = null; }
+				    if (fs != null) { fs.Close(); fs.Dispose(); fs = null; }
+			    }
+		    }
+		    else { Debug.LogWarning("ERROR: Landscape SetMeshVolumeHighlighterOptions could retrieve saved data"); }
+        }
+
+#endif
+        #endregion
+
         #region MegaSplat Methods (Editor Only)
 
-        #if UNITY_EDITOR
-	    /// <summary>
-	    /// Retrieve whether MegaSplat AutoClosePainter is enabled from a serialized file
-	    /// </summary>
-	    public static bool GetMegaSplatAutoClosePainter()
+#if UNITY_EDITOR
+        /// <summary>
+        /// Retrieve whether MegaSplat AutoClosePainter is enabled from a serialized file
+        /// </summary>
+        public static bool GetMegaSplatAutoClosePainter()
 	    {
 		    lbSavedData = RetrieveSavedData ();
 		    tempLBSavedData = null;
@@ -2506,6 +2600,10 @@ namespace LandscapeBuilder
                     LBStencil.FreeStencilResources(this, true);
 
                     this.UpdateTerrainColliders();
+
+                    #if CTS_PRESENT
+                    if (useCTS2019) { LBIntegration.CTSUpdateTextures(this, true); }
+                    #endif
                 }
             }
         }
@@ -4700,7 +4798,21 @@ namespace LandscapeBuilder
                     {
                         // If Per Pixel normals are available AND Draw Instanced is enabled, by default enable per-pixel normals.
                         // If we don't want per-pixel normals we need to update it in code later (or set it manually in LB Editor terrain settings).
-                        if (terrainMat.HasProperty("_TERRAIN_INSTANCED_PERPIXEL_NORMAL"))
+                        // Somewhere between 7.2 and 8.0 this property was changed
+                        if (terrainMat.HasProperty("_EnableInstancedPerPixelNormal"))
+                        {
+                            if (GetLandscapeTerrainDrawInstanced())
+                            {
+                                // Appear to have to update the shader_feature as a keyword, AND set the Float property.
+                                terrainMat.EnableKeyword("_EnableInstancedPerPixelNormal");
+                                terrainMat.SetFloat("_EnableInstancedPerPixelNormal", 1f);
+                                #if UNITY_EDITOR
+                                UnityEditor.EditorUtility.SetDirty(terrainMat);
+                                #endif
+                            }
+                        }
+                        // Check older URP 7.1.2 - pre-8.0?
+                        else if (terrainMat.HasProperty("_TERRAIN_INSTANCED_PERPIXEL_NORMAL"))
                         {
                             if (GetLandscapeTerrainDrawInstanced())
                             {
@@ -4714,7 +4826,7 @@ namespace LandscapeBuilder
                         }
                         else
                         {
-                            Debug.LogWarning("URP material property _TERRAIN_INSTANCED_PERPIXEL_NORMAL is not available. Do you have URP 7.1.2 or newer in your project? Check Package Manager");
+                            Debug.LogWarning("URP material property for per-pixel normal is not available. Do you have URP 7.1.2 or newer in your project? Check Package Manager");
                         }
                     }
                     #endif
@@ -5110,6 +5222,16 @@ namespace LandscapeBuilder
             }
             #endregion
 
+            #region CTS
+            else if (tMaterialType == LBLandscape.TerrainMaterialType.CTS)
+            {
+                #if !UNITY_2019_2_OR_NEWER
+                terrain.materialType = Terrain.MaterialType.Custom;
+                #endif
+                terrain.materialTemplate = terrainCustomMaterial;
+            }
+            #endregion
+
             else
             {
                 #if !UNITY_2019_2_OR_NEWER
@@ -5222,11 +5344,14 @@ namespace LandscapeBuilder
             {
                 terrainCustomMaterial = GetLandscapeTerrainCustomMaterial();
             }
-            if (terrainCustomMaterial == null) { Debug.LogWarning("LBLandscape.GetTerrainMaterialType() terrain materialTemplate is null. Check your Terrain Settings on the Landscape tab."); }
+            if (terrainCustomMaterial == null)
+            {
+                if (isMicroSplatMaterialInitRequired) { _terrainMaterialType = TerrainMaterialType.MicroSplat; }
+                else { Debug.LogWarning("LBLandscape.GetTerrainMaterialType() terrain materialTemplate is null. Check your Terrain Settings on the Landscape tab."); }
+            }
             else if (terrainCustomMaterial.shader.name == "Nature/Terrain/Standard") { _terrainMaterialType = LBLandscape.TerrainMaterialType.BuiltInStandard; }
             else if (terrainCustomMaterial.shader.name == "Nature/Terrain/Diffuse") { _terrainMaterialType = LBLandscape.TerrainMaterialType.BuiltInLegacyDiffuse; }
             else if (terrainCustomMaterial.shader.name == "Nature/Terrain/Specular") { _terrainMaterialType = LBLandscape.TerrainMaterialType.BuiltInLegacySpecular; }
-
             #endif
             else
             {
@@ -5239,7 +5364,7 @@ namespace LandscapeBuilder
 
                 if (terrainCustomMaterial != null)
                 {
-                    //Debug.Log("GetTerrainMaterialType " + terrainCustomMaterial.shader.name);
+                    //Debug.Log("[DEBUG] GetTerrainMaterialType " + terrainCustomMaterial.shader.name);
 
                     if (terrainCustomMaterial.shader.name == "Nature/Terrain/LB Standard") { _terrainMaterialType = LBLandscape.TerrainMaterialType.LBStandard; }
                     else if (terrainCustomMaterial.shader.name == "Relief Pack/ReliefTerrain-FirstPass") { _terrainMaterialType = LBLandscape.TerrainMaterialType.ReliefTerrainPack; }
@@ -5255,6 +5380,8 @@ namespace LandscapeBuilder
                     else if (terrainCustomMaterial.shader.name.Contains("Lightweight Render Pipeline/Terrain/Lit")) { _terrainMaterialType = LBLandscape.TerrainMaterialType.LWRP; }
                     // LWRP 3.3.0
                     else if (terrainCustomMaterial.shader.name.Contains("LightweightPipeline/Terrain/Standard Terrain")) { _terrainMaterialType = LBLandscape.TerrainMaterialType.LWRP; }
+                    // Complete Terrain Shader (CTS 2019)
+                    else if (terrainCustomMaterial.shader.name.Contains("CTS Terrain")) { _terrainMaterialType = LBLandscape.TerrainMaterialType.CTS; }
                     else { _terrainMaterialType = LBLandscape.TerrainMaterialType.Custom; }
                 }
                 else { _terrainMaterialType = LBLandscape.TerrainMaterialType.Custom; }

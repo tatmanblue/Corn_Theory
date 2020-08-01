@@ -36,6 +36,13 @@ float LBInverseLerp(float a, float b, float v)
 	return (v - a) / (b - a);
 }
 
+// Is the value between a and b inclusive?
+float LBInRange(float a, float b, float v)
+{
+	if (v >= a && v <= b) { return 1.0; }
+	else { return 0.0; }
+}
+
 // ------------ CURVE METHODS ------------
 
 // Evaluates a point on a curve, given a set of packed curve keyframes
@@ -140,6 +147,32 @@ float LBEvaluateWideRangeCurve(float t)
 	}
 }
 
+
+float LBEvaluateWideRangeLeftOnlyCurve(float t)
+{
+	// Right 75%: all values are 1
+	if (t >= 0.25) { return 1.0; }
+	else
+	{
+		// Don't allow values less than 0
+		if (t < 0.0) { t = 0.0; }
+		// First quarter: Gradient of +4
+		return 4.0 * t;
+	}
+}
+
+float LBEvaluateWideRangeRightOnlyCurve(float t)
+{
+	// Right 25% range: all values are 1
+	if (t <= 0.75) { return 1.0; }
+	else
+	{
+		// Don't allow values more than 1
+		if (t > 1.0) { t = 1.0; }
+		// Final quarter: Gradient of -4
+		return 4.0 * (1.0 - t);
+	}
+}
 
 // ------------ SHAPE AND POINT MATHS METHODS ------------
 

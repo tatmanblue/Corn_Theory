@@ -316,18 +316,30 @@ namespace LandscapeBuilder
 
         /// <summary>
         /// Find the TextureArrayConfig for a given MicroSplat terrain material.
-        /// This assumes it is always in the same project folder
+        /// This assumes it is in the same project folder. If it is not in the
+        /// default folder, it also checks the terrainData folder which can
+        /// happen for imported terrains.
         /// </summary>
+        /// <param name="landscape"></param>
         /// <param name="terrainMat"></param>
         /// <returns></returns>
-        public static JBooth.MicroSplat.TextureArrayConfig GetTextureArrayConfig(Material terrainMat)
+        public static JBooth.MicroSplat.TextureArrayConfig GetTextureArrayConfig(LBLandscape landscape, Material terrainMat)
         {
             JBooth.MicroSplat.TextureArrayConfig textureArrayConfig = null;
 
             if (terrainMat != null)
             {
                 string folder = GetMicroSplatDataFolder(terrainMat, true);
+
                 textureArrayConfig = LBEditorHelper.GetAsset<JBooth.MicroSplat.TextureArrayConfig>(folder, terrainMat.name.Replace("MicroSplat", "MicroSplatConfig") + ".asset");
+
+                // Check the terrain data folder if 1) The material is stored in the scene AND 2) it is not in the default location
+                if (textureArrayConfig == null && landscape != null && landscape.useProjectForTerrainData)
+                {
+                    //Debug.Log("[DEBUG] GetTextureArrayConfig checking: " + landscape.terrainDataFolder + " rather than " + folder);
+                    folder = landscape.terrainDataFolder + "/MicroSplatData";
+                    textureArrayConfig = LBEditorHelper.GetAsset<JBooth.MicroSplat.TextureArrayConfig>(folder, terrainMat.name.Replace("MicroSplat", "MicroSplatConfig") + ".asset");
+                }
             }
             return textureArrayConfig;
         }
@@ -351,8 +363,7 @@ namespace LandscapeBuilder
             else
             {
                 // Find the Texture Array Config file
-                //JBooth.MicroSplat.TextureArrayConfig textureArrayConfig = LBEditorHelper.GetAsset<JBooth.MicroSplat.TextureArrayConfig>("MicroSplatData", terrainMat.name.Replace("MicroSplat","MicroSplatConfig") + ".asset");
-                JBooth.MicroSplat.TextureArrayConfig textureArrayConfig = GetTextureArrayConfig(terrainMat);
+                JBooth.MicroSplat.TextureArrayConfig textureArrayConfig = GetTextureArrayConfig(landscape, terrainMat);
                 if (textureArrayConfig == null) { if (showErrors) { Debug.LogWarning("ERROR: " + methodName + " could not find TextureArrayConfig [MicroSplatData/" + terrainMat.name.Replace("MicroSplat", "MicroSplatConfig") + ".asset]"); } }
                 else
                 {

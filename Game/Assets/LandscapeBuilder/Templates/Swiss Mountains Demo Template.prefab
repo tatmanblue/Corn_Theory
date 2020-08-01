@@ -3,9 +3,10 @@
 --- !u!1 &129252
 GameObject:
   m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 100100000}
-  serializedVersion: 5
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
   m_Component:
   - component: {fileID: 411098}
   - component: {fileID: 11423164}
@@ -18,9 +19,10 @@ GameObject:
   m_IsActive: 1
 --- !u!4 &411098
 Transform:
-  m_ObjectHideFlags: 1
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 100100000}
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 129252}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
@@ -31,9 +33,10 @@ Transform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &11423164
 MonoBehaviour:
-  m_ObjectHideFlags: 1
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 100100000}
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 129252}
   m_Enabled: 1
   m_EditorHideFlags: 0
@@ -380,6 +383,8 @@ MonoBehaviour:
     isBelowSeaLevelDataIncluded: 0
     modifierAddInvert: 0
     modifierUseBlending: 0
+    modifierBlendingCentreSize: 0.71
+    modifierBlendingFillCorners: 0
     areaRectRotation: 0
     modifierMode: 5
     modifierRAWFile:
@@ -689,6 +694,8 @@ MonoBehaviour:
     isBelowSeaLevelDataIncluded: 0
     modifierAddInvert: 0
     modifierUseBlending: 0
+    modifierBlendingCentreSize: 0.71
+    modifierBlendingFillCorners: 0
     areaRectRotation: 0
     modifierMode: 5
     modifierRAWFile:
@@ -998,6 +1005,8 @@ MonoBehaviour:
     isBelowSeaLevelDataIncluded: 0
     modifierAddInvert: 0
     modifierUseBlending: 0
+    modifierBlendingCentreSize: 0.71
+    modifierBlendingFillCorners: 0
     areaRectRotation: 0
     modifierMode: 5
     modifierRAWFile:
@@ -1140,6 +1149,7 @@ MonoBehaviour:
     filterList: []
     lbTerrainDataList: []
     GUID: 9820d427-5663-4e09-b60c-56a269848446
+    blendCurveMode: 1
   - texture: {fileID: 2800000, guid: ffb0ca6483707412c8ae9a605865ccb0, type: 3}
     normalMap: {fileID: 2800000, guid: 16415104bc3ec4fab96df2d2a686b017, type: 3}
     heightMap: {fileID: 0}
@@ -1222,6 +1232,7 @@ MonoBehaviour:
     filterList: []
     lbTerrainDataList: []
     GUID: 63f4e6d4-2c37-44c1-ba12-46b77669b4f8
+    blendCurveMode: 1
   - texture: {fileID: 2800000, guid: 44b3f5b19e24542a3ac407370453ae04, type: 3}
     normalMap: {fileID: 2800000, guid: 80b16f255d78c45d791fb91d3559bcdf, type: 3}
     heightMap: {fileID: 0}
@@ -1304,6 +1315,7 @@ MonoBehaviour:
     filterList: []
     lbTerrainDataList: []
     GUID: b3a5a9fc-e274-44da-bcf8-db20d9df3c63
+    blendCurveMode: 1
   - texture: {fileID: 2800000, guid: dabfeb402b245491b8fd9d955b48981d, type: 3}
     normalMap: {fileID: 2800000, guid: 5caa61bde6c354219a496147337bf357, type: 3}
     heightMap: {fileID: 0}
@@ -1386,10 +1398,12 @@ MonoBehaviour:
     filterList: []
     lbTerrainDataList: []
     GUID: 9034e7d5-727e-4b09-8b53-a175498061c6
+    blendCurveMode: 1
   terrainTreesList:
   - maxTreesPerSqrKm: 250
     bendFactor: 0.5
-    prefab: {fileID: 191094, guid: 13218263754c7fa4a8ddf64d5416317e, type: 2}
+    prefab: {fileID: 1962969092505954816, guid: ffb21479d56cec944ae6584c39ef8e90,
+      type: 3}
     minScale: 2
     maxScale: 3
     treeScalingMode: 0
@@ -1453,12 +1467,13 @@ MonoBehaviour:
     maxTintStrength: 0.2
     tintColour: {r: 0, g: 1, b: 0, a: 1}
     lbTerrainDataList: []
-    prefabName: 
+    prefabName: LB_Tree2
     showPrefabPreview: 0
     GUID: f101b89e-d86e-4ae2-8e5a-87a76ed78501
   - maxTreesPerSqrKm: 250
     bendFactor: 0.5
-    prefab: {fileID: 100888, guid: db47eb23ef9acb74da3dfcd584de6c91, type: 2}
+    prefab: {fileID: 3025512539234439298, guid: e9df1c50c794dbe4497f5b415e734922,
+      type: 3}
     minScale: 2
     maxScale: 3
     treeScalingMode: 0
@@ -1522,7 +1537,7 @@ MonoBehaviour:
     maxTintStrength: 0.2
     tintColour: {r: 0, g: 1, b: 0, a: 1}
     lbTerrainDataList: []
-    prefabName: 
+    prefabName: LB_Tree4
     showPrefabPreview: 0
     GUID: 88d88a30-1c7d-4193-a1a8-9c59a517ffe3
   terrainGrassList:
@@ -1830,10 +1845,10 @@ MonoBehaviour:
   envAmbientSource: 0
   skyboxType: 0
   skyboxesList:
-  - material: {fileID: 2100000, guid: b8f20d5ca50d16143afc11f5e4af6fc1, type: 2}
+  - material: {fileID: 0}
     transitionStartTime: 15
     transitionEndTime: 17
-  - material: {fileID: 2100000, guid: b6ceed7a620794ec4b5d6d52d34a8d95, type: 2}
+  - material: {fileID: 0}
     transitionStartTime: 5
     transitionEndTime: 6
   proceduralSkybox: {fileID: 2100000, guid: 45b0a3896a9794cdd907d5c96ae84a7e, type: 2}
@@ -2232,7 +2247,7 @@ MonoBehaviour:
   useWeather: 1
   isHDREnabled: 0
   rainParticleSystemPrefab: {fileID: 477038, guid: 8c029d12358244f03b3dfa1109063299,
-    type: 2}
+    type: 3}
   hailParticleSystemPrefab: {fileID: 0}
   snowParticleSystemPrefab: {fileID: 0}
   useClouds: 1
@@ -2454,6 +2469,7 @@ MonoBehaviour:
   autoRefreshGroupDesigner: 1
   useVegetationSystem: 0
   useVegetationSystemTextures: 0
+  useCTS2019: 0
   useLandscapeExtension: 0
   lbLandscapeExtension:
     heightOffset: 0
@@ -2470,15 +2486,4 @@ MonoBehaviour:
   useGPUPath: 0
   isUndoTopographyDisabled: 0
   isPopulateLandscape: 1
-  debugMode: 1
---- !u!1001 &100100000
-Prefab:
-  m_ObjectHideFlags: 1
-  serializedVersion: 2
-  m_Modification:
-    m_TransformParent: {fileID: 0}
-    m_Modifications: []
-    m_RemovedComponents: []
-  m_ParentPrefab: {fileID: 0}
-  m_RootGameObject: {fileID: 129252}
-  m_IsPrefabParent: 1
+  debugMode: 0

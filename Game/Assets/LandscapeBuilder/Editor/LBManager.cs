@@ -1,12 +1,21 @@
-﻿// Landscape Builder. Copyright (c) 2016-2019 SCSM Pty Ltd. All rights reserved.
+﻿// Landscape Builder. Copyright (c) 2016-2020 SCSM Pty Ltd. All rights reserved.
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor;
 using System.IO;
+using UnityEngine.SceneManagement;
 
 namespace LandscapeBuilder
 {
+    /// <summary>
+    /// LBManager helps to finalise a project so that it can be released.
+    /// Has a dependency on LBSetup.cs, LBLayer, LBWater, LBTerrainData, LBLandscape,
+    /// LBMapPath, LBGroup, LBGroupMember, LBTerrainTree, LBTerrainTexture, LBTerrainGrass,
+    /// LBObjectPath etc
+    /// NOTE: Try to keep dependencies to core LB classes. Don't include other editor classes
+    /// apart from LBEditorCommon.
+    /// </summary>
     public class LBManager : EditorWindow
     {
         #region Public variables
@@ -37,6 +46,7 @@ namespace LandscapeBuilder
         private bool isRemoveDemoScene = true;
         private bool isRemoveDemoAssets = false;
         private bool isRemoveUnityWater = false;
+        private bool isRemoveModifiers = false;
         private bool isRemoveRuntimeSamples = false;
         private bool isRemoveSRP = true;
 
@@ -47,7 +57,8 @@ namespace LandscapeBuilder
         private Color currentBgndColor = Color.white;
         private string txtColourName = "black";
         private GUIStyle labelFieldRichText = null;
-        private static readonly float labelWidthOffset = 25f;
+        private static readonly float labelWidthWideOffset = 25f;
+        private static readonly float labelWidthNarrowOffset = 16f;
 
         #endregion
 
@@ -65,6 +76,7 @@ namespace LandscapeBuilder
         #region GUIContent
         private static readonly GUIContent landscapeGUIContent = new GUIContent(" Landscape", "Drag in the Landscape parent GameObject from the scene Hierarchy.");
         private static readonly GUIContent saveTemplateNameContent = new GUIContent("Template Name", "The name of the saved Landscape Template. IMPORTANT: Make sure these are unique in your project to avoid some being overwritten.");
+        private static readonly GUIContent inventoryButtonContent = new GUIContent("Get Inventory", "This will output an text file containining the items in your landscape. NOTE: Prefabs will be listed but will not show their individual assets.");
         #endregion
 
         #region GUIContent - Phase 2
@@ -78,11 +90,17 @@ namespace LandscapeBuilder
         #region GUIContent - Phase 3
         private static readonly GUIContent removeEditorScriptsContent = new GUIContent("Remove Editor Scripts", "Remove all LB Editor scripts from the project");
         private static readonly GUIContent removeDemoSceneContent = new GUIContent("Remove Demo Scene", "Remove LB Demo Scenes from the project");
-        private static readonly GUIContent removeDemoAssetsContent = new GUIContent("Remove Demo Assets", "Remove all LB Demo assets from the project");
+        private static readonly GUIContent removeDemoAssetsContent = new GUIContent("Remove Demo Assets", "Remove all LB Demo assets (including textures, trees, and meshes) from the project");
         private static readonly GUIContent removeUnityWaterContent = new GUIContent("Remove Legacy Unity Water", "Remove old Unity Water Standard Assets included with LB from the project. If you don't use Unity water from Standard Assets you can safely remove these.");
-        private static readonly GUIContent removeRuntimeSamplesContent = new GUIContent("Remove Runtime Samples", "Remove runtime prefabs, scripts, and objects from the project");
-        private static readonly GUIContent removeSRPContent = new GUIContent("Remove SRP Packages", "Remove the LB SRP folder and packages from the project. Even if using LWRP or HDRP, you will have most likely already opened and installed the assets in these packages. Now they can safely be removed.");
+        private static readonly GUIContent removeModifiersrContent = new GUIContent("Remove Modifiers & Images", "Remove ALL Topography Image Modifiers and sample heightmap Images and masks. Unless you are using these to generate heightmaps at runtime, you don't need them.");
+        private static readonly GUIContent removeRuntimeSamplesContent = new GUIContent("Remove Runtime Samples", "Remove runtime prefabs, scripts, MapPath demo textures, and objects from the project");
+        private static readonly GUIContent removeSRPContent = new GUIContent("Remove SRP Packages", "Remove the LB SRP folder and packages from the project. Even if using LWRP, URP or HDRP, you will have most likely already opened and installed the assets in these packages. Now they can safely be removed.");
         private static readonly GUIContent uninstallBtnContent = new GUIContent("Uninstall", "WARNING: This will DELETE scripts and folders in your project. There is no UNDO button. Use with caution.");
+
+        private static readonly string phase3Info = "You need to: Selectively remove unnecessary Landscape Builder scripts and assets in the project. Re-import LB package to re-install them.";
+        private static readonly string phase3DemoAssetWarning = "If you use any sample or demo assets like trees, ground textures, sheep, meshes etc., please move them outside the LandscapeBuilder folder first.";
+        private static readonly string phase3ModifiersWarning = "If you have your own modifier files in the Modifiers folder please move them outside the LandscapeBuilder folder first.";
+        private static readonly string phase3Prompt = "This action will uninstall all selected components. Make sure you have Finalised all landscape in all scenes before proceeding. If you are unsure Cancel.\n\nWARNING: There is NO UNDO.";
 
         #endregion
 
@@ -97,17 +115,22 @@ namespace LandscapeBuilder
             }
 
             GUILayout.BeginVertical("HelpBox");
-            EditorGUILayout.HelpBox("The LB Manager will help you optimise your landscapes prior to shipping your game. It will remove all unneeded LB components. [Technical Preview]", MessageType.Info, true);
+            EditorGUILayout.HelpBox("The LB Manager will help you optimise your landscapes prior to shipping your game. It will remove all unneeded LB components. PLEASE READ MANUAL FIRST.", MessageType.Info, true);
+
+            EditorGUILayout.HelpBox("This feature is currently in technical preview", MessageType.Warning);
 
             EditorGUI.BeginChangeCheck();
+            EditorGUIUtility.labelWidth -= labelWidthNarrowOffset;
             landscape = (LBLandscape)EditorGUILayout.ObjectField(landscapeGUIContent, landscape, typeof(LBLandscape), true);
+            EditorGUIUtility.labelWidth += labelWidthNarrowOffset;
             if (EditorGUI.EndChangeCheck() && landscape != null)
             {
                 landscapeTemplateName = "LB_Backup_" + landscape.name + "_Template";
             }
+            GUILayout.EndVertical();
 
             scrollPosition = EditorGUILayout.BeginScrollView(scrollPosition);
-            EditorGUIUtility.labelWidth += labelWidthOffset;
+            EditorGUIUtility.labelWidth += labelWidthWideOffset;
 
             #region Start of Phase 1
             currentBgndColor = GUI.backgroundColor;
@@ -117,10 +140,11 @@ namespace LandscapeBuilder
             EditorGUILayout.LabelField("<color=" + txtColourName + "><b>Phase 1 - Backup</b></color>", labelFieldRichText);
 
             EditorGUILayout.HelpBox("You need to: Backup each landscape in each scene to a template.", MessageType.Info, true);
-            EditorGUIUtility.labelWidth -= labelWidthOffset;
+            EditorGUIUtility.labelWidth -= labelWidthWideOffset + labelWidthNarrowOffset;
             landscapeTemplateName = EditorGUILayout.TextField(saveTemplateNameContent, landscapeTemplateName);
-            EditorGUIUtility.labelWidth += labelWidthOffset;
+            EditorGUIUtility.labelWidth += labelWidthWideOffset + labelWidthNarrowOffset;
 
+            GUILayout.BeginHorizontal();
             if (GUILayout.Button("Backup Template", GUILayout.MaxWidth(130f)))
             {
                 bool isSceneSaveRequired = false;
@@ -144,6 +168,13 @@ namespace LandscapeBuilder
                     EditorUtility.DisplayDialog("Backup Template", "Select a landscape above so that you can back it up to a template", "Got it!");
                 }
             }
+
+            if (GUILayout.Button(inventoryButtonContent, GUILayout.MaxWidth(110f)))
+            {
+                GetInventory();
+            }
+
+            GUILayout.EndHorizontal();
 
             GUILayout.EndVertical(); // End of Phase 1
             #endregion End Phase 1
@@ -195,18 +226,25 @@ namespace LandscapeBuilder
             GUI.backgroundColor = currentBgndColor;
             EditorGUILayout.LabelField("<color=" + txtColourName + "><b>Phase 3 - Uninstall</b></color>", labelFieldRichText);
 
-            EditorGUILayout.HelpBox("You need to: Selectively remove unnecessary Landscape Builder scripts in the project. Re-import LB package to re-install them.", MessageType.Info, true);
+            EditorGUILayout.HelpBox(phase3Info, MessageType.Info, true);
 
             isRemoveDemoScene = EditorGUILayout.Toggle(removeDemoSceneContent, isRemoveDemoScene);
+
+            if (isRemoveDemoAssets) { EditorGUILayout.HelpBox(phase3DemoAssetWarning, MessageType.Warning, true); }
+            
             isRemoveDemoAssets = EditorGUILayout.Toggle(removeDemoAssetsContent, isRemoveDemoAssets);
             isRemoveUnityWater = EditorGUILayout.Toggle(removeUnityWaterContent, isRemoveUnityWater);
+
+            if (isRemoveModifiers) { EditorGUILayout.HelpBox(phase3ModifiersWarning, MessageType.Warning, true); }
+            isRemoveModifiers = EditorGUILayout.Toggle(removeModifiersrContent, isRemoveModifiers);
+
             isRemoveRuntimeSamples = EditorGUILayout.Toggle(removeRuntimeSamplesContent, isRemoveRuntimeSamples);
             isRemoveEditorScripts = EditorGUILayout.Toggle(removeEditorScriptsContent, isRemoveEditorScripts);
             isRemoveSRP = EditorGUILayout.Toggle(removeSRPContent, isRemoveSRP);
 
             if (GUILayout.Button(uninstallBtnContent, GUILayout.MaxWidth(130f)))
             {
-                if (EditorUtility.DisplayDialog("Uninstall components", "This action will uninstall all selected components. Make sure you have Finalised all landscape in all scenes before proceeding. If you are unsure Cancel.\n\nWARNING: There is NO UNDO.", "DO IT!", "Cancel"))
+                if (EditorUtility.DisplayDialog("Uninstall components", phase3Prompt, "DO IT!", "Cancel"))
                 {
                     // Close the LB Editor if it is open
                     var lbW = LBEditorHelper.GetLBW();
@@ -215,6 +253,7 @@ namespace LandscapeBuilder
                     if (isRemoveDemoAssets) { UninstallDemoAssets(); }
                     else if (isRemoveDemoScene) { UninstallDemoScene(); }
                     if (isRemoveUnityWater) { UninstallUnityWater(); }
+                    if (isRemoveModifiers) { UninstallModifiers(); }
                     if (isRemoveRuntimeSamples) { UinstallRuntimeSamples(); }
                     if (isRemoveEditorScripts) { UninstallEditorScripts(); }
                     if (isRemoveSRP) { UninstallSRP(); }
@@ -226,8 +265,7 @@ namespace LandscapeBuilder
 
             EditorGUIUtility.labelWidth -= 10f;
             EditorGUILayout.EndScrollView();
-
-            GUILayout.EndVertical();
+            EditorGUILayout.Space();
         }
 
         private void OnEnable()
@@ -258,6 +296,351 @@ namespace LandscapeBuilder
         {
             if (tempComponentList == null) { tempComponentList = new List<Component>(10); }
             else { tempComponentList.Clear(); }
+        }
+
+        /// <summary>
+        /// Open the Finder (Mac) or Explorer (Windows) in a given folder.
+        /// </summary>
+        /// <param name="folderPath"></param>
+        private void OpenFileBrowser(string folderPath)
+        {
+            try
+            {
+                if (SystemInfo.operatingSystemFamily == OperatingSystemFamily.MacOSX)
+                {
+                    System.Diagnostics.Process.Start("open", folderPath);
+                }
+                else
+                {
+                    // Windows (not sure able Linux)
+                    System.Diagnostics.Process.Start(folderPath);
+                }
+            }
+            catch (System.Exception ex)
+            {
+                Debug.LogWarning("Could not open file browser. " + ex.Message);
+            }
+        }
+
+        /// <summary>
+        /// Get the text of the path for the texture
+        /// </summary>
+        /// <param name="texture"></param>
+        /// <returns></returns>
+        private string GetAssetPathText(Texture2D texture)
+        {
+            string assetPath = AssetDatabase.GetAssetPath(texture);
+            return string.IsNullOrEmpty(assetPath) ? "None" : assetPath;
+        }
+
+        /// <summary>
+        /// Get the text of the path for the material.
+        /// If the material is in the scene, rather than an asset, it will return
+        /// None (materialname).
+        /// </summary>
+        /// <param name="mat"></param>
+        /// <returns></returns>
+        private string GetAssetPathText(Material mat)
+        {
+            string assetPath = AssetDatabase.GetAssetPath(mat);
+            return string.IsNullOrEmpty(assetPath) ? (mat != null ?  "None (" + mat.name + ")" : "None") : assetPath;
+        }
+
+        /// <summary>
+        ///  Get the text of the path for the GameObject
+        /// </summary>
+        /// <param name="go"></param>
+        /// <returns></returns>
+        private string GetAssetPathText(GameObject go)
+        {
+            if (go == null) { return "None"; }
+            else
+            {
+                string assetPath = AssetDatabase.GetAssetPath(go);
+                return string.IsNullOrEmpty(assetPath) ? "None" : assetPath;
+            }
+        }
+
+        /// <summary>
+        /// Return an space or the subname in brackets with a leading space
+        /// </summary>
+        /// <param name="subname"></param>
+        /// <returns></returns>
+        private string GetFormattedSecondaryName(string subname)
+        {
+            return string.IsNullOrEmpty(subname) ? " " : " (" + subname + ")";
+        }
+
+        private string GetTextNoSpace(string s)
+        {
+            return string.IsNullOrEmpty(s) ? "" : s;
+        }
+
+        #endregion
+
+        #region Private Methods - Phase 1
+
+        private void GetInventory()
+        {
+            if (landscape != null)
+            {
+                // Create the file outside the assets folder in the LandscapeBuilder folder.
+                string invFilePath = "LandscapeBuilder/" + SceneManager.GetActiveScene().name + "_" + landscape.name + "_inventory.txt";
+
+                bool isContinue = !File.Exists(invFilePath);
+
+                if (!isContinue)
+                {
+                    isContinue = EditorUtility.DisplayDialog("Overwrite Inventory File", "Do you want to overwrite the existing inventory text file?\n\nWARNING: There is NO UNDO.", "DO IT!", "Cancel");
+                }
+
+                if (isContinue)
+                {
+                    string newLine = string.Empty;
+                    string assetPath = string.Empty;
+                    // Create a new file. Overwrite existing.
+                    StreamWriter fs = File.CreateText(invFilePath);
+
+                    #region Landscape Basics
+
+                    newLine = "Landscape Builder version " + LBEditorCommon.LBVersion + " " + LBEditorCommon.LBBetaVersion;
+                    fs.WriteLine(newLine);
+                    fs.WriteLine();
+
+                    newLine = "Landscape name: " + landscape.name;
+                    fs.WriteLine(newLine);
+
+                    newLine = "Start Position: x:" + landscape.start.x + " y:" + landscape.start.y + " z:" + +landscape.start.z;
+                    fs.WriteLine(newLine);
+
+                    bool isNonStandardSize = landscape.size.x != landscape.size.y;
+                    newLine = "Landscape Size: " + landscape.size.x + "m by " + landscape.size.y + "m" + (isNonStandardSize ? " * *Non - Standard * *" : "");
+                    fs.WriteLine(newLine);
+
+                    newLine = "Terrain Size: " + landscape.GetLandscapeTerrainWidth() + "m by " + landscape.GetLandscapeTerrainLength() + "m";
+                    fs.WriteLine(newLine);
+
+                    newLine = "Terrain Height: " + landscape.GetLandscapeTerrainHeight() + "m";
+                    fs.WriteLine(newLine);
+
+                    newLine = "Terrain Heightmap Resolution: " + landscape.GetLandscapeTerrainHeightmapResolution();
+                    fs.WriteLine(newLine);
+                    
+                    fs.WriteLine("GPU Acceleration - Topography: " + landscape.useGPUTopography.ToString());
+                    fs.WriteLine("GPU Acceleration - Texturing: " + landscape.useGPUTexturing.ToString());
+                    fs.WriteLine("GPU Acceleration - Grass: " + landscape.useGPUGrass.ToString());
+                    fs.WriteLine("GPU Acceleration - Path: " + landscape.useGPUPath.ToString());
+
+                    #endregion
+
+                    #region Inventory - water
+                    foreach (LBWater lbWater in landscape.landscapeWaterList)
+                    {
+                        newLine = "[Water] " + lbWater.name + (lbWater.isPrimaryWater ? " (Primary)" : "") + " prefab: " + lbWater.waterPrefabName;
+                        fs.WriteLine(newLine);
+                    }
+                    #endregion
+
+                    #region Inventory - MapPaths
+
+                    List<LBMapPath> lbMapPaths = new List<LBMapPath>(1);
+
+                    landscape.GetComponentsInChildren(lbMapPaths);
+
+                    int numMapPaths = lbMapPaths == null ? 0 : lbMapPaths.Count;
+                    if (numMapPaths > 0) { fs.WriteLine(); fs.WriteLine("MAP PATHS"); }
+
+                    for (int i = 0; i < numMapPaths; i++)
+                    {
+                        LBMapPath lbMapPath = lbMapPaths[i];
+                        if (lbMapPath != null && lbMapPath.lbPath != null)
+                        {
+                            Transform trfm = lbMapPath.transform.Find(lbMapPath.lbPath.pathName + " Mesh");
+                            newLine = "[MapPath] " + lbMapPath.lbPath.pathName + " (mesh: " + (trfm == null ? "None" : trfm.name) + ") Mesh Material: " + GetAssetPathText(lbMapPath.meshMaterial);
+                            fs.WriteLine(newLine);
+                        }
+                    }
+
+                    #endregion
+
+                    #region Inventory - Topography
+
+                    int numLayers = landscape.topographyLayersList == null ? 0 : landscape.topographyLayersList.Count;
+
+                    if (numLayers > 0) { fs.WriteLine(); fs.WriteLine("TOPOGRAPHY"); }
+
+                    for(int i = 0; i < numLayers; i++)
+                    {
+                        LBLayer lbLayer = landscape.topographyLayersList[i];
+
+                        string layerName = (lbLayer.isDisabled ? "{Disabled} " : " ")  + (string.IsNullOrEmpty(lbLayer.layerName) ? "Layer " + (i+1).ToString("000") : lbLayer.layerName);
+
+                        // Image add/sub/detail layers
+                        if (lbLayer.LayerTypeInt >= 4 && lbLayer.LayerTypeInt <= 7)
+                        {
+                            newLine = "[LBLayer] " + layerName + " (" + lbLayer.type.ToString() + ") imageSource: " + lbLayer.imageSource.ToString();
+                            fs.WriteLine(newLine);
+                        }
+
+                        if (lbLayer.heightmapImage != null)
+                        {
+                            newLine = "[LBLayer] " + layerName + " (" + lbLayer.type.ToString() + ") heightmapImage: " + GetAssetPathText(lbLayer.heightmapImage);
+                            fs.WriteLine(newLine);
+                        }
+
+                        if (lbLayer.modifierLBWater != null && lbLayer.modifierLBWater.waterMaterial)
+                        {
+                            newLine = "[LBLayer] " + layerName + " (" + lbLayer.type.ToString() + ") water material: " + GetAssetPathText(lbLayer.modifierLBWater.waterMaterial);
+                            fs.WriteLine(newLine);
+                        }
+
+                        if (lbLayer.modifierLBWater != null && string.IsNullOrEmpty(lbLayer.modifierLBWater.waterPrefabName))
+                        {
+                            newLine = "[LBLayer] " + layerName + " (" + lbLayer.type.ToString() + ") water prefab: " + lbLayer.modifierLBWater.waterPrefabName;
+                            fs.WriteLine(newLine);
+                        }
+
+                        if (lbLayer.type == LBLayer.LayerType.UnityTerrains && LBTerrainData.HasRAWHeightData(lbLayer.lbTerrainDataList))
+                        {
+                            newLine = "[LBLayer] " + layerName + " (" + lbLayer.type.ToString() + ") Original Data Source: " + LBTerrainData.GetDataSourceDisplayName(lbLayer.lbTerrainDataList);
+                            fs.WriteLine(newLine);
+                        }
+
+                        if (lbLayer.type == LBLayer.LayerType.ImageModifier)
+                        {
+                            newLine = "[LBLayer] " + layerName + " (" + lbLayer.type.ToString() + ") " + lbLayer.modifierSourceFileType.ToString() + " Data Source: ";
+                            if (lbLayer.modifierRAWFile != null)
+                            {
+                                newLine += string.IsNullOrEmpty(lbLayer.modifierRAWFile.dataSourceName) ? "Unknown" : lbLayer.modifierRAWFile.dataSourceName;
+                            }
+                            else { newLine += "Unknown"; }
+                            fs.WriteLine(newLine);
+                        }
+                    }
+
+                    #endregion
+
+                    #region Inventory - Texturing
+                    int numTextures = landscape.terrainTexturesList == null ? 0 : landscape.terrainTexturesList.Count;
+                    if (numTextures > 0) { fs.WriteLine(); fs.WriteLine("TEXTURING"); }
+                    for (int i = 0; i < numTextures; i++)
+                    {
+                        LBTerrainTexture lbTerrainTexture = landscape.terrainTexturesList[i];
+                        if (lbTerrainTexture != null)
+                        {
+                            fs.WriteLine("[Texture] " + (i + 1).ToString("000") + (lbTerrainTexture.isDisabled ? " {Disabled}" : ""));
+                            fs.WriteLine(" texture: " + GetAssetPathText(lbTerrainTexture.texture) + GetFormattedSecondaryName(lbTerrainTexture.textureName));
+                            fs.WriteLine(" normalmap: " + GetAssetPathText(lbTerrainTexture.normalMap) + GetFormattedSecondaryName(lbTerrainTexture.normalMapName));
+                            fs.WriteLine(" heightmap: " + GetAssetPathText(lbTerrainTexture.heightMap));
+                            if (lbTerrainTexture.texturingMode == LBTerrainTexture.TexturingMode.Map || lbTerrainTexture.texturingMode == LBTerrainTexture.TexturingMode.HeightInclinationMap)
+                            {
+                                fs.WriteLine(" map: " + GetAssetPathText(lbTerrainTexture.map));
+                            }
+                        }
+                    }
+                    #endregion
+
+                    #region Inventory - Trees
+                    int numTrees = landscape.terrainTreesList == null ? 0 : landscape.terrainTreesList.Count;
+                    if (numTrees > 0) { fs.WriteLine(); fs.WriteLine("TREES"); }
+                    for (int i = 0; i < numTrees; i++)
+                    {
+                        LBTerrainTree lbTerrainTree = landscape.terrainTreesList[i];
+                        if (lbTerrainTree != null)
+                        {
+                            fs.WriteLine("[Tree] " + (i + 1).ToString("000") + (lbTerrainTree.isDisabled ? " {Disabled}" : "") + " prefab: " + GetAssetPathText(lbTerrainTree.prefab) + GetFormattedSecondaryName(lbTerrainTree.prefabName));                           
+                            if (lbTerrainTree.treePlacingMode == LBTerrainTree.TreePlacingMode.Map || lbTerrainTree.treePlacingMode == LBTerrainTree.TreePlacingMode.HeightInclinationMap)
+                            {
+                                fs.WriteLine(" map: " + GetAssetPathText(lbTerrainTree.map));
+                            }
+                        }
+                    }
+                    #endregion
+
+                    #region Inventory - Grass
+                    int numGrass = landscape.terrainGrassList == null ? 0 : landscape.terrainGrassList.Count;
+                    if (numGrass > 0) { fs.WriteLine(); fs.WriteLine("GRASS"); }
+                    for (int i = 0; i < numGrass; i++)
+                    {
+                        LBTerrainGrass lbGrass = landscape.terrainGrassList[i];
+                        if (lbGrass != null)
+                        {
+                            newLine = "[Grass] " + (i + 1).ToString("000") + (lbGrass.isDisabled ? " { Disabled}" : "") + " ";
+                            if (lbGrass.useMeshPrefab)
+                            {
+                                newLine += GetAssetPathText(lbGrass.meshPrefab) + GetFormattedSecondaryName(lbGrass.meshPrefabName);
+                            }
+                            else
+                            {
+                                newLine += GetAssetPathText(lbGrass.texture) + GetFormattedSecondaryName(lbGrass.textureName);
+                            }
+                            fs.WriteLine(newLine);
+                            if (lbGrass.grassPlacingMode == LBTerrainGrass.GrassPlacingMode.Map || lbGrass.grassPlacingMode == LBTerrainGrass.GrassPlacingMode.HeightInclinationMap)
+                            {
+                                fs.WriteLine(" map: " + GetAssetPathText(lbGrass.map));
+                            }
+                        }
+                    }
+
+                    #endregion
+
+                    #region Inventory - Groups
+                    int numGroups = landscape.lbGroupList == null ? 0 : landscape.lbGroupList.Count;
+                    if (numGroups > 0) { fs.WriteLine(); fs.WriteLine("GROUPS"); }
+                    for (int gIdx = 0; gIdx < numGroups; gIdx++)
+                    {
+                        LBGroup lbGroup = landscape.lbGroupList[gIdx];
+                        if (lbGroup != null)
+                        {
+                            fs.WriteLine("[GROUP] " + (gIdx + 1).ToString("000") + (lbGroup.isDisabled ? " { Disabled} " : " ") + (string.IsNullOrEmpty(lbGroup.groupName) ? "No Name" : lbGroup.groupName) + " GroupType: " + lbGroup.lbGroupType.ToString());
+
+                            int numMembers = lbGroup.groupMemberList == null ? 0 : lbGroup.groupMemberList.Count;
+                            
+                            if (numMembers < 1) { fs.WriteLine(" [No Members]"); }
+                            else
+                            {
+                                for (int mIdx = 0; mIdx < numMembers; mIdx++)
+                                {
+                                    LBGroupMember lbGroupMember = lbGroup.groupMemberList[mIdx];
+                                    if (lbGroupMember != null)
+                                    {
+                                        fs.WriteLine(" [GROUPMEMBER] " + (mIdx + 1).ToString("000") + (lbGroupMember.isDisabled ? " {Disabled} " : " ") + lbGroupMember.lbMemberType.ToString());
+                                        if (lbGroupMember.lbMemberType == LBGroupMember.LBMemberType.Prefab)
+                                        {
+                                            fs.WriteLine("  prefab: " + GetAssetPathText(lbGroupMember.prefab) + GetFormattedSecondaryName(lbGroupMember.prefabName));
+                                        }
+                                        else if (lbGroupMember.lbMemberType == LBGroupMember.LBMemberType.ObjPath)
+                                        {
+                                            LBObjPath lbObjPath = lbGroupMember.lbObjPath;
+
+                                            if (lbObjPath != null)
+                                            {
+                                                fs.WriteLine("  path name: " + GetTextNoSpace(lbObjPath.pathName));
+                                                fs.WriteLine("  surface mesh material: " + GetAssetPathText(lbObjPath.surfaceMeshMaterial));
+                                                fs.WriteLine("  base mesh material: " + GetAssetPathText(lbObjPath.baseMeshMaterial));
+
+                                                // Default Series and Width-based Series only contain linkage (GUID) member data. The actual prefabs
+                                                // are stored in regular GroupMember's of type prefab.
+                                            }    
+                                        }
+                                    }
+                                }
+                            }                            
+                        }
+                    }
+
+                    #endregion
+
+                    fs.Close();
+
+                    string fullFolderPath = Path.GetFullPath(Path.GetDirectoryName(invFilePath));
+                    OpenFileBrowser(fullFolderPath);
+                }
+            }
+            else
+            {
+                EditorUtility.DisplayDialog("Get Inventory", "Select a landscape above so that you can get its inventory.", "Got it!");
+            }
         }
 
         #endregion
@@ -388,14 +771,12 @@ namespace LandscapeBuilder
 
         /// <summary>
         /// Delete the Demo Scene folder and the templates that ship with LB.
+        /// Delete Bootcamp Assets, Textures Heightmap, and Textures NormalMaps folders.
+        /// Delete sample heightmap images from Images folder.
         /// </summary>
         private void UninstallDemoAssets()
         {
-            if (Directory.Exists(LBSetup.demosceneFolder))
-            {
-                AssetDatabase.DeleteAsset(LBSetup.demosceneFolder);
-                
-            }
+            // Remove templates first
             if (Directory.Exists(LBSetup.templatesFolder))
             {
                 AssetDatabase.DeleteAsset(LBSetup.templatesFolder + "/DemoLandscape1 Template.prefab");
@@ -404,6 +785,45 @@ namespace LandscapeBuilder
                 AssetDatabase.DeleteAsset(LBSetup.templatesFolder + "/Mountains Plane Demo Template.prefab");
                 AssetDatabase.DeleteAsset(LBSetup.templatesFolder + "/ObjPath Demo Template.prefab");
                 AssetDatabase.DeleteAsset(LBSetup.templatesFolder + "/Swiss Mountains Demo Template.prefab");
+            }
+
+            if (Directory.Exists(LBSetup.demosceneFolder))
+            {
+                AssetDatabase.DeleteAsset(LBSetup.demosceneFolder);
+            }
+
+            if (Directory.Exists(LBSetup.lbFolder + "/Bootcamp Assets"))
+            {
+                AssetDatabase.DeleteAsset(LBSetup.lbFolder + "/Bootcamp Assets");
+            }
+
+            // Cleanup Textures folder
+            if (Directory.Exists(LBSetup.lbFolder + "/Textures/Heightmap"))
+            {
+                AssetDatabase.DeleteAsset(LBSetup.lbFolder + "/Textures/Heightmap");
+            }
+
+            if (Directory.Exists(LBSetup.lbFolder + "/Textures/NormalMaps"))
+            {
+                AssetDatabase.DeleteAsset(LBSetup.lbFolder + "/Textures/NormalMaps");
+            }
+
+            // Old ST prefab trees from pre-2.3.0
+            if (Directory.Exists(LBSetup.lbFolder + "/OptimisedTrees"))
+            {
+                AssetDatabase.DeleteAsset(LBSetup.lbFolder + "/OptimisedTrees");
+            }
+
+            // Remove standard asset textures that come with LB
+            if (Directory.Exists(LBSetup.lbFolder + "/Standard Assets/Environment/TerrainAssets/BillboardTextures"))
+            {
+                AssetDatabase.DeleteAsset(LBSetup.lbFolder + "/Standard Assets/Environment/TerrainAssets/BillboardTextures");
+            }
+
+            // Remove standard asset textures that come with LB
+            if (Directory.Exists(LBSetup.lbFolder + "/Standard Assets/Environment/TerrainAssets/SurfaceTextures"))
+            {
+                AssetDatabase.DeleteAsset(LBSetup.lbFolder + "/Standard Assets/Environment/TerrainAssets/SurfaceTextures");
             }
 
             Debug.Log("LB Manager - Uninstalled the Demo assets.");
@@ -421,6 +841,34 @@ namespace LandscapeBuilder
         }
 
         /// <summary>
+        /// Remove Topography Image Modifiers and sample heightmap Images
+        /// </summary>
+        private void UninstallModifiers()
+        {
+            // cleanup old heightmap images and masks
+            if (Directory.Exists(LBSetup.lbFolder + "/Images"))
+            {
+                AssetDatabase.DeleteAsset(LBSetup.lbFolder + "/Images/CottageHeightmap1.png");
+                AssetDatabase.DeleteAsset(LBSetup.lbFolder + "/Images/HillsHeightmap.psd");
+                AssetDatabase.DeleteAsset(LBSetup.lbFolder + "/Images/IslandMask1.psd");
+                AssetDatabase.DeleteAsset(LBSetup.lbFolder + "/Images/IslandMask2.psd");
+                AssetDatabase.DeleteAsset(LBSetup.lbFolder + "/Images/IslandMask3.psd");
+                AssetDatabase.DeleteAsset(LBSetup.lbFolder + "/Images/LagoonMask.psd");
+                AssetDatabase.DeleteAsset(LBSetup.lbFolder + "/Images/LayerMapMask1.png");
+                AssetDatabase.DeleteAsset(LBSetup.lbFolder + "/Images/LayerMapMask2.png");
+                AssetDatabase.DeleteAsset(LBSetup.lbFolder + "/Images/MountainsHeightmap.psd");
+            }
+
+            // remove whole topgraphy Image Modifiers folder
+            if (Directory.Exists(LBSetup.modifiersFolder))
+            {
+                AssetDatabase.DeleteAsset(LBSetup.modifiersFolder);
+            }
+
+            Debug.Log("LB Manager - Uninstalled All Topography Image Modifiers and sample heightmap Images and masks.");
+        }
+
+        /// <summary>
         /// Delete the Samples folder which includes runtime prefabs, scripts etc.
         /// </summary>
         private void UinstallRuntimeSamples()
@@ -429,6 +877,15 @@ namespace LandscapeBuilder
             {
                 AssetDatabase.DeleteAsset(LBSetup.samplesFolder);
                 Debug.Log("LB Manager - Uninstalled Runtime Samples");
+            }
+
+            // Remove the runtime MapPath map textures used in the samples
+            if (Directory.Exists(LBSetup.demosceneFolder + "/Maps"))
+            {
+                AssetDatabase.DeleteAsset(LBSetup.demosceneFolder + "/Maps/RTGrassLayer6.png");
+                AssetDatabase.DeleteAsset(LBSetup.demosceneFolder + "/Maps/RTPathway6.png");
+                AssetDatabase.DeleteAsset(LBSetup.demosceneFolder + "/Maps/RTPathway7.png");
+                AssetDatabase.DeleteAsset(LBSetup.demosceneFolder + "/Maps/RTValleyFloor6.png");
             }
         }
 
@@ -465,6 +922,8 @@ namespace LandscapeBuilder
 
             if (Directory.Exists(LBSetup.editorFolder))
             {
+                // Keep LBEditorCommon.cs and LBManager.cs
+
                 AssetDatabase.DeleteAsset(LBSetup.editorFolder + "/3rdPartyLicenses");
                 AssetDatabase.DeleteAsset(LBSetup.editorFolder + "/Textures");
 
@@ -479,6 +938,15 @@ namespace LandscapeBuilder
                 AssetDatabase.DeleteAsset(LBSetup.editorFolder + "/LBImportTIFF.cs");
                 AssetDatabase.DeleteAsset(LBSetup.editorFolder + "/LBEditorIntegration.cs");
                 AssetDatabase.DeleteAsset(LBSetup.editorFolder + "/LibTIFF");
+
+                // Sometimes not all content from LibTIFF is removed
+                AssetDatabase.Refresh(ImportAssetOptions.Default);
+
+                // If some content remains delete it after a refresh
+                if (Directory.Exists(LBSetup.editorFolder + "/LibTIFF"))
+                {
+                    AssetDatabase.DeleteAsset(LBSetup.editorFolder + "/LibTIFF");
+                }
             }
 
             // Remove the setup folder which contains the grass setup data

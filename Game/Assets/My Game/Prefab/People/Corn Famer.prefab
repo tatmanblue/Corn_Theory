@@ -1575,7 +1575,7 @@ CapsuleCollider:
   m_Radius: 1
   m_Height: 1
   m_Direction: 1
-  m_Center: {x: 0, y: 1.2, z: 0}
+  m_Center: {x: 0, y: 1.5, z: 0}
 --- !u!195 &1246653440
 NavMeshAgent:
   m_ObjectHideFlags: 0
@@ -1630,7 +1630,7 @@ MonoBehaviour:
   m_RunCycleLegOffset: 0.2
   m_MoveSpeedMultiplier: 0.5
   m_AnimSpeedMultiplier: 1
-  m_GroundCheckDistance: 0.5
+  m_GroundCheckDistance: 0.6
 --- !u!114 &221609429
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1646,7 +1646,7 @@ MonoBehaviour:
   drawGizmos: 1
   chaseRadius: 7
   stoppingRadius: 1
-  breakRadius: 1
+  breakRadius: 2
   chasePlayer: 1
   weaponAttachPoint: {fileID: 0}
   missionId: 0

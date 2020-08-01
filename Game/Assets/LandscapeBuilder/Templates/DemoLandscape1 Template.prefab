@@ -1,22 +1,12 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
---- !u!1001 &100100000
-Prefab:
-  m_ObjectHideFlags: 1
-  serializedVersion: 2
-  m_Modification:
-    m_TransformParent: {fileID: 0}
-    m_Modifications: []
-    m_RemovedComponents: []
-  m_ParentPrefab: {fileID: 0}
-  m_RootGameObject: {fileID: 1000014244781892}
-  m_IsPrefabParent: 1
 --- !u!1 &1000014244781892
 GameObject:
   m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 100100000}
-  serializedVersion: 5
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
   m_Component:
   - component: {fileID: 4000013831885918}
   - component: {fileID: 114000013605381768}
@@ -29,9 +19,10 @@ GameObject:
   m_IsActive: 1
 --- !u!4 &4000013831885918
 Transform:
-  m_ObjectHideFlags: 1
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 100100000}
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1000014244781892}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
@@ -42,9 +33,10 @@ Transform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &114000013605381768
 MonoBehaviour:
-  m_ObjectHideFlags: 1
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 100100000}
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1000014244781892}
   m_Enabled: 1
   m_EditorHideFlags: 0
@@ -332,6 +324,8 @@ MonoBehaviour:
     isBelowSeaLevelDataIncluded: 0
     modifierAddInvert: 0
     modifierUseBlending: 0
+    modifierBlendingCentreSize: 0.71
+    modifierBlendingFillCorners: 0
     areaRectRotation: 0
     modifierMode: 5
     modifierRAWFile:
@@ -741,6 +735,8 @@ MonoBehaviour:
     isBelowSeaLevelDataIncluded: 0
     modifierAddInvert: 0
     modifierUseBlending: 0
+    modifierBlendingCentreSize: 0.71
+    modifierBlendingFillCorners: 0
     areaRectRotation: 0
     modifierMode: 5
     modifierRAWFile:
@@ -883,6 +879,7 @@ MonoBehaviour:
     filterList: []
     lbTerrainDataList: []
     GUID: 29df1291-6e99-4db2-aac9-98e0218a1527
+    blendCurveMode: 1
   - texture: {fileID: 2800000, guid: c6e0767b1f8c34890ac245217f4b9731, type: 3}
     normalMap: {fileID: 2800000, guid: d514aabbca730458b9ef7aca670552f0, type: 3}
     heightMap: {fileID: 0}
@@ -965,6 +962,7 @@ MonoBehaviour:
     filterList: []
     lbTerrainDataList: []
     GUID: 4da006b9-bf3e-4925-903c-ffc45df3e522
+    blendCurveMode: 1
   - texture: {fileID: 2800000, guid: 18214e9d6af6248559d501391856f1c7, type: 3}
     normalMap: {fileID: 2800000, guid: 127ebf74cc9174990bb2e3ea765097f8, type: 3}
     heightMap: {fileID: 0}
@@ -1047,6 +1045,7 @@ MonoBehaviour:
     filterList: []
     lbTerrainDataList: []
     GUID: 3c15eaf0-e8b5-40ba-95ce-0be2719d01f8
+    blendCurveMode: 1
   - texture: {fileID: 2800000, guid: 440eb36db91ca410f800ff3cfe43572f, type: 3}
     normalMap: {fileID: 2800000, guid: 68aa7fb3a02884731bd8079d87c84094, type: 3}
     heightMap: {fileID: 0}
@@ -1129,6 +1128,7 @@ MonoBehaviour:
     filterList: []
     lbTerrainDataList: []
     GUID: 56d6d16d-f0cd-42ea-a197-72e85ddcc7d8
+    blendCurveMode: 1
   - texture: {fileID: 2800000, guid: 51933586d3f594db593e2a127141dc58, type: 3}
     normalMap: {fileID: 2800000, guid: 5f6e4b1e4e24f4f5aa5526e4863e8fd8, type: 3}
     heightMap: {fileID: 0}
@@ -1211,6 +1211,7 @@ MonoBehaviour:
     filterList: []
     lbTerrainDataList: []
     GUID: 74d67028-4e66-4f55-a68c-f9add422c2e2
+    blendCurveMode: 1
   - texture: {fileID: 2800000, guid: 7247856ec89ad441d897e188c0c3c9eb, type: 3}
     normalMap: {fileID: 2800000, guid: a66d816fde35a4b36b239d4be6154296, type: 3}
     heightMap: {fileID: 0}
@@ -1293,10 +1294,12 @@ MonoBehaviour:
     filterList: []
     lbTerrainDataList: []
     GUID: 58fcc323-4080-4e60-98a0-fef77a03e078
+    blendCurveMode: 1
   terrainTreesList:
   - maxTreesPerSqrKm: 1200
     bendFactor: 0.5
-    prefab: {fileID: 157732, guid: 8fd22f540a37643a08a9cbfa4bf718a4, type: 2}
+    prefab: {fileID: 3025512539234439298, guid: e9df1c50c794dbe4497f5b415e734922,
+      type: 3}
     minScale: 1
     maxScale: 3
     treeScalingMode: 0
@@ -1360,7 +1363,7 @@ MonoBehaviour:
     maxTintStrength: 0.2
     tintColour: {r: 0, g: 1, b: 0, a: 1}
     lbTerrainDataList: []
-    prefabName: 
+    prefabName: LB_Tree4
     showPrefabPreview: 0
     GUID: 2bbf72d2-da21-4fa1-87d0-c88e01697695
   terrainGrassList:
@@ -2101,9 +2104,9 @@ MonoBehaviour:
   useWeather: 1
   isHDREnabled: 0
   rainParticleSystemPrefab: {fileID: 477038, guid: 8c029d12358244f03b3dfa1109063299,
-    type: 2}
+    type: 3}
   hailParticleSystemPrefab: {fileID: 477038, guid: 7dd6a849919e96546ba5e68662ff65ce,
-    type: 2}
+    type: 3}
   snowParticleSystemPrefab: {fileID: 0}
   useClouds: 1
   use3DNoise: 1
@@ -2275,6 +2278,7 @@ MonoBehaviour:
   autoRefreshGroupDesigner: 1
   useVegetationSystem: 0
   useVegetationSystemTextures: 0
+  useCTS2019: 0
   useLandscapeExtension: 0
   lbLandscapeExtension:
     heightOffset: 0

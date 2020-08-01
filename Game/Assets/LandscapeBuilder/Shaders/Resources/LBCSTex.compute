@@ -60,6 +60,7 @@ struct LBTexture
 	int isStencilLayerFiltersToApply;
 	int importedTexArrayIdx;
 	uint importedTexWidth;
+	float4 blendCurveMode;
 };
 
 StructuredBuffer<LBTexture> lbTextures;
@@ -86,23 +87,49 @@ float GetBlendWeight(uint smTexIdx, float2 posN, float2 landscapePos2DN, float2 
 	float blendWeight = 0.0;
 	uint texturingMode = lbTextures[smTexIdx].texturingMode;
 
+	float _incln = 0.0;
+	float _height = 0.0;
+	float4 textuingBlendCurveMode = lbTextures[smTexIdx].blendCurveMode;
+
 	// Height
 	if (texturingMode == 0)
 	{
-		blendWeight = LBEvaluateWideRangeCurve(LBInverseLerp(lbTexRules[smTexIdx].minHeightN, lbTexRules[smTexIdx].maxHeightN, heightN));
+		_height = LBInverseLerp(lbTexRules[smTexIdx].minHeightN, lbTexRules[smTexIdx].maxHeightN, heightN);
+		
+		blendWeight = (textuingBlendCurveMode.x * LBEvaluateWideRangeCurve(_height)) +
+			          (textuingBlendCurveMode.y * LBInRange(lbTexRules[smTexIdx].minHeightN, lbTexRules[smTexIdx].maxHeightN, heightN)) +
+			          (textuingBlendCurveMode.z * LBEvaluateWideRangeLeftOnlyCurve(_height)) +
+			          (textuingBlendCurveMode.w * LBEvaluateWideRangeRightOnlyCurve(_height));
+
+		//blendWeight = LBEvaluateWideRangeCurve(LBInverseLerp(lbTexRules[smTexIdx].minHeightN, lbTexRules[smTexIdx].maxHeightN, heightN));
 	}
 
 	// Inclination
 	else if (texturingMode == 1)
 	{
-		blendWeight = LBEvaluateWideRangeCurve(LBInverseLerp(lbTexRules[smTexIdx].minInclination, lbTexRules[smTexIdx].maxInclination, angle));
+		_incln = LBInverseLerp(lbTexRules[smTexIdx].minInclination, lbTexRules[smTexIdx].maxInclination, angle);
+
+		blendWeight = (textuingBlendCurveMode.x * LBEvaluateWideRangeCurve(_incln)) +
+                      (textuingBlendCurveMode.y * LBInRange(lbTexRules[smTexIdx].minInclination, lbTexRules[smTexIdx].maxInclination, angle)) +
+                      (textuingBlendCurveMode.z * LBEvaluateWideRangeLeftOnlyCurve(_incln)) +
+                      (textuingBlendCurveMode.w * LBEvaluateWideRangeRightOnlyCurve(_incln));
+
+		//blendWeight = LBEvaluateWideRangeCurve(LBInverseLerp(lbTexRules[smTexIdx].minInclination, lbTexRules[smTexIdx].maxInclination, angle));
 	}
 
 	// HeightAndInclination
 	else if (texturingMode == 2)
 	{
-		blendWeight = LBEvaluateWideRangeCurve(LBInverseLerp(lbTexRules[smTexIdx].minHeightN, lbTexRules[smTexIdx].maxHeightN, heightN))
-			* LBEvaluateWideRangeCurve(LBInverseLerp(lbTexRules[smTexIdx].minInclination, lbTexRules[smTexIdx].maxInclination, angle));
+		_incln = LBInverseLerp(lbTexRules[smTexIdx].minInclination, lbTexRules[smTexIdx].maxInclination, angle);
+		_height = LBInverseLerp(lbTexRules[smTexIdx].minHeightN, lbTexRules[smTexIdx].maxHeightN, heightN);
+
+		blendWeight = (textuingBlendCurveMode.x * LBEvaluateWideRangeCurve(_height) * LBEvaluateWideRangeCurve(_incln)) +
+                      (textuingBlendCurveMode.y * LBInRange(lbTexRules[smTexIdx].minHeightN, lbTexRules[smTexIdx].maxHeightN, heightN) * LBInRange(lbTexRules[smTexIdx].minInclination, lbTexRules[smTexIdx].maxInclination, angle)) +
+                      (textuingBlendCurveMode.z * LBEvaluateWideRangeLeftOnlyCurve(_height) * LBEvaluateWideRangeLeftOnlyCurve(_incln)) +
+                      (textuingBlendCurveMode.w * LBEvaluateWideRangeRightOnlyCurve(_height) * LBEvaluateWideRangeRightOnlyCurve(_incln));
+
+		//blendWeight = LBEvaluateWideRangeCurve(LBInverseLerp(lbTexRules[smTexIdx].minHeightN, lbTexRules[smTexIdx].maxHeightN, heightN))
+		//	* LBEvaluateWideRangeCurve(LBInverseLerp(lbTexRules[smTexIdx].minInclination, lbTexRules[smTexIdx].maxInclination, angle));
 	}
 
 	// ConstantInfluence
@@ -114,8 +141,17 @@ float GetBlendWeight(uint smTexIdx, float2 posN, float2 landscapePos2DN, float2 
 	// Height Inclination Curvature
 	else if (texturingMode == 6)
 	{
-		blendWeight = LBEvaluateWideRangeCurve(LBInverseLerp(lbTexRules[smTexIdx].minHeightN, lbTexRules[smTexIdx].maxHeightN, heightN))
-			* LBEvaluateWideRangeCurve(LBInverseLerp(lbTexRules[smTexIdx].minInclination, lbTexRules[smTexIdx].maxInclination, angle));
+		//blendWeight = LBEvaluateWideRangeCurve(LBInverseLerp(lbTexRules[smTexIdx].minHeightN, lbTexRules[smTexIdx].maxHeightN, heightN))
+		//	* LBEvaluateWideRangeCurve(LBInverseLerp(lbTexRules[smTexIdx].minInclination, lbTexRules[smTexIdx].maxInclination, angle));
+		
+		_incln = LBInverseLerp(lbTexRules[smTexIdx].minInclination, lbTexRules[smTexIdx].maxInclination, angle);
+		_height = LBInverseLerp(lbTexRules[smTexIdx].minHeightN, lbTexRules[smTexIdx].maxHeightN, heightN);
+
+		blendWeight = (textuingBlendCurveMode.x * LBEvaluateWideRangeCurve(_height) * LBEvaluateWideRangeCurve(_incln)) +
+			          (textuingBlendCurveMode.y * LBInRange(lbTexRules[smTexIdx].minHeightN, lbTexRules[smTexIdx].maxHeightN, heightN) * LBInRange(lbTexRules[smTexIdx].minInclination, lbTexRules[smTexIdx].maxInclination, angle)) +
+			          (textuingBlendCurveMode.z * LBEvaluateWideRangeLeftOnlyCurve(_height) * LBEvaluateWideRangeLeftOnlyCurve(_incln)) +
+			          (textuingBlendCurveMode.w * LBEvaluateWideRangeRightOnlyCurve(_height) * LBEvaluateWideRangeRightOnlyCurve(_incln));
+
 		if (blendWeight > 0.0)
 		{
 			float h = 0.0;
@@ -189,8 +225,16 @@ float GetBlendWeight(uint smTexIdx, float2 posN, float2 landscapePos2DN, float2 
 		// Apply height and inclination if required
 		if (texturingMode == 5)
 		{
-			mapValue *= LBEvaluateWideRangeCurve(LBInverseLerp(lbTexRules[smTexIdx].minHeightN, lbTexRules[smTexIdx].maxHeightN, heightN))
-				* LBEvaluateWideRangeCurve(LBInverseLerp(lbTexRules[smTexIdx].minInclination, lbTexRules[smTexIdx].maxInclination, angle));
+			//mapValue *= LBEvaluateWideRangeCurve(LBInverseLerp(lbTexRules[smTexIdx].minHeightN, lbTexRules[smTexIdx].maxHeightN, heightN))
+			//	* LBEvaluateWideRangeCurve(LBInverseLerp(lbTexRules[smTexIdx].minInclination, lbTexRules[smTexIdx].maxInclination, angle));
+
+			_incln = LBInverseLerp(lbTexRules[smTexIdx].minInclination, lbTexRules[smTexIdx].maxInclination, angle);
+			_height = LBInverseLerp(lbTexRules[smTexIdx].minHeightN, lbTexRules[smTexIdx].maxHeightN, heightN);
+
+			mapValue *= (textuingBlendCurveMode.x * LBEvaluateWideRangeCurve(_height) * LBEvaluateWideRangeCurve(_incln)) +
+				(textuingBlendCurveMode.y * LBInRange(lbTexRules[smTexIdx].minHeightN, lbTexRules[smTexIdx].maxHeightN, heightN) * LBInRange(lbTexRules[smTexIdx].minInclination, lbTexRules[smTexIdx].maxInclination, angle)) +
+				(textuingBlendCurveMode.z * LBEvaluateWideRangeLeftOnlyCurve(_height) * LBEvaluateWideRangeLeftOnlyCurve(_incln)) +
+				(textuingBlendCurveMode.w * LBEvaluateWideRangeRightOnlyCurve(_height) * LBEvaluateWideRangeRightOnlyCurve(_incln));
 		}
 
 		blendWeight = mapValue;

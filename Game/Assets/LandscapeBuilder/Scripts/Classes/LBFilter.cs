@@ -278,7 +278,10 @@ namespace LandscapeBuilder
                             }
                             else
                             {
-                                if (showErrors) { Debug.LogWarning("ERROR LBFilter.UpdateTextures - could not find a match for " + lbFilter.terrainTexture.texture.name); }
+                                if (showErrors)
+                                {
+                                    Debug.LogWarning("ERROR LBFilter.UpdateTextures - could not find a match for " + (lbFilter.terrainTexture != null && lbFilter.terrainTexture.texture != null ? lbFilter.terrainTexture.texture.name : "filter " + (f+1).ToString()));
+                                }
                             }
                         }
                     }

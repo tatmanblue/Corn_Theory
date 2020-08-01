@@ -62,12 +62,17 @@ namespace LandscapeBuilder
             PowerOfFour = 13,
         }
 
+        // A subset of these are also used
+        // in LBTerrainTexture.BlendCurve
         public enum FilterCurvePreset
         {
-            Default,
-            WideRange,
-            MaxIncreasing,
-            MinIncreasing
+            Default = 0,
+            WideRange = 1,
+            MaxIncreasing = 2,
+            MinIncreasing = 3,
+            Flat = 4,
+            WideRangeLeftOnly = 5,
+            WideRangeRightOnly = 6
         }
 
         public enum MapPathBlendCurvePreset
@@ -909,6 +914,11 @@ namespace LandscapeBuilder
                 curveKeys[2].outTangent = -2f;
                 newCurve = new AnimationCurve(curveKeys);
             }
+            // Use this if (min angle > 0.001f && max angle < 89.999f)
+            else if (filterCurvePreset == FilterCurvePreset.Flat)
+            {
+                newCurve = AnimationCurve.Linear(0f, 1f, 1f, 1f);
+            }
             else if (filterCurvePreset == FilterCurvePreset.WideRange)
             {
                 keyInt = newCurve.AddKey(0f, 0f);
@@ -922,8 +932,38 @@ namespace LandscapeBuilder
                 curveKeys[1].outTangent = 0f;
                 curveKeys[2].inTangent = 0f;
                 curveKeys[2].outTangent = -4f;
+                curveKeys[3].inTangent = -4f;
                 curveKeys[3].outTangent = -4f;
-                curveKeys[3].outTangent = -4f;
+                newCurve = new AnimationCurve(curveKeys);
+            }
+            // Use this if (min angle > 0.001f && max angle > 89.999f)
+            else if (filterCurvePreset == FilterCurvePreset.WideRangeLeftOnly)
+            {
+                keyInt = newCurve.AddKey(0f, 0f);
+                keyInt = newCurve.AddKey(0.25f, 1f);
+                keyInt = newCurve.AddKey(1f, 1f);
+                Keyframe[] curveKeys = newCurve.keys;
+                curveKeys[0].inTangent = 4f;
+                curveKeys[0].outTangent = 4f;
+                curveKeys[1].inTangent = 4f;
+                curveKeys[1].outTangent = 0f;
+                curveKeys[2].inTangent = 0f;
+                curveKeys[2].outTangent = 0f;
+                newCurve = new AnimationCurve(curveKeys);
+            }
+            // Use this if (min angle < 0.001f && max angle > 89.999f)
+            else if (filterCurvePreset == FilterCurvePreset.WideRangeRightOnly)
+            {
+                keyInt = newCurve.AddKey(0f, 1f);
+                keyInt = newCurve.AddKey(0.75f, 1f);
+                keyInt = newCurve.AddKey(1f, 0f);
+                Keyframe[] curveKeys = newCurve.keys;
+                curveKeys[0].inTangent = 0f;
+                curveKeys[0].outTangent = 0f;
+                curveKeys[1].inTangent = 0f;
+                curveKeys[1].outTangent = -4f;
+                curveKeys[2].inTangent = -4f;
+                curveKeys[2].outTangent = -4f;
                 newCurve = new AnimationCurve(curveKeys);
             }
             else if (filterCurvePreset == FilterCurvePreset.MaxIncreasing)

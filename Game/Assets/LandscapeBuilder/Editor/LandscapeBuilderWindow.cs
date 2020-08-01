@@ -8,7 +8,7 @@ using System.IO;
 using Object = UnityEngine.Object;
 //using System.Linq;
 
-// Landscape Builder. Copyright (c) 2016-2019 SCSM Pty Ltd. All rights reserved.
+// Landscape Builder. Copyright (c) 2016-2020 SCSM Pty Ltd. All rights reserved.
 namespace LandscapeBuilder
 {
     public class LandscapeBuilderWindow : EditorWindow
@@ -328,6 +328,7 @@ namespace LandscapeBuilder
         private bool addStencilsToTemplate = true;
         private bool addPathMeshMaterialsToTemplate = false;
         private LBTemplate lbTemplateToRestore = null;
+        private bool importToNewLandscapeFromTemplate = false;
         private bool importTerrainSettingsFromTemplate = true;
         private bool importTopographyFromTemplate = true;
         private bool importTexturesFromTemplate = true;
@@ -377,6 +378,8 @@ namespace LandscapeBuilder
         private bool volumeHighlighterEnabled = false;
         private bool volumeHighlighterRequired = false;
         private bool volumeHighligherJustEnabled = false;
+        private Color volumeHighlighterColour;
+        private bool volumeHighlighterIsDrawMesh = false;
         private LBLayer layerToRemove = null;
         private int insertLayerPos = -1;
         private LBLayer layerToMove = null;
@@ -478,6 +481,7 @@ namespace LandscapeBuilder
         private int groupMemberLookupIndex2 = -1;
         private string groupMemberLookupName = string.Empty;
         private LBMapPath lbMapPathToImport = null;
+        private GameObject sourceSplineToImport = null;
         private int numObjPathSeriesInList = 0;
         private int deleteObjPathSeriesPos = -1;
         private int insertObjPathSeriesPos = -1;
@@ -654,11 +658,14 @@ namespace LandscapeBuilder
         private UnityEngine.Color exportERMapColour = UnityEngine.Color.blue;
 
         // Advanced variables
+        private int showAdvancedTabInEditor = 0;
         private TextureImporter texImporter;
         private bool drawTreesAndFoliage = true;
         private bool autoSaveEnabled = true;
         private bool isNonSquareTerrainsEnabled = false;
         private bool isLegacyNoiseOffsetEnabled = false;
+        private bool isNoCelestials = false;
+        private bool isCheckForNoCelestials = true;
 
         // Stitch tool variables
         private LBLandscape stitchLandscape1 = null;
@@ -764,6 +771,7 @@ namespace LandscapeBuilder
         private static readonly GUIContent terrainSettingsGroupingIDContent = new GUIContent("Grouping ID", "Used in U2018.3+ when Auto Connect is enabled to set terrain neighbours. All terrains with the same GroupingID are automatically connected for LOD etc.");
         #endif
         private static readonly GUIContent terrainSettingsUseProjectForTDataContent = new GUIContent("Store TData in Project", "Store the terrain data files in the project folder rather than the scene (only recommended for large landscapes with 25+ terrains)");
+        private static readonly GUIContent terrainSettingsRelinkProjectForTDataContent = new GUIContent("R", "Relink the terrain data files to this project, by getting the new location. Move the folder in Unity Project pane first.");
         private static readonly GUIContent terrainSettingsGrassWindSpeedContent = new GUIContent("Speed", "The speed of the wind that affects the grass. Setting this to 0 won't disable wind for grass");
         private static readonly GUIContent terrainSettingsGrassRippleSizeContent = new GUIContent("Ripple Size", "The size of the grass ripples");
         private static readonly GUIContent terrainSettingsGrassWindBendingContent = new GUIContent("Grass Bending", "The degree to which the grass is bent by the wind. Setting this to 0 will disable wind for grass");
@@ -772,6 +780,9 @@ namespace LandscapeBuilder
         private static readonly GUIContent terrainSettingsUseVegetationSystemProContent = new GUIContent("Use Vegetation System", "Automatically add Vegetation Studio Pro scripts to terrains in the landscape. WARNING: The Landscape name must be unique in the whole project. Ensure Texturing, Grass, Trees, Groups tabs have been applied before enabling.");
         private static readonly GUIContent terrainSettingsUseVegetationSystemTexturesContent = new GUIContent("Apply Textures", "Apply the textures in the Landscape Builder Texturing tab with Vegetation Studio");
         private static readonly GUIContent terrainSettingsUseVegetationSystemTexturesAutoContent = new GUIContent("Auto Textures", "Enable LB textues for auto splat generation with Vegetation Studio (DEFAULT: OFF)");
+        #if CTS_PRESENT
+        private static readonly GUIContent terrainSettingsUseCTS2019Content = new GUIContent("Use CTS 2019", "Sends Texturing data from LB to CTS 2019 when enabled. First you need to Add CTS To All Terrains, then Create and Apply Profile. See CTS for more information on setup.");
+        #endif
 
         private static readonly GUIContent sceneWaterPrefabContent = new GUIContent("Water Prefab", "The prefab to use for water in the scene");
         private static readonly GUIContent scenePrimaryBodyOfWaterContent = new GUIContent("Primary Body of Water", "Is this the primary body of water in the scene? eg The ocean");
@@ -803,6 +814,7 @@ namespace LandscapeBuilder
         private static GUIContent saveTemplateIncludeMapTexturesContent = new GUIContent("Include Map Textures", "Includes the Map Textures in the exported package. WARNING: These are the actual textures and will significantly increase the size of the package");
         private static GUIContent saveTemplateIncludeLayerHeightmapTexturesContent = new GUIContent("Include T. Layer Images", "Includes the Topography Layer Image Based Heightmap textures in the exported package. WARNING: These are the actual textures and will significantly increase the size of the package");
         private static GUIContent applyTemplateGotoFolderBtnContent = new GUIContent("F", "Find and highlight the default LB Template folder in the project hierarchy");
+        private static GUIContent applyTemplateNewLandscapeContent = new GUIContent("Create New Landscape", "Create a new landscape from this Template rather than importing into the Landscape being edited (Default: Disabled)");
         private static GUIContent applyTemplateImportTerrainSettingsContent = new GUIContent("Import Terrain Settings", "Import and apply the terrain settings from the Template replace existing settings for this landscape (Default: Enabled)");
         private static GUIContent applyTemplateImportTopographyContent = new GUIContent("Import Topography", "Import the topography layers from the Template replace existing");
         private static GUIContent applyTemplateImportTexturesContent = new GUIContent("Import Textures", "Import the Textures from the Template and replace existing");
@@ -915,6 +927,8 @@ namespace LandscapeBuilder
         private static GUIContent layersModifierInvertContent = new GUIContent("Invert", "All the heights of the modifier will be inverted, so that the modifier cuts into the landscape instead of adding to it");
         private static GUIContent layersModifierYOffsetContent = new GUIContent("Y Offset", "Offset, in metres, of the modifier on the y-axis. When Invert is enabled, offset should be -ve to have effect.");
         private static GUIContent layersModifierUseBlendingContent = new GUIContent("Use Blending", "Whether the edges of the modifier will be blended with the surrounding landscape");
+        private static GUIContent layersModifierBlendingCentreSizeContent = new GUIContent("Centre Size", "The amount of the centre of the Image Modifier that is preserved during blending with the surrounds.");
+        private static GUIContent layersModifierBlendingFillCornersContent = new GUIContent("Fill Corners", "The amount the corners are filled with the modifier when it is blended with the surrounds.");
         private static GUIContent layersModifiersResetContent = new GUIContent("Reset", "Reset Modifier Settings to factory defaults");
         private static GUIContent layersModifiersUseWaterContent = new GUIContent("Add Water", "Add water to the Lake or Valley");
         private static GUIContent layersModifiersWaterMeshLandscapeUVContent = new GUIContent("Water Landscape UVs", "UVs for mesh that is created will be based on the dimensions of the landscape, rather than the actual mesh.");
@@ -1115,7 +1129,7 @@ namespace LandscapeBuilder
         private readonly static GUIContent groupsMemberObjCopyButtonContent = new GUIContent("Cp", "Copy all points on the object path to the LB Copy Buffer");
         private readonly static GUIContent groupsMemberObjPasteButtonContent = new GUIContent("Paste", "Paste (REPLACE) all points in the object path with points in the LB Copy Buffer. WARNING: There is NO UNDO");
         private readonly static GUIContent groupsMemberObjSetWidthButtonContent = new GUIContent("W", "Change the width of all points on the object path");
-        private readonly static GUIContent groupsMemberObjGetPointsButtonContent = new GUIContent("Get", "Get path points from an existing Map Path or the LB Copy Buffer");
+        private readonly static GUIContent groupsMemberObjGetPointsButtonContent = new GUIContent("Get", "Get path points from an existing Map Path, RAM spline, or the LB Copy Buffer");
         private readonly static GUIContent groupsMemberObjPointSpacingButtonContent = new GUIContent("Dis", "Evenly distribute the path points along the spline with a target spacing distance");
         private readonly static GUIContent groupsMemberObjReverseButtonContent = new GUIContent("<->", "Reverse the direction of the path points");
         private readonly static GUIContent groupsMemberObjResetRotationButtonContent = new GUIContent("Reset Rot.", "Will reset the rotation on each path point to 0 degrees on the z-axis. This will not affect member rotation rules.");
@@ -1187,6 +1201,7 @@ namespace LandscapeBuilder
         private static readonly GUIContent texturingHeaderContent = new GUIContent("The texturing tab allows you to procedurally texture your landscape according to rules you define." +
                                              " To use Textures in other tabs, they must first be applied to the landscape here.");
         private static readonly GUIContent texturingImportContent = new GUIContent("Import", "Import existing textures (splatmaps) in the terrains");
+        private static readonly GUIContent texturingRelinkContent = new GUIContent("R", "Attempt to relink missing textures by finding the first with a similar name in the asset database.");
         private static readonly GUIContent texturingScriptContent = new GUIContent("S", "Script Texture to Console window");
         private static readonly GUIContent texturingAddFilterContent = new GUIContent("Add Filter", "Add Area or Stencil Layer filter");
         private static readonly GUIContent texturingAreaRectContent = new GUIContent("       Area Rectangle", "The area in the landscape that this texture will be applied to");
@@ -1196,6 +1211,7 @@ namespace LandscapeBuilder
         private static readonly GUIContent texturingTintColourContent = new GUIContent("Tint Colour", "The tint to apply to the texture");
         private static readonly GUIContent texturingTintStrengthContent = new GUIContent("Tint Strength", "The amount of tint to apply to the texture");
         private static readonly GUIContent texturingIsRotatedContent = new GUIContent("Is Rotated", "Rotation is applied to the texture - Not available with Textures that have a Normal Map");
+        private static readonly GUIContent texturingBlendModeContent = new GUIContent("Blend Mode", "Blending of min and max values for height and/or inclination rules. See manual for details.");
         private static readonly GUIContent texturingMinHeightContent = new GUIContent("Min Height", "Minimum height in metres that the texture will appear at");
         private static readonly GUIContent texturingMaxHeightContent = new GUIContent("Max Height", "Maximum height in metres that the texture will appear at");
         private static readonly GUIContent texturingMinInclinationContent = new GUIContent("Min Inclination", "Minimum inclination in degrees that the texture will appear at");
@@ -1349,6 +1365,15 @@ namespace LandscapeBuilder
         #region Static GUIContent Common
         private static GUIContent commonStencilEditButtonContent = new GUIContent("Edit", "Edit this Stencil in the scene view");
         private static GUIContent commonStencilNewButtonContent = new GUIContent("New", "Create a new Stencil in the scene view. Typically, you only need one Stencil as each one can have multiple Stencil Layers");
+
+        #endregion
+
+        #region Static GUIContent for Advanced
+
+        private static GUIContent[] advancedToolbarContent = new GUIContent[3];
+        private readonly static GUIContent advancedToolbarOptionsContent = new GUIContent("Options");
+        private readonly static GUIContent advancedToolbarToolsContent = new GUIContent("Tools");
+        private readonly static GUIContent advancedToolbarIntegrationContent = new GUIContent("Integration");
 
         #endregion
 
@@ -1623,6 +1648,8 @@ namespace LandscapeBuilder
                 disableAllTerrains = LBLandscape.GetDisableAllTextures();
 
                 megaSplatAutoClosePainter = LBLandscape.GetMegaSplatAutoClosePainter();
+ 
+                LBLandscape.GetMeshVolumeHighlighterOptions(ref volumeHighlighterIsDrawMesh, ref volumeHighlighterColour);
 
                 hasRetrievedSavedData = true;
             }
@@ -1633,7 +1660,7 @@ namespace LandscapeBuilder
             // the LandscapeBuilder folder from it's original location in Assets/LandscapeBuilder.
             if (!isDefaultResourcesValid)
             {
-                EditorGUILayout.HelpBox("Did you move the LandscapeBuilder folder into a non-default location? i.e. Is not directly under the Assets folder.", MessageType.Error, true);
+                EditorGUILayout.HelpBox("Did you move the LandscapeBuilder folder into a non-default location? i.e. Is not directly under the Assets folder. If not, try restarting Unity.", MessageType.Error, true);
             }
 
             // Retrieve preset names from Default Resources prefab
@@ -1959,11 +1986,11 @@ namespace LandscapeBuilder
                     // Script out the landscape terrain settings to the console window
                     if (GUILayout.Button(scriptTerrainSettingsContent, buttonCompact, GUILayout.MaxWidth(20f)))
                     {
-#if UNITY_2018_2_OR_NEWER
+                        #if UNITY_2018_2_OR_NEWER
                         LBEditorHelper.CallMenu("Window/General/Console");
-#else
+                        #else
                         LBEditorHelper.CallMenu("Window/Console");
-#endif
+                        #endif
                         Debug.Log(landscape.ScriptLandscapeSettings(landscapeName, "\n"));
                     }
                 }
@@ -1972,6 +1999,8 @@ namespace LandscapeBuilder
                 {
                     EditorGUIUtility.labelWidth += 10f;
                     EditorGUILayout.HelpBox("Terrain Settings gives you control over the default Unity functionality of the terrains in your landscape.", MessageType.None, true);
+
+                    #region Unity Terrain Material Type
 
                     terrainSettingsType = (TerrainSettingsType)EditorGUILayout.EnumPopup(terrainSettingsPresetContent, terrainSettingsType);
 
@@ -1985,6 +2014,27 @@ namespace LandscapeBuilder
                     {
                         terrainCustomMaterial = (Material)EditorGUILayout.ObjectField(terrainCustomMatContent, terrainCustomMaterial, typeof(Material), false);
                     }
+
+                    #endregion
+
+                    #region CTS Terrain Material
+                    
+                    else if (terrainMaterialType == LBLandscape.TerrainMaterialType.CTS)
+                    {
+                        if (landscape != null)
+                        {
+                            #if CTS_PRESENT
+                            terrainCustomMaterial = (Material)EditorGUILayout.ObjectField(terrainCustomMatContent, terrainCustomMaterial, typeof(Material), false);
+                            #else
+                            EditorGUILayout.HelpBox("CTS 2019 does not seem to be installed in this project", MessageType.Error, true);
+                            #endif
+                        }
+                        else
+                        {
+                            EditorGUILayout.HelpBox("To integrate with CTS 2019, follow the instructions in the LB manual (Help) or click Get Support above.", MessageType.Info, true);
+                        }
+                    }
+                    #endregion
 
                     #region MegaSplat Terrain Material
                     else if (terrainMaterialType == LBLandscape.TerrainMaterialType.MegaSplat && landscape != null)
@@ -2097,7 +2147,7 @@ namespace LandscapeBuilder
 
                                 if (GUILayout.Button("Config", buttonCompact, GUILayout.MaxWidth(100f)))
                                 {
-                                    JBooth.MicroSplat.TextureArrayConfig textureArrayConfig = LBEditorIntegration.GetTextureArrayConfig(terrainCustomMaterial);
+                                    JBooth.MicroSplat.TextureArrayConfig textureArrayConfig = LBEditorIntegration.GetTextureArrayConfig(landscape, terrainCustomMaterial);
 
                                     if (textureArrayConfig != null)
                                     {
@@ -2107,11 +2157,19 @@ namespace LandscapeBuilder
                                 if (GUILayout.Button("Shader", buttonCompact, GUILayout.MaxWidth(100f)))
                                 {
                                     Material microSplatMat = LBEditorHelper.GetAsset<Material>(LBEditorIntegration.GetMicroSplatDataFolder(terrainCustomMaterial, true), terrainCustomMaterial.name + ".mat");
+
+                                    // Check the terrain data folder if 1) The material is stored in the scene AND 2) it is not in the default location
+                                    if (microSplatMat == null && landscape != null && landscape.useProjectForTerrainData)
+                                    {
+                                        microSplatMat = LBEditorHelper.GetAsset<Material>(landscape.terrainDataFolder + "/MicroSplatData", terrainCustomMaterial.name + ".mat");
+                                    }
+
                                     if (microSplatMat != null) { LBEditorHelper.SelectObjectInProjectWindow(microSplatMat, true); }
                                 }
                                 GUILayout.EndHorizontal();
 
-                                if (terrainCustomMaterial.shader.name.Contains("LandscapeTerrain0"))
+                                // The Shader needs to have a unique name (like the landscape). Imported terrains will have custom terrain names.
+                                if (terrainCustomMaterial.shader.name.Contains("LandscapeTerrain0") || !terrainCustomMaterial.shader.name.Contains(landscape.name))
                                 {
                                     GUILayout.BeginHorizontal();
                                     EditorGUILayout.HelpBox("The default shader name needs to be updated to match the (hopefully unique) landscape name", MessageType.Warning);
@@ -2142,6 +2200,8 @@ namespace LandscapeBuilder
                         landscape.rtpUseTessellation = EditorGUILayout.Toggle(terrainUseRTPTesselationContent, landscape.rtpUseTessellation);
                     }
                     #endregion
+
+                    #region Basic Terrain Settings
 
                     heightmapResolution = EditorGUILayout.IntPopup("Heightmap Resolution", heightmapResolution, possibleHMRStrings, possibleHMRs);
                     terrainHeight = EditorGUILayout.FloatField(terrainSettingsHeightContent, terrainHeight);
@@ -2206,6 +2266,9 @@ namespace LandscapeBuilder
                     if (useTerrainAutoConnect) { }
                     if (terrainGroupingID > 0) { }
 #endif
+                    #endregion
+
+                    #region Terrain Data Location
 
                     if (landscape == null)
                     {
@@ -2213,7 +2276,7 @@ namespace LandscapeBuilder
                         useProjectForTerrainData = EditorGUILayout.Toggle(terrainSettingsUseProjectForTDataContent, useProjectForTerrainData);
                         if (useProjectForTerrainData)
                         {
-                            EditorGUILayout.HelpBox("This feature is currently in technical preview", MessageType.Warning);
+                            LBEditorHelper.InTechPreview(false);
                             GUILayout.BeginHorizontal();
                             EditorGUI.BeginChangeCheck();
                             terrainDataFolder = EditorGUILayout.TextField(exportTerrainDataFolderContent, terrainDataFolder);
@@ -2235,8 +2298,42 @@ namespace LandscapeBuilder
                         // Only display Find folder if this has already been applied to terrains
                         if (landscape.useProjectForTerrainData)
                         {
+                            if (GUILayout.Button(terrainSettingsRelinkProjectForTDataContent, toggleTinyButtonStyleNormal, GUILayout.Width(20f)))
+                            {
+                                string newTerrainDataFolder = terrainDataFolder;
+
+                                LBEditorHelper.GetPathFromUser("New Terrain Data Folder", "Assets/", true, ref newTerrainDataFolder);
+
+                                if (!string.IsNullOrEmpty(newTerrainDataFolder))
+                                {
+                                    // Validate the new proposed location
+                                    string[] _searchFilter = new string[] { "Assets/" + newTerrainDataFolder };
+                                    string[] _guids = AssetDatabase.FindAssets("t:terraindata", _searchFilter);
+
+                                    // User may not have gone into Landscape Stats tab or do anything else
+                                    // so force fetch of terrains in this landscape.
+                                    landscape.SetLandscapeTerrains(true);
+
+                                    int _numGuids = _guids == null ? 0 : _guids.Length;
+                                    int _numTerrains = landscape.landscapeTerrains == null ? 0 : landscape.landscapeTerrains.Length;
+
+                                    if (_numGuids > 0 && _numGuids == _numTerrains)
+                                    {
+                                        terrainDataFolder = newTerrainDataFolder;
+                                        landscape.terrainDataFolder = terrainDataFolder;
+                                        EditorUtility.DisplayDialog("Change TerrainData folder", "Do not forget to Apply Terrain Settings", "Got it!");
+                                    }
+                                    else
+                                    {
+                                        Debug.LogWarning("Number of TerrainData files " + " (" + _numGuids + ") in " + newTerrainDataFolder + " does not match the number of your terrains (" + _numTerrains + " )");
+                                    }
+                                }
+                            }
+
                             if (GUILayout.Button("F", toggleTinyButtonStyleNormal, GUILayout.Width(20f)))
                             {
+                                // make sure the project window is visiable first
+                                LBEditorHelper.CallMenu("Window/General/Project");
                                 LBEditorHelper.HighlightFolderInProjectWindow("Assets/" + landscape.terrainDataFolder, true, true);
                             }
                         }
@@ -2248,7 +2345,7 @@ namespace LandscapeBuilder
                             useProjectForTerrainData = EditorGUILayout.Toggle(terrainSettingsUseProjectForTDataContent, useProjectForTerrainData);
                             if (useProjectForTerrainData)
                             {
-                                EditorGUILayout.HelpBox("This feature is currently in technical preview", MessageType.Warning);
+                                LBEditorHelper.InTechPreview(false);
                                 GUILayout.BeginHorizontal();
                                 EditorGUI.BeginChangeCheck();
                                 terrainDataFolder = EditorGUILayout.TextField(exportTerrainDataFolderContent, terrainDataFolder);
@@ -2263,6 +2360,7 @@ namespace LandscapeBuilder
                         }
                     }
 
+                    #endregion
 
                     #region Grass Wind Settings
                     showTerrainGrassWindSettings = EditorGUILayout.Foldout(showTerrainGrassWindSettings, "Grass Wind Settings");
@@ -2294,6 +2392,24 @@ namespace LandscapeBuilder
                             landscape.useVegetationSystemTextures = EditorGUILayout.Toggle(terrainSettingsUseVegetationSystemTexturesAutoContent, landscape.useVegetationSystemTextures);
                         }
                     }
+                    #endregion
+
+                    #region Complete Terrain Shader CTS 2019
+                    if (landscape != null)
+                    {
+                        if (landscape.useCTS2019)
+                        {
+                            #if CTS_PRESENT
+                            LBEditorHelper.InTechPreview(false);
+                            #else
+                            EditorGUILayout.HelpBox("CTS 2019 does not seem to be installed in this project", MessageType.Error);
+                            #endif
+                        }
+                        #if CTS_PRESENT
+                        landscape.useCTS2019 = EditorGUILayout.Toggle(terrainSettingsUseCTS2019Content, landscape.useCTS2019);
+                        #endif
+                    }
+
                     #endregion
 
                     #region Terrain Settings Presets
@@ -2490,8 +2606,16 @@ namespace LandscapeBuilder
                                 Debug.LogWarning("Could not modifiy landscape with Vegetation Studio attributes. Please Report");
                             }
 
+                            // The user may be trying to move the terrain data to a project folder. So keep this editor setting.
+                            bool _tempuseProjectForTerrainData = useProjectForTerrainData;
+                            string _tempterrainDataFolder = terrainDataFolder;
+
                             // Update any changes made by Vegetation Studio to the terrain settings
                             LoadLandscapeSettings();
+
+                            // Restore editor setting after LoadLandscapeSettings()
+                            useProjectForTerrainData = _tempuseProjectForTerrainData;
+                            terrainDataFolder = _tempterrainDataFolder;
 
                             #elif VEGETATION_STUDIO_PRO
                             if (!LBIntegration.VegetationStudioProEnable(landscape, landscape.useVegetationSystem, true))
@@ -2499,8 +2623,16 @@ namespace LandscapeBuilder
                                 Debug.LogWarning("Could not modifiy landscape with Vegetation Studio Pro attributes. Please Report");
                             }
 
+                            // The user may be trying to move the terrain data to a project folder. So keep this editor setting.
+                            bool _tempuseProjectForTerrainData = useProjectForTerrainData;
+                            string _tempterrainDataFolder = terrainDataFolder;
+
                             // Update any changes made by Vegetation Studio Pro to the terrain settings
                             LoadLandscapeSettings();
+
+                            // Restore editor setting after LoadLandscapeSettings()
+                            useProjectForTerrainData = _tempuseProjectForTerrainData;
+                            terrainDataFolder = _tempterrainDataFolder;
 
                             #endif
 
@@ -2612,9 +2744,14 @@ namespace LandscapeBuilder
                             }
                         }
 
-                        if ((Mathf.Abs(numberOfTerrainsWide - (float)numberOfTerrainsWideInt) > 0.0001f) || (Mathf.Abs(numberOfTerrainsLong - (float)numberOfTerrainsLongInt) > 0.0001f))
+                        if (numberOfTerrainsWide < 1 || numberOfTerrainsLong < 1)
                         {
-                            string msg = "The terrain size must be equally divisible by both the landscape X and Y values. " +
+                            string msg = "The landscape must have at least one terrain. Check the Landscape Size X and Y values. Also check the Terrain Width setting.";
+                            EditorUtility.DisplayDialog("Generate Landscape", msg, "OK");
+                        }
+                        else if ((Mathf.Abs(numberOfTerrainsWide - (float)numberOfTerrainsWideInt) > 0.0001f) || (Mathf.Abs(numberOfTerrainsLong - (float)numberOfTerrainsLongInt) > 0.0001f))
+                        {
+                            string msg = "The Terrain Size must be equally divisible by both the Landscape Size X and Y values. " +
                                          "Landscape Builder version " + LBVersion + " only supports rectangular or square landscapes. " +
                                          "To create irregular-shaped scenes, create more than one landscape with different start positions.";
                             EditorUtility.DisplayDialog("Generate Landscape", msg, "OK");
@@ -3964,7 +4101,7 @@ namespace LandscapeBuilder
 
                         GUILayout.BeginVertical(EditorStyles.helpBox);
 
-#region Save Template
+                        #region Save Template
 
                         landscapeTemplateName = EditorGUILayout.TextField(saveTemplateNameContent, landscapeTemplateName);
                         addLBLightingToTemplate = EditorGUILayout.Toggle(saveTemplateIncludeLBLightingContent, addLBLightingToTemplate);
@@ -3999,7 +4136,7 @@ namespace LandscapeBuilder
                         }
                         GUILayout.EndHorizontal();
                         EditorGUILayout.Space();
-#endregion
+                        #endregion
 
                         #region Import Template
 
@@ -4009,6 +4146,9 @@ namespace LandscapeBuilder
                         //lbTemplateToRestore = (LBTemplate)EditorGUILayout.ObjectField("Template to Apply", lbTemplateToRestore, typeof(LBTemplate), false);
                         lbTemplateToRestore = (LBTemplate)EditorGUILayout.ObjectField(lbTemplateToRestore, typeof(LBTemplate), false);
                         GUILayout.EndHorizontal();
+
+                        // Option to create a new landscape (similar to the LBTemplateEditor)
+                        importToNewLandscapeFromTemplate = EditorGUILayout.Toggle(applyTemplateNewLandscapeContent, importToNewLandscapeFromTemplate);
 
                         // Let user control which items are imported to the landscape from the template
                         EditorGUI.BeginChangeCheck();
@@ -4091,7 +4231,12 @@ namespace LandscapeBuilder
                                 if (this.lbGroupList != null && importGroupsFromTemplate) { settingsAlreadyExist = (settingsAlreadyExist || this.lbGroupList.Count > 0); }
                                 if (landscape.landscapeWaterList != null) { settingsAlreadyExist = (settingsAlreadyExist || landscape.landscapeWaterList.Count > 0); }
 
-                                if (settingsAlreadyExist)
+                                if (importToNewLandscapeFromTemplate)
+                                {
+                                    landscape = lbTemplateToRestore.CreateLandscapeFromTemplate(lbTemplateToRestore.landscapeName);
+                                    continueToRestore = true;
+                                }
+                                else if (settingsAlreadyExist)
                                 {
                                     continueToRestore = EditorUtility.DisplayDialog("Landscape contains existing settings", "WARNING: Are you sure you want to apply this template? ALL landscape " +
                                                                 " settings may be lost. Undo is not supported with templates", "Overwrite", "Cancel");
@@ -4226,6 +4371,9 @@ namespace LandscapeBuilder
                                     // Apply terrain settings to the terrains
                                     if (landscapeTerrains != null)
                                     {
+                                        // When creating a new landscape, we need to update some local variables
+                                        if (importToNewLandscapeFromTemplate) { SelectLandscape(landscape); }
+
                                         if (importTerrainSettingsFromTemplate)
                                         {
                                             Vector3 terrainSize = new Vector3(2000f, 2000f, 2000f);
@@ -4305,7 +4453,7 @@ namespace LandscapeBuilder
                                     Vector3 landscapeChangeOffset = lbTemplateToRestore.GetLandscapeChangeOffset(landscape, templateIgnoreStartPosition);
                                     Vector3 landscapeChangeScale = lbTemplateToRestore.GetLandscapeChangeScale(landscape, landscape.GetLandscapeTerrainHeight());
 
-#region Check if we need to update Topography settings
+                                    #region Check if we need to update Topography settings
                                     if (landscapeChangeScale.x != 1f || landscapeChangeScale.z != 1f | landscapeChangeOffset.x != 0f || landscapeChangeOffset.z != 0f)
                                     {
                                         int numTLayers = (landscape.topographyLayersList == null ? 0 : landscape.topographyLayersList.Count);
@@ -4326,7 +4474,7 @@ namespace LandscapeBuilder
                                             }
                                         }
                                     }
-#endregion
+                                    #endregion
 
                                     if (importWaterFromTemplate && lbTemplateToRestore.landscapeWaterList != null)
                                     {
@@ -4566,7 +4714,6 @@ namespace LandscapeBuilder
                             }
                             if (GUILayout.Button(new GUIContent("Get Info", "Get info about the template and write it to the console window"), GUILayout.MaxWidth(70f)))
                             {
-                                // lbTemplateToRestore.CreateLandscapeFromTemplate();
                                 string _info = string.Empty;
                                 _info = "Template Information for template: " + lbTemplateToRestore.gameObject.name + "\n";
                                 _info += "Landscape Size: " + lbTemplateToRestore.size.x + " x " + lbTemplateToRestore.size.y + "\n";
@@ -5402,7 +5549,7 @@ namespace LandscapeBuilder
 
                             else if (topographyLayers[index].type == LBLayer.LayerType.ImageModifier)
                             {
-#region ImageModifier Buttons and User file selection
+                                #region ImageModifier Buttons and User file selection
 
                                 // Allow user to select an image to use for the modifier - this must be a RAW file
                                 EditorGUILayout.BeginVertical(EditorStyles.helpBox);
@@ -5456,9 +5603,9 @@ namespace LandscapeBuilder
 
                                 EditorGUILayout.EndVertical();
 
-#endregion
+                                #endregion
 
-#region Image Modifier Landform selection
+                                #region Image Modifier Landform selection
                                 previousLandformCategory = topographyLayers[index].modifierLandformCategory.ToString();
                                 topographyLayers[index].modifierLandformCategory = (LBModifierOperations.ModifierLandformCategory)EditorGUILayout.EnumPopup(layersModifierCategoryContent, topographyLayers[index].modifierLandformCategory);
                                 hasLandformCategorySelectionChanged = (topographyLayers[index].modifierLandformCategory.ToString() != previousLandformCategory || isLandformCategoryDropdownRefreshRequired);
@@ -5611,11 +5758,11 @@ namespace LandscapeBuilder
                                     else { EditorGUILayout.Popup("Landform", 0, layerModifierNoneFoundArray); }
                                 }
 
-#endregion
+                                #endregion
 
                                 topographyLayers[index].modifierMode = (LBLayer.LayerModifierMode)EditorGUILayout.EnumPopup(layersModifierModeContent, topographyLayers[index].modifierMode);
 
-#region ImageModifier Selection Area Get Data
+                                #region ImageModifier Selection Area Get Data
 
                                 // Is area highlighter is required
                                 volumeHighlighterRequired = (volumeHighlighterRequired || topographyLayers[index].showVolumeHighlighter);
@@ -5703,9 +5850,9 @@ namespace LandscapeBuilder
 #endif
                                 }
 
-#endregion ImageModifier Selection Area Get Data
+                                #endregion ImageModifier Selection Area Get Data
 
-#region ImageModifier Add/Subtract Mode
+                                #region ImageModifier Add/Subtract Mode
 
                                 if (topographyLayers[index].modifierMode == LBLayer.LayerModifierMode.Add)
                                 {
@@ -5743,9 +5890,9 @@ namespace LandscapeBuilder
                                         topographyLayers[index].additiveAmount = EditorGUILayout.Slider(layersModifierAdditiveAmountContent, topographyLayers[index].additiveAmount, 0f, 1f);
                                     }
                                 }
-#endregion
+                                #endregion
 
-#region ImageModifier Set Mode
+                                #region ImageModifier Set Mode
                                 else
                                 {
                                     // Set mode
@@ -5785,9 +5932,9 @@ namespace LandscapeBuilder
                                         //#endif
                                     }
                                 }
-#endregion
+                                #endregion
 
-#region ImageModifier Selection Area Set Data Pt. 1
+                                #region ImageModifier Selection Area Set Data Pt. 1
 
                                 // Unlike in additive layers, the position is measured from the centre of the rect not from the corner
                                 EditorGUILayout.BeginHorizontal();
@@ -5838,10 +5985,15 @@ namespace LandscapeBuilder
                                 }
 
                                 topographyLayers[index].modifierUseBlending = EditorGUILayout.Toggle(layersModifierUseBlendingContent, topographyLayers[index].modifierUseBlending);
+                                if (topographyLayers[index].modifierUseBlending)
+                                {
+                                    topographyLayers[index].modifierBlendingCentreSize = EditorGUILayout.Slider(layersModifierBlendingCentreSizeContent, topographyLayers[index].modifierBlendingCentreSize, 0f, 0.9f);
+                                    topographyLayers[index].modifierBlendingFillCorners = EditorGUILayout.Slider(layersModifierBlendingFillCornersContent, topographyLayers[index].modifierBlendingFillCorners, 0f, 1.0f);
+                                }
 
-#endregion
+                                #endregion
 
-#region ImageModifier Water
+                                #region ImageModifier Water
 
                                 // Currently only available for Lakes and Valleys WITH Invert enabled. Could potentially add "Custom" too
                                 if (topographyLayers[index].modifierAddInvert && 
@@ -5977,7 +6129,7 @@ namespace LandscapeBuilder
                                     else { if (topographyLayers[index].modifierLBWater != null) { topographyLayers[index].modifierLBWater.waterLevel = 0f; } }
                                 }
 
-#endregion
+                                #endregion
 
                                 #region ImageModifier Reset to Factory
 
@@ -6409,7 +6561,7 @@ namespace LandscapeBuilder
                         volumeHighlighter = GameObject.FindObjectOfType<LBVolumeHighlight>();
                         if (volumeHighlighter == null)
                         {
-                            volumeHighlighter = LBVolumeHighlight.CreateVolumeHighLighter();
+                            volumeHighlighter = LBVolumeHighlight.CreateVolumeHighLighter(volumeHighlighterIsDrawMesh, volumeHighlighterColour);
                             // Set to enabled so that we know when we need to repaint the editor in OnInspectorUpdate()
                             volumeHighlighterEnabled = true;
                         }
@@ -8481,7 +8633,7 @@ namespace LandscapeBuilder
                                                         if (lbGroup.lbGroupType != LBGroup.LBGroupType.Uniform)
                                                         {
                                                             // Default to same height as Group Designer plane
-                                                            lbObjPath.heightAboveTerrain = 0f;
+                                                            lbGroupMember.lbObjPath.heightAboveTerrain = 0f;
                                                         }
                                                     }
                                                 }
@@ -9124,6 +9276,12 @@ namespace LandscapeBuilder
                                                             {
                                                                 EditorUtility.DisplayProgressBar("Restoring trees", "PLEASE WAIT", 0.3f);
                                                                 landscape.RevertTrees1D("RP_" + lbGroupMember.GUID, true);
+
+                                                                // +LB 2.3.1 bugfix - trees don't resnap to terrains when isRemoveExitingTrees is enabled
+                                                                // for the Object path.
+                                                                // We need to update the terrain LOD and vegetation information
+                                                                // DOES NOT FIX THE PROBLEM
+                                                                //LBLandscapeTerrain.ApplyDelayedHeightmapLOD(landscapeTerrains);
                                                             }
 
 #if VEGETATION_STUDIO_PRO
@@ -9274,7 +9432,6 @@ namespace LandscapeBuilder
                                                         isSceneDirtyRequired = true;
                                                     }
 
-                                                    //if (lbObjPath.useWidth) { EditorGUILayout.HelpBox("WIP - Object Path Width is currently in technical preview.", MessageType.Warning);}
                                                     #endregion
 
                                                     #region Display Attributes
@@ -9526,7 +9683,7 @@ namespace LandscapeBuilder
                                                 {
                                                     EditorGUILayout.HelpBox("Series Start/End Members are optional. Layout determines how the Main Member Objects are distributed along the path. Don't forget to check the member proximity settings.", MessageType.Info);
 
-#region Default Series
+                                                    #region Default Series
                                                     // The default series variable are embedded in the LBObjPath
                                                     // These pre-date the LBObjPathSeries class.
 
@@ -9541,7 +9698,7 @@ namespace LandscapeBuilder
 
                                                     if (lbObjPath.showDefaultSeriesInEditor)
                                                     {                                                     
-#region Prefab Start settings
+                                                        #region Prefab Start settings
                                                         if (lbObjPath.startObjPrefab == null) { lbObjPath.startObjPrefab = new LBObjPrefab(); }
 
                                                         // Find the matching LBGroupMember (if any)
@@ -9586,9 +9743,9 @@ namespace LandscapeBuilder
                                                         }
                                                         if (GUILayout.Button("X", buttonCompact, GUILayout.MaxWidth(20f))) { lbObjPath.startObjPrefab.groupMemberGUID = string.Empty; isSceneDirtyRequired = true; }
                                                         GUILayout.EndHorizontal();
-#endregion
+                                                        #endregion
 
-#region Prefab End settings
+                                                        #region Prefab End settings
                                                         if (lbObjPath.endObjPrefab == null) { lbObjPath.endObjPrefab = new LBObjPrefab(); }
 
                                                         // Find the matching LBGroupMember (if any)
@@ -9631,9 +9788,9 @@ namespace LandscapeBuilder
                                                         }
                                                         if (GUILayout.Button("X", buttonCompact, GUILayout.MaxWidth(20f))) { lbObjPath.endObjPrefab.groupMemberGUID = string.Empty; isSceneDirtyRequired = true; }
                                                         GUILayout.EndHorizontal();
-#endregion
+                                                        #endregion
 
-#region Main Prefab List settings
+                                                        #region Main Prefab List settings
                                                         if (lbObjPath.mainObjPrefabList == null) { lbObjPath.mainObjPrefabList = new List<LBObjPrefab>(); }
                                                         numMainPrefabsInList = (lbObjPath.mainObjPrefabList == null ? 0 : lbObjPath.mainObjPrefabList.Count);
 
@@ -9642,7 +9799,7 @@ namespace LandscapeBuilder
                                                         objPrefabToRemove = null;
                                                         insertObjPathPrefabPos = -1;
 
-#region Append or Reduce Number Main Prefabs
+                                                        #region Append or Reduce Number Main Prefabs
 
                                                         GUILayout.BeginHorizontal();
                                                         EditorGUILayout.LabelField("Main Members: " + numMainPrefabsInList.ToString("00"));
@@ -9664,9 +9821,9 @@ namespace LandscapeBuilder
                                                             }
                                                         }
                                                         GUILayout.EndHorizontal();
-#endregion
+                                                        #endregion
 
-#region Display Main ObjPrefab list
+                                                        #region Display Main ObjPrefab list
 
                                                         for (int i = 0; i < numMainPrefabsInList; i++)
                                                         {
@@ -9726,9 +9883,9 @@ namespace LandscapeBuilder
                                                             }
                                                         }
 
-#endregion
+                                                        #endregion
 
-#region Insert/Delete Main ObjPrefab
+                                                        #region Insert/Delete Main ObjPrefab
                                                         if (insertObjPathPrefabPos >= 0)
                                                         {
 
@@ -9740,11 +9897,11 @@ namespace LandscapeBuilder
                                                             objPrefabToRemove = null;
                                                             isSceneDirtyRequired = true;
                                                         }
-#endregion
+                                                        #endregion
 
-#endregion
+                                                        #endregion
 
-#region Layout
+                                                        #region Layout
                                                         EditorGUI.BeginChangeCheck();
                                                         lbObjPath.layoutMethod = (LBObjPath.LayoutMethod)EditorGUILayout.EnumPopup(groupsMemberObjTypeLayoutMethodContent, lbObjPath.layoutMethod);
                                                         lbObjPath.selectionMethod = (LBObjPath.SelectionMethod)EditorGUILayout.EnumPopup(groupsMemberObjSelectionMethodContent, lbObjPath.selectionMethod);
@@ -9783,13 +9940,13 @@ namespace LandscapeBuilder
                                                             if (isGroupDesignerInitialised) { Selection.activeObject = null; }
                                                         }
 
-#endregion
+                                                        #endregion
 
                                                     }
                                                     GUILayout.EndVertical();
-#endregion Default Series
+                                                    #endregion Default Series
 
-#region Series List
+                                                    #region Series List
                                                     if (lbObjPath.useWidth)
                                                     {
                                                         GUILayout.BeginVertical(EditorStyles.helpBox);
@@ -9806,11 +9963,9 @@ namespace LandscapeBuilder
                                                         {
                                                             lbObjPath.isSeriesListOverride = EditorGUILayout.Toggle(groupsMemberObjPathSeriesOverrideContent, lbObjPath.isSeriesListOverride);
 
-#region Override Width-based Series List
+                                                            #region Override Width-based Series List
                                                             if (lbObjPath.isSeriesListOverride)
                                                             {
-                                                                EditorGUILayout.HelpBox("WIP - Series Override is currently in technical preview", MessageType.Warning);
-
                                                                 // Find the matching LBGroupMember (if any). It must be an Object Path
                                                                 groupMemberLookupIndex2 = lbGroup.groupMemberList.FindIndex(gmbr => gmbr.GUID == lbObjPath.seriesListGroupMemberGUID && !string.IsNullOrEmpty(gmbr.GUID) && gmbr.lbMemberType == LBGroupMember.LBMemberType.ObjPath);
                                                                 // Now find it in the smaller list of MemberType: ObjPath
@@ -9860,9 +10015,9 @@ namespace LandscapeBuilder
                                                                 GUILayout.EndHorizontal();
 
                                                             }
-#endregion
+                                                            #endregion
 
-#region This Member Width-based Series List
+                                                            #region This Member Width-based Series List
                                                             else
                                                             {
                                                                 numObjPathSeriesInList = lbObjPath.lbObjPathSeriesList == null ? 0 : lbObjPath.lbObjPathSeriesList.Count;
@@ -9874,7 +10029,7 @@ namespace LandscapeBuilder
                                                                 insertObjPathSeriesPos = -1;
                                                                 moveObjPathSeriesPos = -1;
 
-#region Append or Reduce Number of Series
+                                                                #region Append or Reduce Number of Series
                                                                 GUILayout.BeginHorizontal();
                                                                 EditorGUILayout.LabelField("Series: " + numObjPathSeriesInList.ToString("00"));
                                                                 if (GUILayout.Button("+", GUILayout.MaxWidth(30f)))
@@ -9897,9 +10052,9 @@ namespace LandscapeBuilder
                                                                 }
                                                                 GUILayout.EndHorizontal();
 
-#endregion Append or Reduce Number of Series
+                                                                #endregion Append or Reduce Number of Series
 
-#region Display Series List
+                                                                #region Display Series List
                                                                 for (int sIdx = 0; sIdx < numObjPathSeriesInList; sIdx++)
                                                                 {
                                                                     objPathSeries = lbObjPath.lbObjPathSeriesList[sIdx];
@@ -9932,7 +10087,7 @@ namespace LandscapeBuilder
 
                                                                         if (objPathSeries.showInEditor)
                                                                         {
-#region Series Name
+                                                                            #region Series Name
                                                                             EditorGUI.BeginChangeCheck();
                                                                             objPathSeries.seriesName = EditorGUILayout.TextField(groupsMemberObjSeriesNameContent, objPathSeries.seriesName);
 
@@ -9946,7 +10101,7 @@ namespace LandscapeBuilder
                                                                             {
                                                                                 EditorGUILayout.HelpBox("Please use a unique Series Name for the Object Path", MessageType.Warning);
                                                                             }
-#endregion
+                                                                            #endregion
 
                                                                             // We don't support SubGroups within SubGroups
                                                                             if (lbGroup.lbGroupType == LBGroup.LBGroupType.SubGroup)
@@ -10127,7 +10282,7 @@ namespace LandscapeBuilder
                                                                             }
                                                                             else
                                                                             {
-#region Series Prefab Start settings
+                                                                                #region Series Prefab Start settings
                                                                                 // Find the matching LBGroupMember (if any)
                                                                                 groupMemberLookupIndex2 = lbGroup.groupMemberList.FindIndex(gmbr => gmbr.GUID == objPathSeries.startObjPrefab.groupMemberGUID && !string.IsNullOrEmpty(gmbr.GUID));
                                                                                 // Now find it in the smaller list of MemberType: Prefab
@@ -10192,9 +10347,9 @@ namespace LandscapeBuilder
                                                                                     objPathSeries.startMemberOffset = EditorGUILayout.Slider(groupsMemberObjPathStartMemberOffsetContent, objPathSeries.startMemberOffset, -objPathMemberSpacingDistance, objPathMemberSpacingDistance);
                                                                                 }
 
-#endregion
+                                                                                #endregion
 
-#region Series Prefab End settings
+                                                                                #region Series Prefab End settings
                                                                                 // Find the matching LBGroupMember (if any)
                                                                                 groupMemberLookupIndex2 = lbGroup.groupMemberList.FindIndex(gmbr => gmbr.GUID == objPathSeries.endObjPrefab.groupMemberGUID && !string.IsNullOrEmpty(gmbr.GUID));
                                                                                 // Now find it in the smaller list of MemberType: Prefab
@@ -10256,9 +10411,9 @@ namespace LandscapeBuilder
 
                                                                                     objPathSeries.endMemberOffset = EditorGUILayout.Slider(groupsMemberObjPathEndMemberOffsetContent, objPathSeries.endMemberOffset, -objPathMemberSpacingDistance, objPathMemberSpacingDistance);
                                                                                 }
-#endregion
+                                                                                #endregion
 
-#region Series Main Prefab List settings
+                                                                                #region Series Main Prefab List settings
                                                                                 numMainPrefabsInList = (objPathSeries.mainObjPrefabList == null ? 0 : objPathSeries.mainObjPrefabList.Count);
 
                                                                                 // reset delete/insert for Main Obj Prefabs
@@ -10266,7 +10421,7 @@ namespace LandscapeBuilder
                                                                                 objPrefabToRemove = null;
                                                                                 insertObjPathPrefabPos = -1;
 
-#region Series Append or Reduce Number Main Prefabs
+                                                                                #region Series Append or Reduce Number Main Prefabs
 
                                                                                 GUILayout.BeginHorizontal();
                                                                                 EditorGUILayout.LabelField(new GUIContent("Main Members: " + numMainPrefabsInList.ToString("00"), "A list of prefabs to place along the Object Path. Use the Selection Method to determine which items are placed along the path."));
@@ -10288,9 +10443,9 @@ namespace LandscapeBuilder
                                                                                     }
                                                                                 }
                                                                                 GUILayout.EndHorizontal();
-#endregion
+                                                                                #endregion
 
-#region Series Display Main ObjPrefab list
+                                                                                #region Series Display Main ObjPrefab list
 
                                                                                 for (int i = 0; i < numMainPrefabsInList; i++)
                                                                                 {
@@ -10350,9 +10505,9 @@ namespace LandscapeBuilder
                                                                                     }
                                                                                 }
 
-#endregion
+                                                                                #endregion
 
-#region Insert/Delete Main ObjPrefab
+                                                                                #region Insert/Delete Main ObjPrefab
                                                                                 if (insertObjPathPrefabPos >= 0)
                                                                                 {
 
@@ -10364,12 +10519,12 @@ namespace LandscapeBuilder
                                                                                     objPrefabToRemove = null;
                                                                                     isSceneDirtyRequired = true;
                                                                                 }
-#endregion
+                                                                                #endregion
 
-#endregion
+                                                                                #endregion
                                                                             }
 
-#region Layout
+                                                                            #region Layout
                                                                             EditorGUI.BeginChangeCheck();
                                                                             objPathSeries.layoutMethod = (LBObjPath.LayoutMethod)EditorGUILayout.EnumPopup(groupsMemberObjTypeLayoutMethodContent, objPathSeries.layoutMethod);
 
@@ -10435,14 +10590,14 @@ namespace LandscapeBuilder
                                                                                 if (isGroupDesignerInitialised) { Selection.activeObject = null; }
                                                                             }
 
-#endregion
+                                                                            #endregion
                                                                         }
                                                                     }
                                                                 }
 
-#endregion Display Series List
+                                                                #endregion Display Series List
 
-#region Insert/Move/Delete Series
+                                                                #region Insert/Move/Delete Series
                                                                 if (insertObjPathSeriesPos >= 0)
                                                                 {
                                                                     GUI.FocusControl(null);
@@ -10523,9 +10678,9 @@ namespace LandscapeBuilder
                                                                     }
                                                                 }
 
-#endregion Insert/Delete Series
+                                                                #endregion Insert/Delete Series
                                                             }
-#endregion
+                                                            #endregion
                                                         }
                                                         GUILayout.EndVertical();
                                                     }
@@ -10534,7 +10689,7 @@ namespace LandscapeBuilder
                                                         EditorGUILayout.HelpBox("To enable a width-based series, on this member's General tab, turn on 'Path has Width'", MessageType.Info);
                                                     }
 
-#endregion
+                                                    #endregion
                                                 }
                                                 #endregion
 
@@ -10584,7 +10739,7 @@ namespace LandscapeBuilder
                                                     }
                                                     #endregion
 
-                                                    #region Get Points from MapPath Toggle Button
+                                                    #region Get Points from MapPath or RAM spline Toggle Button
                                                     if (lbObjPath.isGetPointsMode)
                                                     {
                                                         if (GUILayout.Button(groupsMemberObjGetPointsButtonContent, toggleCompactButtonStyleToggled, GUILayout.MaxWidth(40f)))
@@ -10692,7 +10847,7 @@ namespace LandscapeBuilder
                                                     if (lbObjPath.isGetPointWidthMode)
                                                     {
                                                         GUILayout.BeginHorizontal();
-                                                        lbObjPath.minPathWidth = EditorGUILayout.Slider(groupsMemberObjPathSetWidthContent, lbObjPath.minPathWidth, 0.5f, 100f);
+                                                        lbObjPath.minPathWidth = EditorGUILayout.Slider(groupsMemberObjPathSetWidthContent, lbObjPath.minPathWidth, 0.5f, 1000f);
                                                         if (GUILayout.Button("Change", GUILayout.Width(65f)))
                                                         {
                                                             lbObjPath.SetPathWidths(lbObjPath.minPathWidth);
@@ -10704,10 +10859,10 @@ namespace LandscapeBuilder
                                                         GUILayout.EndHorizontal();
 
                                                         GUILayout.BeginHorizontal();
-                                                        lbObjPath.addPathWidth = EditorGUILayout.Slider(groupsMemberObjPathAddWidthContent, lbObjPath.addPathWidth, -50f, 50f);
+                                                        lbObjPath.addPathWidth = EditorGUILayout.Slider(groupsMemberObjPathAddWidthContent, lbObjPath.addPathWidth, -500f, 500f);
                                                         if (GUILayout.Button("Change", GUILayout.Width(65f)))
                                                         {
-                                                            lbObjPath.AddPathWidths(lbObjPath.addPathWidth, 0.5f, 100f);
+                                                            lbObjPath.AddPathWidths(lbObjPath.addPathWidth, 0.5f, 1000f);
                                                             lbObjPath.minPathWidth = lbObjPath.GetMinWidth();
                                                             lbObjPath.RefreshObjPathPositions(lbObjPath.showSurroundingInScene, false);
                                                             if (isObjPathDesignerInitialised) { lbObjPathDesigner.RefreshPath(); }
@@ -10745,10 +10900,11 @@ namespace LandscapeBuilder
                                                     }
                                                     #endregion
 
-                                                    #region Get Points from MapPath OR LB Copy Buffer
+                                                    #region Get Points from MapPath, RAM Spline OR LB Copy Buffer
                                                     // The button is toggled on/off above
                                                     if (lbObjPath.isGetPointsMode)
                                                     {
+                                                        #region Import MapPath points
                                                         labelText = "Select or drag a MapPath from the current Landscape into the slot to import points from an existing MapPath. All existing points will be deleted.";
                                                         EditorGUILayout.HelpBox(labelText, MessageType.Info);
                                                         // Allow user to drag in or select a Map Path from the scene view
@@ -10817,7 +10973,39 @@ namespace LandscapeBuilder
                                                             }
                                                             lbMapPathToImport = null;
                                                         }
+                                                        #endregion
 
+                                                        #region Import River Auto Material (RAM) spline
+                                                        labelText = "Select or drag a RAM Spline into the slot to import control points. All existing points will be deleted from current Object Path.";
+                                                        EditorGUILayout.HelpBox(labelText, MessageType.Info);
+
+                                                        sourceSplineToImport = (GameObject)EditorGUILayout.ObjectField("Source RAM Spline", sourceSplineToImport, typeof(GameObject), true);
+                                                        if (sourceSplineToImport != null)
+                                                        {
+                                                            // Check if there are any existing points in path
+                                                            bool isContinueToAddPoints = true;
+
+                                                            if (lbObjPath.positionList.Count > 0)
+                                                            {
+                                                                isContinueToAddPoints = EditorUtility.DisplayDialog("Overwrite existing path points?", "This action will clear all current path points\n\nWARNING: There is NO UNDO.", "Overwrite", "Cancel");
+                                                            }
+
+                                                            if (isContinueToAddPoints)
+                                                            {
+                                                                if (LBIntegration.GetRAMSplinePoints(landscape, lbObjPath, sourceSplineToImport, true))
+                                                                {
+                                                                    lbObjPath.isGetPointsMode = false;
+                                                                    isSceneDirtyRequired = true;
+
+                                                                    // Update the number in the list for the editor code below
+                                                                    numPointsInList = lbObjPath.positionList == null ? 0 : lbObjPath.positionList.Count;
+                                                                }
+                                                            }
+                                                            sourceSplineToImport = null;
+                                                        }
+                                                        #endregion
+
+                                                        #region Get Points from Copy Buffer
                                                         // Can only copy points from Uniform Group to Uniform Group OR non-Uniform to non-Uniform (clearings and subgroups)
                                                         if (grpMbrCopy != null && grpMbrCopy.lbMemberType == LBGroupMember.LBMemberType.ObjPath &&
                                                            (
@@ -10888,6 +11076,7 @@ namespace LandscapeBuilder
                                                             EditorGUILayout.LabelField("No Object Path data in LB Copy Buffer");
                                                         }
                                                         EditorGUILayout.Space();
+                                                        #endregion
                                                     }
 
                                                     #endregion
@@ -10933,7 +11122,7 @@ namespace LandscapeBuilder
                                                             if (lbObjPath.useWidth && lbObjPath.widthList != null)
                                                             {
                                                                 // TODO - fix expanded width when scroll bar is on.
-                                                                lbObjPath.widthList[i] = LBEditorHelper.LogarithmicSlider(groupsMemberObjPathWidthContent, defaultEditorLabelWidth, lbObjPath.widthList[i], 0.01f, 100f, false, 10);
+                                                                lbObjPath.widthList[i] = LBEditorHelper.LogarithmicSlider(groupsMemberObjPathWidthContent, defaultEditorLabelWidth, lbObjPath.widthList[i], 0.01f, 1000f, false, 10);
                                                             }
                                                             GUILayout.EndVertical();
                                                         }
@@ -11858,6 +12047,7 @@ namespace LandscapeBuilder
                         else { labelText = "<color=" + txtColourName + "><b>Texture " + (index + 1) + "</b> " + GetTextureName(terrainTexturesList[index].texture, terrainTexturesList[index].textureName) + "</color>"; }
 
                         EditorGUILayout.LabelField(labelText, labelFieldRichText);
+                        if (GUILayout.Button(texturingRelinkContent, buttonCompact, GUILayout.MaxWidth(20f))) { LBEditorHelper.RelinkTerrainTexture(terrainTexturesList[index]); }
                         if (GUILayout.Button(texturingScriptContent, buttonCompact, GUILayout.MaxWidth(20f))) { Debug.Log(terrainTexturesList[index].ScriptTexture(index, "\n")); }
                         if (GUILayout.Button(new GUIContent("I", "Insert new Texture above this Texture"), buttonCompact, GUILayout.Width(20f))) { insertTexturePos = index; }
                         if (terrainTexturesList[index].showTexture) { if (GUILayout.Button("Hide", buttonCompact, GUILayout.MaxWidth(40f))) { GUI.FocusControl(null); terrainTexturesList[index].showTexture = false; } }
@@ -11924,8 +12114,11 @@ namespace LandscapeBuilder
                             #endregion
 
                             EditorGUIUtility.labelWidth = defaultEditorLabelWidth;
+                            GUILayout.BeginHorizontal();
+                            EditorGUILayout.LabelField("Tiling", GUILayout.Width(defaultEditorLabelWidth - 6f));
+                            terrainTexturesList[index].tileSize = (Vector2)EditorGUILayout.Vector2Field(GUIContent.none, terrainTexturesList[index].tileSize);
+                            GUILayout.EndHorizontal();
 
-                            terrainTexturesList[index].tileSize = (Vector2)EditorGUILayout.Vector2Field("Tiling", terrainTexturesList[index].tileSize);
                             terrainTexturesList[index].metallic = EditorGUILayout.Slider("Metallic", terrainTexturesList[index].metallic, 0f, 1f);
                             terrainTexturesList[index].smoothness = EditorGUILayout.Slider("Smoothness", terrainTexturesList[index].smoothness, 0f, 1f);
 
@@ -11998,6 +12191,18 @@ namespace LandscapeBuilder
                             #endregion
 
                             terrainTexturesList[index].texturingMode = (LBTerrainTexture.TexturingMode)EditorGUILayout.EnumPopup("Texturing Mode", terrainTexturesList[index].texturingMode);
+
+                            #region Blending Curve Mode
+                            if (terrainTexturesList[index].texturingMode == LBTerrainTexture.TexturingMode.Height ||
+                                terrainTexturesList[index].texturingMode == LBTerrainTexture.TexturingMode.HeightAndInclination ||
+                                terrainTexturesList[index].texturingMode == LBTerrainTexture.TexturingMode.HeightInclinationCurvature ||
+                                terrainTexturesList[index].texturingMode == LBTerrainTexture.TexturingMode.HeightInclinationMap ||
+                                terrainTexturesList[index].texturingMode == LBTerrainTexture.TexturingMode.Inclination
+                            )
+                            {
+                                terrainTexturesList[index].blendCurveMode = (LBTerrainTexture.BlendCurveMode)EditorGUILayout.EnumPopup(texturingBlendModeContent, terrainTexturesList[index].blendCurveMode);
+                            }
+                            #endregion
 
                             #region Terrain Height for Textures
                             if (terrainTexturesList[index].texturingMode == LBTerrainTexture.TexturingMode.Height ||
@@ -15226,520 +15431,698 @@ namespace LandscapeBuilder
             {
                 // Advanced tab
                 #region AdvancedTab
-                scrollPosition = EditorGUILayout.BeginScrollView(scrollPosition);
 
-                // Texture generation
-                EditorGUILayout.LabelField("<color=" + txtColourName + "><b>Texture Generator</b></color>\n\nThe Texture Generator enables you to bring terrain and mesh textures to life with " +
-                                           "professional looking Albedo, Metallic, Normal, Height, Occlusion, and Emission Maps.", helpBoxRichText);
+                showAdvancedTabInEditor = GUILayout.Toolbar(showAdvancedTabInEditor, advancedToolbarContent);
 
-                if (GUILayout.Button("Texture Generator")) { LBTextureGeneratorWindow.ShowWindow(); }
+                #region Advanced Options tab
 
-                #region Advanced Misc Settings
-
-                if (landscape != null && landscapeGameObject != null)
+                if (showAdvancedTabInEditor == 0)
                 {
-                    // Disable Trees And Grass
+                    scrollPosition = EditorGUILayout.BeginScrollView(scrollPosition);
+
+                    #region Advanced Misc Settings
+
+                    if (landscape != null && landscapeGameObject != null)
+                    {
+                        // Disable Trees And Grass
+                        GUILayout.BeginHorizontal(helpBoxRichText);
+                        EditorGUI.BeginChangeCheck();
+                        drawTreesAndFoliage = !EditorGUILayout.Toggle(!drawTreesAndFoliage, GUILayout.Width(15f));
+                        labelText = "<color=" + txtColourName + "><b>Disable Trees And Grass</b></color>\n\nYou can disable trees and grass to improve performance, especially helpful in the editor";
+                        EditorGUILayout.LabelField(labelText, labelsmallFieldRichText);
+                        GUILayout.EndHorizontal();
+
+                        if (EditorGUI.EndChangeCheck())
+                        {
+                            landscapeTerrains = landscapeGameObject.GetComponentsInChildren<Terrain>();
+                            if (landscapeTerrains != null)
+                            {
+                                for (index = 0; index < landscapeTerrains.Length; index++)
+                                {
+                                    landscapeTerrains[index].drawTreesAndFoliage = drawTreesAndFoliage;
+                                }
+                            }
+                            isSceneSaveRequired = true;
+                        }
+
+                        // Show/Hide Timing
+                        GUILayout.BeginHorizontal(helpBoxRichText);
+                        EditorGUI.BeginChangeCheck();
+                        landscape.showTiming = EditorGUILayout.Toggle(landscape.showTiming, GUILayout.Width(15f));
+                        if (EditorGUI.EndChangeCheck()) { isSceneSaveRequired = true; }
+                        labelText = "<color=" + txtColourName + "><b>Show Timing</b></color>\n\nOutput some operation timings to the console";
+                        EditorGUILayout.LabelField(labelText, labelsmallFieldRichText);
+                        GUILayout.EndHorizontal();
+
+                        // Show/Hide Texture heightMap option
+                        GUILayout.BeginHorizontal(helpBoxRichText);
+                        EditorGUI.BeginChangeCheck();
+                        landscape.showTextureHeightmap = EditorGUILayout.Toggle(landscape.showTextureHeightmap, GUILayout.Width(15f));
+                        if (EditorGUI.EndChangeCheck()) { isSceneSaveRequired = true; }
+                        labelText = "<color=" + txtColourName + "><b>Show Texture Heightmap</b></color>\n\nSome products, like RTP and MicroSplat, use texture heightmaps. This allows heightmaps to be stored with Textures in the Texturing Tab.";
+                        EditorGUILayout.LabelField(labelText, labelsmallFieldRichText);
+                        GUILayout.EndHorizontal();
+                    }
+
+                    if (landscape == null) { EditorGUILayout.Space(); }
                     GUILayout.BeginHorizontal(helpBoxRichText);
                     EditorGUI.BeginChangeCheck();
-                    drawTreesAndFoliage = !EditorGUILayout.Toggle(!drawTreesAndFoliage, GUILayout.Width(15f));
-                    labelText = "<color=" + txtColourName + "><b>Disable Trees And Grass</b></color>\n\nYou can disable trees and grass to improve performance, especially helpful in the editor";
-                    EditorGUILayout.LabelField(labelText, labelsmallFieldRichText);
+                    autoSaveEnabled = EditorGUILayout.Toggle(autoSaveEnabled, GUILayout.Width(15f));
+                    if (EditorGUI.EndChangeCheck())
+                    {
+                        LBLandscape.SetAutoSaveState(autoSaveEnabled);
+                        isSceneSaveRequired = true;
+                    }
+                    EditorGUILayout.LabelField("<color=" + txtColourName + "><b>AutoSave</b></color>\n\nIf AutoSave is enabled, the scene will be automatically" +
+                        " saved after every Landscape Builder operation", labelsmallFieldRichText);
+                    GUILayout.EndHorizontal();
+
+                    #region GPU Acceleration
+                    if (landscape != null && landscapeGameObject != null)
+                    {
+                        //EditorGUILayout.Space();
+                        if (landscape.IsGPUAccelerationAvailable())
+                        {
+                            GUILayout.BeginVertical(helpBoxRichText);
+
+                            EditorGUI.BeginChangeCheck();
+                            GUILayout.BeginHorizontal();
+                            landscape.useGPUTopography = EditorGUILayout.Toggle(landscape.useGPUTopography, GUILayout.Width(15f));
+                            EditorGUILayout.LabelField("<color=" + txtColourName + "><b>GPU Acceleration - Topography</b></color>", labelsmallFieldRichText);
+                            GUILayout.EndHorizontal();
+                            if (EditorGUI.EndChangeCheck()) { isSceneSaveRequired = true; }
+
+                            EditorGUI.BeginChangeCheck();
+                            GUILayout.BeginHorizontal();
+                            landscape.useGPUTexturing = EditorGUILayout.Toggle(landscape.useGPUTexturing, GUILayout.Width(15f));
+                            EditorGUILayout.LabelField("<color=" + txtColourName + "><b>GPU Acceleration - Texturing</b></color>", labelsmallFieldRichText);
+                            GUILayout.EndHorizontal();
+                            if (EditorGUI.EndChangeCheck()) { isSceneSaveRequired = true; }
+
+                            EditorGUI.BeginChangeCheck();
+                            GUILayout.BeginHorizontal();
+                            landscape.useGPUGrass = EditorGUILayout.Toggle(landscape.useGPUGrass, GUILayout.Width(15f));
+                            EditorGUILayout.LabelField("<color=" + txtColourName + "><b>GPU Acceleration - Grass</b></color>", labelsmallFieldRichText);
+                            GUILayout.EndHorizontal();
+                            if (EditorGUI.EndChangeCheck()) { isSceneSaveRequired = true; }
+
+                            EditorGUI.BeginChangeCheck();
+                            GUILayout.BeginHorizontal();
+                            landscape.useGPUPath = EditorGUILayout.Toggle(landscape.useGPUPath, GUILayout.Width(15f));
+                            EditorGUILayout.LabelField("<color=" + txtColourName + "><b>GPU Acceleration - Path</b></color>\n\nSet per landscape. Not compatible with all hardware.\n" +
+                                SystemInfo.graphicsDeviceName + " " + (SystemInfo.graphicsMemorySize / 1024f).ToString("0.0") + "GB", labelsmallFieldRichText);
+                            GUILayout.EndHorizontal();
+                            if (EditorGUI.EndChangeCheck()) { isSceneSaveRequired = true; }
+
+                            GUILayout.EndVertical();
+                        }
+                        else
+                        {
+                            GUILayout.BeginHorizontal(helpBoxRichText);
+                            EditorGUILayout.LabelField("<color=" + txtColourName + "><b>GPU Acceleration (PREVIEW)</b></color>\n\nSet per landscape. Not compatible with all hardware.\n\n" +
+                                "Compute Shaders: " + (SystemInfo.supportsComputeShaders ? "Supported" : "<b>Not Supported</b>") + "\n" +
+                                "Texture2DArrays: " + (SystemInfo.supports2DArrayTextures ? "Supported" : "<b>Not Supported</b>") + "\n" +
+                                SystemInfo.graphicsDeviceName + " " + (SystemInfo.graphicsMemorySize / 1024f).ToString("0.0") + "MB", labelsmallFieldRichText);
+                            GUILayout.EndHorizontal();
+                            landscape.useGPUTexturing = false;
+                            landscape.useGPUGrass = false;
+                            landscape.useGPUTopography = false;
+                        }
+                    }
+                    #endregion
+
+                    #region Override Undo
+                    if (landscape != null && landscapeGameObject != null)
+                    {
+                        GUILayout.BeginVertical(helpBoxRichText);
+                        EditorGUI.BeginChangeCheck();
+                        GUILayout.BeginHorizontal();
+                        landscape.isUndoTopographyDisabled = EditorGUILayout.Toggle(landscape.isUndoTopographyDisabled, GUILayout.Width(15f));
+                        EditorGUILayout.LabelField("<color=" + txtColourName + "><b>Override Undo - Topography</b></color>", labelsmallFieldRichText);
+                        GUILayout.EndHorizontal();
+                        if (EditorGUI.EndChangeCheck()) { isSceneSaveRequired = true; }
+                        if (landscape.isUndoTopographyDisabled)
+                        {
+                            EditorGUILayout.HelpBox("NOT RECOMMENDED - If you do not know why you are turning this on, please turn if off, else you might lose data.", MessageType.Error, true);
+                        }
+                        GUILayout.EndVertical();
+                    }
+                    #endregion
+
+                    #region Non Square Terrains (EXPERIMENTAL)
+                    //EditorGUILayout.Space();
+                    GUILayout.BeginHorizontal(helpBoxRichText);
+                    EditorGUI.BeginChangeCheck();
+                    isNonSquareTerrainsEnabled = EditorGUILayout.Toggle(isNonSquareTerrainsEnabled, GUILayout.Width(15f));
+                    if (EditorGUI.EndChangeCheck())
+                    {
+                        LBLandscape.SetIsNonSquareTerrainsEnabled(isNonSquareTerrainsEnabled);
+                        isSceneSaveRequired = true;
+                    }
+                    EditorGUILayout.LabelField("<color=" + txtColourName + "><b>Non Square Terrains (EXPERIMENTAL)</b></color>\n\nIf this is enabled, you can create terrains and landscapes " +
+                        "with a different width and length. NOTE: Some feature of LB like Stencils will not be available. Heightmap and detail pixels will be non-square.", labelsmallFieldRichText);
+                    GUILayout.EndHorizontal();
+                    #endregion
+
+                    //EditorGUILayout.Space();
+                    GUILayout.BeginHorizontal(helpBoxRichText);
+                    EditorGUI.BeginChangeCheck();
+                    isLegacyNoiseOffsetEnabled = EditorGUILayout.Toggle(isLegacyNoiseOffsetEnabled, GUILayout.Width(15f));
+                    if (EditorGUI.EndChangeCheck())
+                    {
+                        LBLandscape.SetIsLegacyNoiseOffsetEnabled(isLegacyNoiseOffsetEnabled);
+                        isSceneSaveRequired = true;
+                    }
+                    EditorGUILayout.LabelField("<color=" + txtColourName + "><b>Legacy Noise Offset</b></color>\n\nFor backward compatibility with landscapes created prior to version 1.4.2.", labelsmallFieldRichText);
+                    GUILayout.EndHorizontal();
+                    #endregion
+
+                    #region Topo Layer Volume Highlighter options
+
+                    GUILayout.BeginVertical(helpBoxRichText);
+                    EditorGUILayout.LabelField("<color=" + txtColourName + "><b>Topography Image Modifier Layer Options</b></color>", labelsmallFieldRichText);
+
+                    EditorGUI.BeginChangeCheck();
+                    GUILayout.BeginHorizontal();
+                    volumeHighlighterIsDrawMesh = EditorGUILayout.Toggle(volumeHighlighterIsDrawMesh, GUILayout.Width(15f));
+                    EditorGUILayout.LabelField("<color=" + txtColourName + "><b>Show Full Mesh</b></color>", labelsmallFieldRichText);
+                    GUILayout.EndHorizontal();
+
+                    GUILayout.BeginHorizontal();
+                    EditorGUILayout.LabelField("<color=" + txtColourName + "><b>Mesh Display Colour</b></color>", labelsmallFieldRichText);
+                    if (GUILayout.Button("R", buttonCompact, GUILayout.MaxWidth(20f)))
+                    {
+                        volumeHighlighterColour = LBLandscape.GetDefaultMeshVolumeHighlighterColour();
+                        LBLandscape.SetMeshVolumeHighlighterOptions(volumeHighlighterIsDrawMesh, volumeHighlighterColour);
+                    }
+                    volumeHighlighterColour = EditorGUILayout.ColorField(volumeHighlighterColour);
                     GUILayout.EndHorizontal();
 
                     if (EditorGUI.EndChangeCheck())
                     {
-                        landscapeTerrains = landscapeGameObject.GetComponentsInChildren<Terrain>();
-                        if (landscapeTerrains != null)
-                        {
-                            for (index = 0; index < landscapeTerrains.Length; index++)
-                            {
-                                landscapeTerrains[index].drawTreesAndFoliage = drawTreesAndFoliage;
-                            }
-                        }
-                        isSceneSaveRequired = true;
+                        LBLandscape.SetMeshVolumeHighlighterOptions(volumeHighlighterIsDrawMesh, volumeHighlighterColour);
                     }
 
-                    // Show/Hide Timing
-                    GUILayout.BeginHorizontal(helpBoxRichText);
-                    EditorGUI.BeginChangeCheck();
-                    landscape.showTiming = EditorGUILayout.Toggle(landscape.showTiming, GUILayout.Width(15f));
-                    if (EditorGUI.EndChangeCheck()) { isSceneSaveRequired = true; }
-                    labelText = "<color=" + txtColourName + "><b>Show Timing</b></color>\n\nOutput some operation timings to the console";
-                    EditorGUILayout.LabelField(labelText, labelsmallFieldRichText);
-                    GUILayout.EndHorizontal();
-
-                    // Show/Hide Texture heightMap option
-                    GUILayout.BeginHorizontal(helpBoxRichText);
-                    EditorGUI.BeginChangeCheck();
-                    landscape.showTextureHeightmap = EditorGUILayout.Toggle(landscape.showTextureHeightmap, GUILayout.Width(15f));
-                    if (EditorGUI.EndChangeCheck()) { isSceneSaveRequired = true; }
-                    labelText = "<color=" + txtColourName + "><b>Show Texture Heightmap</b></color>\n\nSome products, like RTP and MicroSplat, use texture heightmaps. This allows heightmaps to be stored with Textures in the Texturing Tab.";
-                    EditorGUILayout.LabelField(labelText, labelsmallFieldRichText);
-                    GUILayout.EndHorizontal();
-                }
-
-                if (landscape == null) { EditorGUILayout.Space(); }
-                GUILayout.BeginHorizontal(helpBoxRichText);
-                EditorGUI.BeginChangeCheck();
-                autoSaveEnabled = EditorGUILayout.Toggle(autoSaveEnabled, GUILayout.Width(15f));
-                if (EditorGUI.EndChangeCheck())
-                {
-                    LBLandscape.SetAutoSaveState(autoSaveEnabled);
-                    isSceneSaveRequired = true;
-                }
-                EditorGUILayout.LabelField("<color=" + txtColourName + "><b>AutoSave</b></color>\n\nIf AutoSave is enabled, the scene will be automatically" +
-                    " saved after every Landscape Builder operation", labelsmallFieldRichText);
-                GUILayout.EndHorizontal();
-
-                #region GPU Acceleration
-                if (landscape != null && landscapeGameObject != null)
-                {
-                    //EditorGUILayout.Space();
-                    if (landscape.IsGPUAccelerationAvailable())
-                    {
-                        GUILayout.BeginVertical(helpBoxRichText);
-
-                        EditorGUI.BeginChangeCheck();
-                        GUILayout.BeginHorizontal();
-                        landscape.useGPUTopography = EditorGUILayout.Toggle(landscape.useGPUTopography, GUILayout.Width(15f));
-                        EditorGUILayout.LabelField("<color=" + txtColourName + "><b>GPU Acceleration - Topography</b></color>", labelsmallFieldRichText);
-                        GUILayout.EndHorizontal();
-                        if (EditorGUI.EndChangeCheck()) { isSceneSaveRequired = true; }
-
-                        EditorGUI.BeginChangeCheck();
-                        GUILayout.BeginHorizontal();
-                        landscape.useGPUTexturing = EditorGUILayout.Toggle(landscape.useGPUTexturing, GUILayout.Width(15f));
-                        EditorGUILayout.LabelField("<color=" + txtColourName + "><b>GPU Acceleration - Texturing</b></color>", labelsmallFieldRichText);
-                        GUILayout.EndHorizontal();
-                        if (EditorGUI.EndChangeCheck()) { isSceneSaveRequired = true; }
-
-                        EditorGUI.BeginChangeCheck();
-                        GUILayout.BeginHorizontal();
-                        landscape.useGPUGrass = EditorGUILayout.Toggle(landscape.useGPUGrass, GUILayout.Width(15f));
-                        EditorGUILayout.LabelField("<color=" + txtColourName + "><b>GPU Acceleration - Grass</b></color>", labelsmallFieldRichText);
-                        GUILayout.EndHorizontal();
-                        if (EditorGUI.EndChangeCheck()) { isSceneSaveRequired = true; }
-
-                        EditorGUI.BeginChangeCheck();
-                        GUILayout.BeginHorizontal();
-                        landscape.useGPUPath = EditorGUILayout.Toggle(landscape.useGPUPath, GUILayout.Width(15f));
-                        EditorGUILayout.LabelField("<color=" + txtColourName + "><b>GPU Acceleration - Path</b></color>\n\nSet per landscape. Not compatible with all hardware.\n" +
-                            SystemInfo.graphicsDeviceName + " " + (SystemInfo.graphicsMemorySize / 1024f).ToString("0.0") + "GB", labelsmallFieldRichText);
-                        GUILayout.EndHorizontal();
-                        if (EditorGUI.EndChangeCheck()) { isSceneSaveRequired = true; }
-
-                        GUILayout.EndVertical();
-                    }
-                    else
-                    {
-                        GUILayout.BeginHorizontal(helpBoxRichText);
-                        EditorGUILayout.LabelField("<color=" + txtColourName + "><b>GPU Acceleration (PREVIEW)</b></color>\n\nSet per landscape. Not compatible with all hardware.\n\n" +
-                            "Compute Shaders: " + (SystemInfo.supportsComputeShaders ? "Supported" : "<b>Not Supported</b>") + "\n" +
-                            "Texture2DArrays: " + (SystemInfo.supports2DArrayTextures ? "Supported" : "<b>Not Supported</b>") + "\n" +
-                            SystemInfo.graphicsDeviceName + " " + (SystemInfo.graphicsMemorySize / 1024f).ToString("0.0") + "MB", labelsmallFieldRichText);
-                        GUILayout.EndHorizontal();
-                        landscape.useGPUTexturing = false;
-                        landscape.useGPUGrass = false;
-                        landscape.useGPUTopography = false;
-                    }
-                }
-                #endregion
-
-                #region Override Undo
-                if (landscape != null && landscapeGameObject != null)
-                {
-                    GUILayout.BeginVertical(helpBoxRichText);
-                    EditorGUI.BeginChangeCheck();
-                    GUILayout.BeginHorizontal();
-                    landscape.isUndoTopographyDisabled = EditorGUILayout.Toggle(landscape.isUndoTopographyDisabled, GUILayout.Width(15f));
-                    EditorGUILayout.LabelField("<color=" + txtColourName + "><b>Override Undo - Topography</b></color>", labelsmallFieldRichText);
-                    GUILayout.EndHorizontal();
-                    if (EditorGUI.EndChangeCheck()) { isSceneSaveRequired = true; }
-                    if (landscape.isUndoTopographyDisabled)
-                    {
-                        EditorGUILayout.HelpBox("NOT RECOMMENDED - If you do not know why you are turning this on, please turn if off, else you might lose data.", MessageType.Error, true);
-                    }
                     GUILayout.EndVertical();
-                }
-                #endregion
 
-                #region Non Square Terrains (EXPERIMENTAL)
-                //EditorGUILayout.Space();
-                GUILayout.BeginHorizontal(helpBoxRichText);
-                EditorGUI.BeginChangeCheck();
-                isNonSquareTerrainsEnabled = EditorGUILayout.Toggle(isNonSquareTerrainsEnabled, GUILayout.Width(15f));
-                if (EditorGUI.EndChangeCheck())
-                {
-                    LBLandscape.SetIsNonSquareTerrainsEnabled(isNonSquareTerrainsEnabled);
-                    isSceneSaveRequired = true;
-                }
-                EditorGUILayout.LabelField("<color=" + txtColourName + "><b>Non Square Terrains (EXPERIMENTAL)</b></color>\n\nIf this is enabled, you can create terrains and landscapes " +
-                    "with a different width and length. NOTE: Some feature of LB like Stencils will not be available. Heightmap and detail pixels will be non-square.", labelsmallFieldRichText);
-                GUILayout.EndHorizontal();
-                #endregion
+                    #endregion
 
-                //EditorGUILayout.Space();
-                GUILayout.BeginHorizontal(helpBoxRichText);
-                EditorGUI.BeginChangeCheck();
-                isLegacyNoiseOffsetEnabled = EditorGUILayout.Toggle(isLegacyNoiseOffsetEnabled, GUILayout.Width(15f));
-                if (EditorGUI.EndChangeCheck())
-                {
-                    LBLandscape.SetIsLegacyNoiseOffsetEnabled(isLegacyNoiseOffsetEnabled);
-                    isSceneSaveRequired = true;
-                }
-                EditorGUILayout.LabelField("<color=" + txtColourName + "><b>Legacy Noise Offset</b></color>\n\nFor backward compatibility with landscapes created prior to version 1.4.2.", labelsmallFieldRichText);
-                GUILayout.EndHorizontal();
-                #endregion
-
-                #region Advanced Clean Up Undo Files
-                //EditorGUILayout.Space();
-                EditorGUILayout.LabelField("<color=" + txtColourName + "><b>Undo Cleanup</b></color>\n\nLandscape Builder creates undo files outside of the Assets folder, which" +
-                                           " don't get deleted when Unity is closed and take up disk space. You can use the Clean Up Undo Files" +
-                                           " button to delete these undo files", helpBoxRichText);
-
- 
-                if (GUILayout.Button("Clean Up Undo Files"))
-                {
-                    LBLandscape.PerformUndoCleanup(0, true);
-                }
-                #endregion
-
-                #region Position MainCamera to Scene View
-                EditorGUILayout.Space();
-                EditorGUILayout.LabelField("<color=" + txtColourName + "><b>Position Main Camera</b></color>\n\nSets the camera in the scene with the MainCamera Tag to the same" +
-                               " viewable rectange as the Scene view in the Unity Editor.", helpBoxRichText);
-
-                if (GUILayout.Button("Position MainCamera to Scene View"))
-                {
-                    try
+                    #region Setup Options
+                    if (isCheckForNoCelestials)
                     {
-                        editorCamera = UnityEditor.SceneView.lastActiveSceneView.camera;
-                        GameObject mainCameraGO = GameObject.FindGameObjectWithTag("MainCamera");
-                        if (mainCameraGO != null)
+                        isNoCelestials = File.Exists(LBSetup.noCelestialsFile);
+                        isCheckForNoCelestials = false;
+                    }
+
+                    GUILayout.BeginHorizontal(helpBoxRichText);
+                    EditorGUI.BeginChangeCheck();
+                    isNoCelestials = EditorGUILayout.Toggle(isNoCelestials, GUILayout.Width(15f));
+                    if (EditorGUI.EndChangeCheck())
+                    {
+                        isCheckForNoCelestials = true;
+                        if (!isNoCelestials)
                         {
-                            Camera mainCamera = mainCameraGO.GetComponent<Camera>();
-                            if (mainCamera != null && editorCamera != null)
+                            File.Delete(LBSetup.noCelestialsFile);
+                        }
+                        else if (isNoCelestials && !File.Exists(LBSetup.noCelestialsFile))
+                        {
+                            FileStream fs = File.Create(LBSetup.noCelestialsFile);
+                            fs.Close();
+                        }             
+                    }
+                    EditorGUILayout.LabelField("<color=" + txtColourName + "><b>No Celestials</b></color>\n\nWhen enabled, the Unity Layer <i>LB Celestials</i> is not created [Default: OFF]", labelsmallFieldRichText);
+                    GUILayout.EndHorizontal();
+
+                    #endregion
+
+                    EditorGUILayout.EndScrollView();
+                }
+                #endregion Advanced Options tab
+
+                #region Advanced Tools tab
+
+                if (showAdvancedTabInEditor == 1)
+                {
+                    #region Texture generation
+                    EditorGUILayout.LabelField("<color=" + txtColourName + "><b>Texture Generator</b></color>\n\nThe Texture Generator enables you to bring terrain and mesh textures to life with " +
+                                               "professional looking Albedo, Metallic, Normal, Height, Occlusion, and Emission Maps.", helpBoxRichText);
+
+                    if (GUILayout.Button("Texture Generator")) { LBTextureGeneratorWindow.ShowWindow(); }
+                    #endregion
+
+                    #region Advanced Clean Up Undo Files
+                    //EditorGUILayout.Space();
+                    EditorGUILayout.LabelField("<color=" + txtColourName + "><b>Undo Cleanup</b></color>\n\nLandscape Builder creates undo files outside of the Assets folder, which" +
+                                               " don't get deleted when Unity is closed and take up disk space. You can use the Clean Up Undo Files" +
+                                               " button to delete these undo files", helpBoxRichText);
+
+                    if (!IsObjPathDesignerOpen(true))
+                    {
+                        if (GUILayout.Button("Clean Up Undo Files"))
+                        {
+                            LBLandscape.PerformUndoCleanup(0, true);
+                        }
+                    }
+                    #endregion
+
+                    #region Position MainCamera to Scene View
+                    EditorGUILayout.Space();
+                    EditorGUILayout.LabelField("<color=" + txtColourName + "><b>Position Main Camera</b></color>\n\nSets the camera in the scene with the MainCamera Tag to the same" +
+                                   " viewable rectange as the Scene view in the Unity Editor.", helpBoxRichText);
+
+                    if (GUILayout.Button("Position MainCamera to Scene View"))
+                    {
+                        try
+                        {
+                            editorCamera = UnityEditor.SceneView.lastActiveSceneView.camera;
+                            GameObject mainCameraGO = GameObject.FindGameObjectWithTag("MainCamera");
+                            if (mainCameraGO != null)
                             {
-                                mainCamera.fieldOfView = editorCamera.fieldOfView;
-
-                                //Debug.Log("[DEBUG] main y:" + mainCamera.rect.y + " h:" + mainCamera.rect.height + " editorCamera y:" + editorCamera.rect.y + " h: " + editorCamera.rect.height );
-                                
-                                // LB 2.10 Beta 3o - don't change the viewport of main camera as it will sometimes be slightly wrong
-                                //mainCamera.rect = editorCamera.rect;
-
-                                Transform tfmToMove = mainCamera.transform;
-                                Quaternion tfrmRotation = editorCamera.transform.rotation;
-
-                                // Check to see if this is a First or Third Person Controller with a parent GameObject
-                                Transform parentCameraTfm = mainCameraGO.transform.parent;
-                                if (parentCameraTfm != null)
+                                Camera mainCamera = mainCameraGO.GetComponent<Camera>();
+                                if (mainCamera != null && editorCamera != null)
                                 {
-                                    // Get a list of all the attached components (and scripts)
-                                    Component[] components = parentCameraTfm.GetComponents(typeof(Component));
+                                    mainCamera.fieldOfView = editorCamera.fieldOfView;
 
-                                    if (components != null)
+                                    //Debug.Log("[DEBUG] main y:" + mainCamera.rect.y + " h:" + mainCamera.rect.height + " editorCamera y:" + editorCamera.rect.y + " h: " + editorCamera.rect.height );
+
+                                    // LB 2.10 Beta 3o - don't change the viewport of main camera as it will sometimes be slightly wrong
+                                    //mainCamera.rect = editorCamera.rect;
+
+                                    Transform tfmToMove = mainCamera.transform;
+                                    Quaternion tfrmRotation = editorCamera.transform.rotation;
+
+                                    // Check to see if this is a First or Third Person Controller with a parent GameObject
+                                    Transform parentCameraTfm = mainCameraGO.transform.parent;
+                                    if (parentCameraTfm != null)
                                     {
-                                        // Copy the array into a List so we can do a search
-                                        List<Component> componentList = new List<Component>(components);
+                                        // Get a list of all the attached components (and scripts)
+                                        Component[] components = parentCameraTfm.GetComponents(typeof(Component));
 
-                                        // if any of the scripts have a name containing the word "Person" then assume it is
-                                        // a first or third person controller
-                                        if (componentList.FindIndex(c => c.GetType().Name.Contains("Person")) >= 0)
+                                        if (components != null)
                                         {
-                                            // Move the parent rather than the child which contains the camera.
-                                            tfmToMove = parentCameraTfm;
-                                            tfrmRotation.x = 0f;
-                                            tfrmRotation.z = 0f;
+                                            // Copy the array into a List so we can do a search
+                                            List<Component> componentList = new List<Component>(components);
+
+                                            // if any of the scripts have a name containing the word "Person" then assume it is
+                                            // a first or third person controller
+                                            if (componentList.FindIndex(c => c.GetType().Name.Contains("Person")) >= 0)
+                                            {
+                                                // Move the parent rather than the child which contains the camera.
+                                                tfmToMove = parentCameraTfm;
+                                                tfrmRotation.x = 0f;
+                                                tfrmRotation.z = 0f;
+                                            }
                                         }
                                     }
+
+                                    tfmToMove.position = editorCamera.transform.position;
+                                    tfmToMove.rotation = tfrmRotation;
                                 }
+                            }
+                            else { Debug.LogWarning("Couldn't find MainCamera in scene. Is the Tag set to MainCamera on the camera gameobject?"); }
+                        }
+                        catch (Exception ex)
+                        {
+                            Debug.LogError("Couldn't set MainCamera. Is Scene tab selected?\n" + ex.Message);
+                        }
+                    }
+                    #endregion
 
-                                tfmToMove.position = editorCamera.transform.position;
-                                tfmToMove.rotation = tfrmRotation;
+                    // Stitching Tool
+                    #region StitchTool
+                    EditorGUILayout.Space();
+                    EditorGUILayout.LabelField("<color=" + txtColourName + "><b>Stitching Tool</b></color>\n\nStitch two adjoining landscape's terrain topographies seamlessly. " +
+                                               "It adjusts the height along the borders of the adjoining landscapes which have the same dimensions and terrain settings.", helpBoxRichText);
+
+                    GUILayout.BeginVertical(EditorStyles.helpBox);
+
+                    // By default use the current landscape for the first one
+                    if (stitchLandscape1 == null && landscape != null)
+                    {
+                        stitchLandscape1 = landscape;
+                    }
+
+                    stitchLandscape1 = (LBLandscape)EditorGUILayout.ObjectField("Landscape 1", stitchLandscape1, typeof(LBLandscape), true);
+                    stitchLandscape2 = (LBLandscape)EditorGUILayout.ObjectField("Landscape 2", stitchLandscape2, typeof(LBLandscape), true);
+                    stitchEdgeDistance = EditorGUILayout.IntSlider(new GUIContent("Edge Distance", "The distance from the edges of the landscapes, in metres, that stitching will begin"), stitchEdgeDistance, 10, 1000);
+                    stitchLandscapeWeight = EditorGUILayout.Slider(new GUIContent("Landscape Weight", "The relative weight each landscape has on the stitching process. Values to the left favour Landscape 1, while values to the right favour Landscape 2"), stitchLandscapeWeight, 0f, 1f);
+                    stitchSetNeighbours = EditorGUILayout.Toggle(new GUIContent("Set Neighbours", "Set the connections between neighbouring terrains to ensure LOD matches"), stitchSetNeighbours);
+
+                    if (stitchLandscape1 != null || stitchLandscape2 != null)
+                    {
+                        GUILayout.Label("Reset Neighbours");
+                        GUILayout.BeginHorizontal();
+                        if (stitchLandscape1 != null)
+                        {
+                            if (GUILayout.Button("Landscape 1", GUILayout.MaxWidth(100f)))
+                            {
+                                // We need to flush each terrain so that the sceneview is updated in the editor
+                                stitchLandscape1.SetTerrainNeighbours(true);
+
+                                if (!Application.isPlaying)
+                                {
+                                    if (autoSaveEnabled) { sceneSaved = EditorSceneManager.SaveScene(EditorSceneManager.GetActiveScene()); }
+                                    else { EditorSceneManager.MarkSceneDirty(EditorSceneManager.GetActiveScene()); }
+                                    SceneView.lastActiveSceneView.Repaint();
+                                }
                             }
                         }
-                        else { Debug.LogWarning("Couldn't find MainCamera in scene. Is the Tag set to MainCamera on the camera gameobject?"); }
-                    }
-                    catch (Exception ex)
-                    {
-                        Debug.LogError("Couldn't set MainCamera. Is Scene tab selected?\n" + ex.Message);
-                    }
-                }
-                #endregion
-
-                // Stitching Tool
-                #region StitchTool
-                EditorGUILayout.Space();
-                EditorGUILayout.LabelField("<color=" + txtColourName + "><b>Stitching Tool</b></color>\n\nStitch two adjoining landscape's terrain topographies seamlessly. " +
-                                           "It adjusts the height along the borders of the adjoining landscapes which have the same dimensions and terrain settings.", helpBoxRichText);
-
-                GUILayout.BeginVertical(EditorStyles.helpBox);
-
-                // By default use the current landscape for the first one
-                if (stitchLandscape1 == null && landscape != null)
-                {
-                    stitchLandscape1 = landscape;
-                }
-
-                stitchLandscape1 = (LBLandscape)EditorGUILayout.ObjectField("Landscape 1", stitchLandscape1, typeof(LBLandscape), true);
-                stitchLandscape2 = (LBLandscape)EditorGUILayout.ObjectField("Landscape 2", stitchLandscape2, typeof(LBLandscape), true);
-                stitchEdgeDistance = EditorGUILayout.IntSlider(new GUIContent("Edge Distance", "The distance from the edges of the landscapes, in metres, that stitching will begin"), stitchEdgeDistance, 10, 1000);
-                stitchLandscapeWeight = EditorGUILayout.Slider(new GUIContent("Landscape Weight", "The relative weight each landscape has on the stitching process. Values to the left favour Landscape 1, while values to the right favour Landscape 2"), stitchLandscapeWeight, 0f, 1f);
-                stitchSetNeighbours = EditorGUILayout.Toggle(new GUIContent("Set Neighbours", "Set the connections between neighbouring terrains to ensure LOD matches"), stitchSetNeighbours);
-
-                if (stitchLandscape1 != null || stitchLandscape2 != null)
-                {
-                    GUILayout.Label("Reset Neighbours");
-                    GUILayout.BeginHorizontal();
-                    if (stitchLandscape1 != null)
-                    {
-                        if (GUILayout.Button("Landscape 1", GUILayout.MaxWidth(100f)))
+                        if (stitchLandscape2 != null)
                         {
-                            // We need to flush each terrain so that the sceneview is updated in the editor
-                            stitchLandscape1.SetTerrainNeighbours(true);
+                            if (GUILayout.Button("Landscape 2", GUILayout.MaxWidth(100f)))
+                            {
+                                // We need to flush each terrain so that the sceneview is updated is updated in the editor
+                                stitchLandscape2.SetTerrainNeighbours(true);
+                                if (!Application.isPlaying)
+                                {
+                                    if (autoSaveEnabled) { sceneSaved = EditorSceneManager.SaveScene(EditorSceneManager.GetActiveScene()); }
+                                    else { EditorSceneManager.MarkSceneDirty(EditorSceneManager.GetActiveScene()); }
+                                    SceneView.lastActiveSceneView.Repaint();
+                                }
+                            }
+                        }
 
-                            if (!Application.isPlaying)
+                        GUILayout.EndHorizontal();
+                    }
+
+                    GUILayout.EndVertical();
+
+                    if (stitchLandscape1 != null && stitchLandscape2 != null)
+                    {
+                        if (GUILayout.Button("Stitch Landscapes Together"))
+                        {
+                            EditorUtility.DisplayProgressBar("Backing up heightmaps", "Please Wait", 0.2f);
+
+                            stitchLandscape1.SaveData(LBLandscape.UndoType.HeightMap);
+                            stitchLandscape2.SaveData(LBLandscape.UndoType.HeightMap);
+
+                            EditorUtility.ClearProgressBar();
+
+                            EditorUtility.DisplayProgressBar("Stitching Landscapes", "Please Wait", 0.3f);
+
+                            bool isSuccessful = LBLandscapeTerrain.StitchLandscapes(stitchLandscape1, stitchLandscape2, stitchEdgeDistance, stitchLandscapeWeight, stitchSetNeighbours);
+
+                            if (isSuccessful)
                             {
                                 if (autoSaveEnabled) { sceneSaved = EditorSceneManager.SaveScene(EditorSceneManager.GetActiveScene()); }
                                 else { EditorSceneManager.MarkSceneDirty(EditorSceneManager.GetActiveScene()); }
-                                SceneView.lastActiveSceneView.Repaint();
+                                EditorUtility.ClearProgressBar();
                             }
-                        }
-                    }
-                    if (stitchLandscape2 != null)
-                    {
-                        if (GUILayout.Button("Landscape 2", GUILayout.MaxWidth(100f)))
-                        {
-                            // We need to flush each terrain so that the sceneview is updated is updated in the editor
-                            stitchLandscape2.SetTerrainNeighbours(true);
-                            if (!Application.isPlaying)
+                            else
                             {
-                                if (autoSaveEnabled) { sceneSaved = EditorSceneManager.SaveScene(EditorSceneManager.GetActiveScene()); }
-                                else { EditorSceneManager.MarkSceneDirty(EditorSceneManager.GetActiveScene()); }
-                                SceneView.lastActiveSceneView.Repaint();
+                                EditorUtility.ClearProgressBar();
+                                EditorUtility.DisplayProgressBar("Stitch failed. Rolling back changes", "Please Wait", 0.8f);
+                                stitchLandscape1.RevertToLastSave(LBLandscape.UndoType.HeightMap);
+                                stitchLandscape2.RevertToLastSave(LBLandscape.UndoType.HeightMap);
+                                EditorUtility.ClearProgressBar();
                             }
                         }
-                    }
 
-                    GUILayout.EndHorizontal();
-                }
-
-                GUILayout.EndVertical();
-
-                if (stitchLandscape1 != null && stitchLandscape2 != null)
-                {
-                    if (GUILayout.Button("Stitch Landscapes Together"))
-                    {
-                        EditorUtility.DisplayProgressBar("Backing up heightmaps", "Please Wait", 0.2f);
-
-                        stitchLandscape1.SaveData(LBLandscape.UndoType.HeightMap);
-                        stitchLandscape2.SaveData(LBLandscape.UndoType.HeightMap);
-
-                        EditorUtility.ClearProgressBar();
-
-                        EditorUtility.DisplayProgressBar("Stitching Landscapes", "Please Wait", 0.3f);
-
-                        bool isSuccessful = LBLandscapeTerrain.StitchLandscapes(stitchLandscape1, stitchLandscape2, stitchEdgeDistance, stitchLandscapeWeight, stitchSetNeighbours);
-
-                        if (isSuccessful)
+                        if (GUILayout.Button("Undo Landscape Stitching"))
                         {
-                            if (autoSaveEnabled) { sceneSaved = EditorSceneManager.SaveScene(EditorSceneManager.GetActiveScene()); }
-                            else { EditorSceneManager.MarkSceneDirty(EditorSceneManager.GetActiveScene()); }
-                            EditorUtility.ClearProgressBar();
-                        }
-                        else
-                        {
-                            EditorUtility.ClearProgressBar();
-                            EditorUtility.DisplayProgressBar("Stitch failed. Rolling back changes", "Please Wait", 0.8f);
+                            EditorUtility.DisplayProgressBar("Undo Landscape Stitching", "Please Wait", 0.5f);
                             stitchLandscape1.RevertToLastSave(LBLandscape.UndoType.HeightMap);
                             stitchLandscape2.RevertToLastSave(LBLandscape.UndoType.HeightMap);
                             EditorUtility.ClearProgressBar();
                         }
                     }
+                    #endregion
 
-                    if (GUILayout.Button("Undo Landscape Stitching"))
+                    #region Refresh Scene and Sort Terrains
+                    EditorGUILayout.Space();
+                    EditorGUILayout.LabelField("<color=" + txtColourName + "><b>Refresh Scene</b></color>\n\nSometimes items can be left in the scene after errors. This may fix those. If not contact support.", helpBoxRichText);
+                    GUILayout.BeginVertical(EditorStyles.helpBox);
+                    GUILayout.BeginHorizontal();
+
+                    #region Refresh Scene - Fix Known Issues
+
+                    if (GUILayout.Button("Refresh Scene", GUILayout.MaxWidth(100f)))
                     {
-                        EditorUtility.DisplayProgressBar("Undo Landscape Stitching", "Please Wait", 0.5f);
-                        stitchLandscape1.RevertToLastSave(LBLandscape.UndoType.HeightMap);
-                        stitchLandscape2.RevertToLastSave(LBLandscape.UndoType.HeightMap);
-                        EditorUtility.ClearProgressBar();
-                    }
-                }
-                #endregion
-
-                #region Refresh Scene - Fix Known Issues
-
-                EditorGUILayout.Space();
-                EditorGUILayout.LabelField("<color=" + txtColourName + "><b>Refresh Scene</b></color>\n\nSometimes items can be left in the scene after errors. This may fix those. If not contact support.", helpBoxRichText);
-                GUILayout.BeginVertical(EditorStyles.helpBox);
-                if (GUILayout.Button("Refresh Scene", GUILayout.MaxWidth(100f)))
-                {
-                    if (!isGroupDesignerEnabled)
-                    {
-                        // GroupBasePlane is left in scene
-                        GameObject grpBasePlane = GameObject.Find("GroupBasePlane");
-                        if (grpBasePlane != null)
+                        if (!isGroupDesignerEnabled)
                         {
-                            Debug.Log("INFO: LB Refresh Scene - removing old " + grpBasePlane.name);
-                            DestroyImmediate(grpBasePlane);
+                            // GroupBasePlane is left in scene
+                            GameObject grpBasePlane = GameObject.Find("GroupBasePlane");
+                            if (grpBasePlane != null)
+                            {
+                                Debug.Log("INFO: LB Refresh Scene - removing old " + grpBasePlane.name);
+                                DestroyImmediate(grpBasePlane);
+                                isSceneDirtyRequired = true;
+                            }
                         }
+
+#if !CTS_PRESENT
+                        // if CTS 2019 was uninstalled while it was enabled in a landscape or
+                        // a template was imported from another project, this fixes it.
+                        if (landscape != null && landscape.useCTS2019)
+                        {
+                            landscape.useCTS2019 = false;
+                            isSceneDirtyRequired = true;
+                        }
+#endif
+
+                        // TODO - need an efficent, scalable way of finding orphaned meshes.
+                        // Can't just get list of all meshes in the scene (as there could be too many)
+                        //List<MeshRenderer> meshRenderList = new List<MeshRenderer>();
+                        //MeshRenderer[] meshRenders = FindObjectsOfType<MeshRenderer>();
+                        //int numRenderers = meshRenders == null ? 0 : meshRenders.Length;
+
+                        //GameObject.FindObjectsOfType<Mesh>().Where(m => m.tran);
+
+                        // If a landscape is being edited, refresh the terrains.
+                        if (landscape != null) { landscape.SetLandscapeTerrains(true); landscapeTerrains = landscape.landscapeTerrains; }
+
+                        Debug.Log("INFO: Landscape Builder - Refresh completed successfully");
                     }
+                    #endregion
 
-                    // TODO - need an efficent, scalable way of finding orphaned meshes.
-                    // Can't just get list of all meshes in the scene (as there could be too many)
-                    //List<MeshRenderer> meshRenderList = new List<MeshRenderer>();
-                    //MeshRenderer[] meshRenders = FindObjectsOfType<MeshRenderer>();
-                    //int numRenderers = meshRenders == null ? 0 : meshRenders.Length;
+                    #region Sort Terrains
+                    if (GUILayout.Button("Sort Terrains", GUILayout.MaxWidth(100f)))
+                    {
+                        if (landscape != null)
+                        {
+                            landscape.SetLandscapeTerrains(true);
+                            int numTerrains = landscape.landscapeTerrains == null ? 0 : landscape.landscapeTerrains.Length;
 
-                    //GameObject.FindObjectsOfType<Mesh>().Where(m => m.tran);
+                            int minSiblingIdx = 99999;
+                            int maxSiblingIdx = -1;
 
-                    Debug.Log("INFO: Landscape Builder - Refresh completed successfully");
+                            // Get the range of index positions in the whole array of transforms under the parent gameobject.
+                            for (int tIdx = 0; tIdx < numTerrains; tIdx++)
+                            {
+                                if (landscape.landscapeTerrains[tIdx] != null)
+                                {
+                                    int siblingIdx = landscape.landscapeTerrains[tIdx].transform.GetSiblingIndex();
+                                    if (siblingIdx < minSiblingIdx) { minSiblingIdx = siblingIdx; }
+                                    if (siblingIdx > maxSiblingIdx) { maxSiblingIdx = siblingIdx; }
+                                }
+                            }
+
+                            // Does the range look reasonable?
+                            if (numTerrains > 0 && maxSiblingIdx + 1 - minSiblingIdx == numTerrains)
+                            {
+                                List<Transform> terrainTfrms = new List<Transform>(numTerrains);
+                                for (int tIdx = 0; tIdx < numTerrains; tIdx++)
+                                {
+                                    Terrain terrain = landscape.landscapeTerrains[tIdx];
+                                    if (terrain != null) { terrainTfrms.Add(terrain.transform); }
+                                }
+
+                                terrainTfrms.Sort(delegate (Transform t1, Transform t2)
+                                {
+                                    if (string.IsNullOrEmpty(t1.name) && string.IsNullOrEmpty(t2.name)) return 0;
+                                    else if (string.IsNullOrEmpty(t1.name)) return -1;
+                                    else if (string.IsNullOrEmpty(t2.name)) return 1;
+                                    else return t1.name.CompareTo(t2.name);
+                                }
+                                );
+
+                                for (int tIdx = 0; tIdx < numTerrains; tIdx++)
+                                {
+                                    Transform tTrm = terrainTfrms[tIdx];
+                                    if (tTrm != null)
+                                    {
+                                        tTrm.transform.SetSiblingIndex(minSiblingIdx + tIdx);
+                                    }
+                                }
+
+                                terrainTfrms.Clear();
+
+                                // Refresh variables
+                                landscape.SetLandscapeTerrains(true);
+                                landscapeTerrains = landscape.landscapeTerrains;
+                            }
+                            else
+                            {
+                                Debug.LogWarning("Sorry, could not sort terrains in the landscape. Index Range: " + minSiblingIdx + "-" + maxSiblingIdx);
+                            }
+                        }
+                        else { Debug.LogWarning("Sorry, could not sort terrains. No landscape set in Landscape tab."); }
+                    }
+                    #endregion
+
+                    GUILayout.EndHorizontal();
+                    GUILayout.EndVertical();
+                    #endregion
                 }
+                #endregion Advanced Toools tab
 
-                GUILayout.EndVertical();
+                #region Advanced Integration Tab
 
-                #endregion
-
-                #region AQUAS Integration
-                EditorGUILayout.Space();
-                EditorGUILayout.LabelField("<color=" + txtColourName + "><b>AQUAS Integration</b></color>\n\nAdd realistic oceans, lakes and flowing rivers to your landscape." +
-                               " ", helpBoxRichText);
-
-                GUILayout.BeginVertical(EditorStyles.helpBox);
-                GUILayout.BeginHorizontal();
-                EditorGUI.BeginChangeCheck();
-                GUILayout.Label(new GUIContent("Flow Map Painter", "The path to the Flow Map Painter exe on your computer"));
-                pathFlowMapPainter = EditorGUILayout.TextField(pathFlowMapPainter);
-                if (EditorGUI.EndChangeCheck())
+                if (showAdvancedTabInEditor == 2)
                 {
-                    LBLandscape.SetPath(LBSavedData.PathType.FlowMapPainterExe, pathFlowMapPainter);
-                }
-                if (GUILayout.Button("..", buttonCompact, GUILayout.MaxWidth(30f)))
-                {
+
+                    #region AQUAS Integration
+                    EditorGUILayout.Space();
+                    EditorGUILayout.LabelField("<color=" + txtColourName + "><b>AQUAS Integration</b></color>\n\nAdd realistic oceans, lakes and flowing rivers to your landscape." +
+                                   " ", helpBoxRichText);
+
+                    GUILayout.BeginVertical(EditorStyles.helpBox);
+                    GUILayout.BeginHorizontal();
+                    EditorGUI.BeginChangeCheck();
+                    GUILayout.Label(new GUIContent("Flow Map Painter", "The path to the Flow Map Painter exe on your computer"));
+                    pathFlowMapPainter = EditorGUILayout.TextField(pathFlowMapPainter);
+                    if (EditorGUI.EndChangeCheck())
+                    {
+                        LBLandscape.SetPath(LBSavedData.PathType.FlowMapPainterExe, pathFlowMapPainter);
+                    }
+                    if (GUILayout.Button("..", buttonCompact, GUILayout.MaxWidth(30f)))
+                    {
 #if UNITY_EDITOR_OSX
                     LBEditorHelper.GetFilePathFromUser(LBSavedData.PathType.FlowMapPainterExe, "Assets", "APP", false, ref pathFlowMapPainter, true);
 #else
-                    LBEditorHelper.GetFilePathFromUser(LBSavedData.PathType.FlowMapPainterExe, "Assets", "EXE", false, ref pathFlowMapPainter, true);
+                        LBEditorHelper.GetFilePathFromUser(LBSavedData.PathType.FlowMapPainterExe, "Assets", "EXE", false, ref pathFlowMapPainter, true);
 #endif
-                }
-                GUILayout.EndHorizontal();
-                GUILayout.EndVertical();
-                #endregion
+                    }
+                    GUILayout.EndHorizontal();
+                    GUILayout.EndVertical();
+                    #endregion
 
-                // HQ Photographic Textures integration
-                #region HQ Photographic Integration
-                EditorGUILayout.Space();
-                EditorGUILayout.LabelField("<color=" + txtColourName + "><b>HQ Photographic Textures Integration</b></color>\n\nThese packs add realistic grass to your landscape." +
-                               " ", helpBoxRichText);
+                    // HQ Photographic Textures integration
+                    #region HQ Photographic Integration
+                    EditorGUILayout.Space();
+                    EditorGUILayout.LabelField("<color=" + txtColourName + "><b>HQ Photographic Textures Integration</b></color>\n\nThese packs add realistic grass to your landscape." +
+                                   " ", helpBoxRichText);
 
-                GUILayout.BeginVertical(EditorStyles.helpBox);
-
-                GUILayout.BeginHorizontal();
-                EditorGUI.BeginChangeCheck();
-                GUILayout.Label(new GUIContent("Vol 1", "The relative path in the project to the HQ Photographic Textures Pack Vol. 1"), GUILayout.Width(45f));
-                pathHQPhotoPackVol1 = EditorGUILayout.TextField(pathHQPhotoPackVol1);
-                if (EditorGUI.EndChangeCheck())
-                {
-                    LBLandscape.SetPath(LBSavedData.PathType.HQPhotographicTexturesVol1, pathHQPhotoPackVol1);
-                }
-                if (GUILayout.Button("..", buttonCompact, GUILayout.MaxWidth(30f)))
-                {
-                    LBEditorHelper.GetPathFromUser(LBSavedData.PathType.HQPhotographicTexturesVol1, "Assets", ref pathHQPhotoPackVol1, true);
-                }
-                GUILayout.EndHorizontal();
-
-                GUILayout.BeginHorizontal();
-                EditorGUI.BeginChangeCheck();
-                GUILayout.Label(new GUIContent("Vol 2", "The relative path in the project to the HQ Photographic Textures Pack Vol. 2"), GUILayout.Width(45f));
-                pathHQPhotoPackVol2 = EditorGUILayout.TextField(pathHQPhotoPackVol2);
-                if (EditorGUI.EndChangeCheck())
-                {
-                    LBLandscape.SetPath(LBSavedData.PathType.HQPhotographicTexturesVol2, pathHQPhotoPackVol2);
-                }
-                if (GUILayout.Button("..", buttonCompact, GUILayout.MaxWidth(30f)))
-                {
-                    LBEditorHelper.GetPathFromUser(LBSavedData.PathType.HQPhotographicTexturesVol2, "Assets", ref pathHQPhotoPackVol2, true);
-                }
-                GUILayout.EndHorizontal();
-
-                GUILayout.BeginHorizontal();
-                EditorGUI.BeginChangeCheck();
-                GUILayout.Label(new GUIContent("Rustic", "The relative path in the project to the Rustic Grass pack"), GUILayout.Width(45f));
-                pathRusticGrass = EditorGUILayout.TextField(pathRusticGrass);
-                if (EditorGUI.EndChangeCheck())
-                {
-                    LBLandscape.SetPath(LBSavedData.PathType.RusticGrass, pathRusticGrass);
-                }
-                if (GUILayout.Button("..", buttonCompact, GUILayout.MaxWidth(30f)))
-                {
-                    LBEditorHelper.GetPathFromUser(LBSavedData.PathType.RusticGrass, "Assets", ref pathRusticGrass, true);
-                }
-                GUILayout.EndHorizontal();
-
-                GUILayout.BeginHorizontal();
-                if (GUILayout.Button("Get Support", buttonCompact)) { Application.OpenURL("http://forum.unity3d.com/threads/395638"); }
-                if (isHQPhotoPackVol1Installed) { labelText2 = "Vol.1 Asset"; } else { labelText2 = "Get HQ Vol. 1"; }
-                if (GUILayout.Button(labelText2, buttonCompact)) { Application.OpenURL("https://www.assetstore.unity3d.com/en/#!/content/32656"); }
-                if (isHQPhotoPackVol2Installed) { labelText2 = "Vol.2 Asset"; } else { labelText2 = "Get HQ Vol. 2"; }
-                if (GUILayout.Button(labelText2, buttonCompact)) { Application.OpenURL("https://www.assetstore.unity3d.com/en/#!/content/37585"); }
-                if (isRusticGrassInstalled) { labelText2 = "Rustic Asset"; } else { labelText2 = "Get Rustic"; }
-                if (GUILayout.Button(labelText2, buttonCompact)) { Application.OpenURL("https://www.assetstore.unity3d.com/en/#!/content/76317"); }
-                EditorGUILayout.EndHorizontal();
-
-                GUILayout.EndVertical();
-                #endregion
-
-                #region MegaSplat Integration
-
-                EditorGUILayout.Space();
-                EditorGUILayout.LabelField("<color=" + txtColourName + "><b>MegaSplat Integration</b></color> " + megaSplatVersion + "\n\nAllows you to use up to 256 textures on your terrains.", helpBoxRichText);
-
-                if (landscape != null && landscapeGameObject != null && isMegaSplatInstalled)
-                {
                     GUILayout.BeginVertical(EditorStyles.helpBox);
 
+                    GUILayout.BeginHorizontal();
                     EditorGUI.BeginChangeCheck();
-                    megaSplatAutoClosePainter = EditorGUILayout.Toggle(new GUIContent("Auto Close Painter", "Automatically Close the Terrain Painter after use"), megaSplatAutoClosePainter);
-
+                    GUILayout.Label(new GUIContent("Vol 1", "The relative path in the project to the HQ Photographic Textures Pack Vol. 1"), GUILayout.Width(45f));
+                    pathHQPhotoPackVol1 = EditorGUILayout.TextField(pathHQPhotoPackVol1);
                     if (EditorGUI.EndChangeCheck())
                     {
-                        LBLandscape.SetMegaSplatAutoClosePainter(megaSplatAutoClosePainter);
-                        isSceneSaveRequired = true;
+                        LBLandscape.SetPath(LBSavedData.PathType.HQPhotographicTexturesVol1, pathHQPhotoPackVol1);
                     }
-                }
-                else
-                {
-                    EditorGUILayout.HelpBox("To integrate with MegaSplat, install MegaSplat 1.14+ in your project and select a landscape to edit.", MessageType.Info, true);
-                    GUILayout.BeginVertical(EditorStyles.helpBox);
-                }
-                GUILayout.BeginHorizontal();
-                if (GUILayout.Button("Get Support", buttonCompact)) { Application.OpenURL("http://forum.unity3d.com/threads/441329"); }
-                if (GUILayout.Button("Videos", buttonCompact)) { Application.OpenURL("https://www.youtube.com/user/slipster216"); }
-                if (isMegaSplatInstalled) { labelText2 = "MegaSplat Asset"; } else { labelText2 = "Get MegaSplat"; }
-                if (GUILayout.Button(labelText2, buttonCompact)) { Application.OpenURL("https://www.assetstore.unity3d.com/en/#!/content/76166"); }
-                if (GUILayout.Button("Web Site", buttonCompact)) { Application.OpenURL("http://www.megasplat.com"); }
-                EditorGUILayout.EndHorizontal();
+                    if (GUILayout.Button("..", buttonCompact, GUILayout.MaxWidth(30f)))
+                    {
+                        LBEditorHelper.GetPathFromUser(LBSavedData.PathType.HQPhotographicTexturesVol1, "Assets", ref pathHQPhotoPackVol1, true);
+                        if (!string.IsNullOrEmpty(pathHQPhotoPackVol1))
+                        {
+                            LBLandscape.SetPath(LBSavedData.PathType.HQPhotographicTexturesVol1, pathHQPhotoPackVol1);
+                        }
+                    }
+                    GUILayout.EndHorizontal();
 
-                GUILayout.EndVertical();
-                EditorGUILayout.Space();
+                    GUILayout.BeginHorizontal();
+                    EditorGUI.BeginChangeCheck();
+                    GUILayout.Label(new GUIContent("Vol 2", "The relative path in the project to the HQ Photographic Textures Pack Vol. 2"), GUILayout.Width(45f));
+                    pathHQPhotoPackVol2 = EditorGUILayout.TextField(pathHQPhotoPackVol2);
+                    if (EditorGUI.EndChangeCheck())
+                    {
+                        LBLandscape.SetPath(LBSavedData.PathType.HQPhotographicTexturesVol2, pathHQPhotoPackVol2);
+                    }
+                    if (GUILayout.Button("..", buttonCompact, GUILayout.MaxWidth(30f)))
+                    {
+                        LBEditorHelper.GetPathFromUser(LBSavedData.PathType.HQPhotographicTexturesVol2, "Assets", ref pathHQPhotoPackVol2, true);
+                        if (!string.IsNullOrEmpty(pathHQPhotoPackVol2))
+                        {
+                            LBLandscape.SetPath(LBSavedData.PathType.HQPhotographicTexturesVol2, pathHQPhotoPackVol2);
+                        }
+                    }
+                    GUILayout.EndHorizontal();
 
-                #endregion
+                    GUILayout.BeginHorizontal();
+                    EditorGUI.BeginChangeCheck();
+                    GUILayout.Label(new GUIContent("Rustic", "The relative path in the project to the Rustic Grass pack"), GUILayout.Width(45f));
+                    pathRusticGrass = EditorGUILayout.TextField(pathRusticGrass);
+                    if (EditorGUI.EndChangeCheck())
+                    {
+                        LBLandscape.SetPath(LBSavedData.PathType.RusticGrass, pathRusticGrass);
+                    }
+                    if (GUILayout.Button("..", buttonCompact, GUILayout.MaxWidth(30f)))
+                    {
+                        LBEditorHelper.GetPathFromUser(LBSavedData.PathType.RusticGrass, "Assets", ref pathRusticGrass, true);
+                        if (!string.IsNullOrEmpty(pathRusticGrass))
+                        {
+                            LBLandscape.SetPath(LBSavedData.PathType.RusticGrass, pathRusticGrass);
+                        }
+                    }
+                    GUILayout.EndHorizontal();
 
-                #region Vegetation Studio Integration
+                    GUILayout.BeginHorizontal();
+                    if (GUILayout.Button("Get Support", buttonCompact)) { Application.OpenURL("http://forum.unity3d.com/threads/395638"); }
+                    if (isHQPhotoPackVol1Installed) { labelText2 = "Vol.1 Asset"; } else { labelText2 = "Get HQ Vol. 1"; }
+                    if (GUILayout.Button(labelText2, buttonCompact)) { Application.OpenURL("https://assetstore.unity.com/packages/2d/textures-materials/32656"); }
+                    if (isHQPhotoPackVol2Installed) { labelText2 = "Vol.2 Asset"; } else { labelText2 = "Get HQ Vol. 2"; }
+                    if (GUILayout.Button(labelText2, buttonCompact)) { Application.OpenURL("https://assetstore.unity.com/packages/2d/textures-materials/37585"); }
+                    if (isRusticGrassInstalled) { labelText2 = "Rustic Asset"; } else { labelText2 = "Get Rustic"; }
+                    if (GUILayout.Button(labelText2, buttonCompact)) { Application.OpenURL("https://assetstore.unity.com/packages/2d/textures-materials/76317"); }
+                    EditorGUILayout.EndHorizontal();
 
-                EditorGUILayout.Space();
-                EditorGUILayout.LabelField("<color=" + txtColourName + "><b>Vegetation Studio Integration</b></color>\n\nVegetation rendering and placement system. To enable it, go to Landscape tab, and Terrain Settings.", helpBoxRichText);
+                    GUILayout.EndVertical();
+                    #endregion
 
-                GUILayout.BeginHorizontal();
-                if (GUILayout.Button("Get Support", buttonCompact)) { Application.OpenURL("http://forum.unity3d.com/threads/479244"); }
+                    #region MegaSplat Integration
+
+                    EditorGUILayout.Space();
+                    EditorGUILayout.LabelField("<color=" + txtColourName + "><b>MegaSplat Integration</b></color> " + megaSplatVersion + "\n\nAllows you to use up to 256 textures on your terrains.", helpBoxRichText);
+
+                    if (landscape != null && landscapeGameObject != null && isMegaSplatInstalled)
+                    {
+                        GUILayout.BeginVertical(EditorStyles.helpBox);
+
+                        EditorGUI.BeginChangeCheck();
+                        megaSplatAutoClosePainter = EditorGUILayout.Toggle(new GUIContent("Auto Close Painter", "Automatically Close the Terrain Painter after use"), megaSplatAutoClosePainter);
+
+                        if (EditorGUI.EndChangeCheck())
+                        {
+                            LBLandscape.SetMegaSplatAutoClosePainter(megaSplatAutoClosePainter);
+                            isSceneSaveRequired = true;
+                        }
+                    }
+                    else
+                    {
+                        EditorGUILayout.HelpBox("To integrate with MegaSplat, install MegaSplat 1.14+ in your project and select a landscape to edit.", MessageType.Info, true);
+                        GUILayout.BeginVertical(EditorStyles.helpBox);
+                    }
+                    GUILayout.BeginHorizontal();
+                    if (GUILayout.Button("Get Support", buttonCompact)) { Application.OpenURL("http://forum.unity3d.com/threads/441329"); }
+                    if (GUILayout.Button("Videos", buttonCompact)) { Application.OpenURL("https://www.youtube.com/user/slipster216"); }
+                    if (isMegaSplatInstalled) { labelText2 = "MegaSplat Asset"; } else { labelText2 = "Get MegaSplat"; }
+                    if (GUILayout.Button(labelText2, buttonCompact)) { Application.OpenURL("https://assetstore.unity.com/packages/tools/terrain/76166"); }
+                    if (GUILayout.Button("Web Site", buttonCompact)) { Application.OpenURL("http://www.megasplat.com"); }
+                    EditorGUILayout.EndHorizontal();
+
+                    GUILayout.EndVertical();
+                    EditorGUILayout.Space();
+
+                    #endregion
+
+                    #region Vegetation Studio Integration
+
+                    EditorGUILayout.Space();
+                    EditorGUILayout.LabelField("<color=" + txtColourName + "><b>Vegetation Studio Integration</b></color>\n\nVegetation rendering and placement system. To enable it, go to Landscape tab, and Terrain Settings.", helpBoxRichText);
+
+                    GUILayout.BeginHorizontal();
+                    if (GUILayout.Button("Get Support", buttonCompact)) { Application.OpenURL("http://forum.unity3d.com/threads/479244"); }
 #if VEGETATION_STUDIO
                 labelText2 = "VegStud Asset";
 #else
-                labelText2 = "Get Veg Studio";
+                    labelText2 = "Get Veg Studio";
 #endif
-                if (GUILayout.Button(labelText2, buttonCompact)) { Application.OpenURL("https://assetstore.unity.com/packages/tools/terrain/vegetation-studio-103389"); }
-                if (GUILayout.Button("Web Site", buttonCompact)) { Application.OpenURL("https://www.awesometech.no/"); }
-                EditorGUILayout.EndHorizontal();
+                    if (GUILayout.Button(labelText2, buttonCompact)) { Application.OpenURL("https://assetstore.unity.com/packages/tools/terrain/103389"); }
+                    if (GUILayout.Button("Web Site", buttonCompact)) { Application.OpenURL("https://www.awesometech.no/"); }
+                    EditorGUILayout.EndHorizontal();
 
 
 #if VEGETATION_STUDIO
@@ -15752,7 +16135,7 @@ namespace LandscapeBuilder
                     // Vegetation Studio may have been imported after the landscape was created.
                     if (landscape.vegetationStudioCameraList == null) { landscape.vegetationStudioCameraList = new List<Camera>(); }
 
-#region Add/Remove Cameras
+                    #region Add/Remove Cameras
                     EditorGUILayout.BeginHorizontal();
                     if (GUILayout.Button("Get Cameras", GUILayout.MaxWidth(100f)))
                     {
@@ -15774,9 +16157,9 @@ namespace LandscapeBuilder
                         }
                     }
                     EditorGUILayout.EndHorizontal();
-#endregion
+                    #endregion
 
-#region Display Vegetation Studio cameras
+                    #region Display Vegetation Studio cameras
 
                     cameraToRemove = null;
                     for (int cmIdx = 0; cmIdx < landscape.vegetationStudioCameraList.Count; cmIdx++)
@@ -15794,27 +16177,27 @@ namespace LandscapeBuilder
                         isSceneSaveRequired = true;
                     }
 
-#endregion
+                    #endregion
 
                     GUILayout.EndVertical();
                 }
 
 #endif
 
-                #endregion
+                    #endregion
 
-                // uNature Integration removed in LB 2.0.6
+                    // uNature Integration removed in LB 2.0.6
 
-                // Add some extra space below uNature so that tooltips can be read okay.
-                GUILayout.Space(15);
-
-                EditorGUILayout.EndScrollView();
+                    // Add some extra space below uNature so that tooltips can be read okay.
+                    GUILayout.Space(15);
+                }
+                #endregion Advanced Integration
 
                 #endregion
             } // End of Advanced Tab
 
             #region SaveScene or make dirty (so it needs to be saved)
-            if (!EditorApplication.isPlayingOrWillChangePlaymode)
+            if (!EditorApplication.isPlayingOrWillChangePlaymode && !Application.isPlaying)
             {
                 if (isSceneSaveRequired)
                 {
@@ -16384,6 +16767,10 @@ namespace LandscapeBuilder
                         LBIntegration.RTPUpdateTextures(landscape, true);
                     }
                 }
+
+                #if CTS_PRESENT
+                if (landscape.useCTS2019) { LBIntegration.CTSUpdateTextures(landscape, true); }
+                #endif
 
                 EditorUtility.ClearProgressBar();
 
@@ -17886,6 +18273,16 @@ namespace LandscapeBuilder
             }
             #endregion
 
+            #region CTS
+            else if (tMaterialType == LBLandscape.TerrainMaterialType.CTS)
+            {
+                #if !UNITY_2019_2_OR_NEWER
+                terrain.materialType = Terrain.MaterialType.Custom;
+                #endif
+                terrain.materialTemplate = terrainCustomMaterial;
+            }
+            #endregion
+
             else
             {
                 #if !UNITY_2019_2_OR_NEWER
@@ -18082,12 +18479,16 @@ namespace LandscapeBuilder
         {
             List<string> texturePathList = null;
 
+            pathHQPhotoPackVol1 = LBLandscape.GetPath(LBSavedData.PathType.HQPhotographicTexturesVol1);
+            pathHQPhotoPackVol2 = LBLandscape.GetPath(LBSavedData.PathType.HQPhotographicTexturesVol2);
+            pathRusticGrass = LBLandscape.GetPath(LBSavedData.PathType.RusticGrass);
+
             // Check to see if HQ Photographic Texture packs are installed in the current project
-            if (string.IsNullOrEmpty(pathHQPhotoPackVol1)) { pathRusticGrass = LBSavedData.GetHQPhotographicTexturesVol1DefaultPath; }
+            if (string.IsNullOrEmpty(pathHQPhotoPackVol1)) { pathHQPhotoPackVol1 = LBSavedData.GetHQPhotographicTexturesVol1DefaultPath; }
             if (string.IsNullOrEmpty(pathHQPhotoPackVol1)) { isHQPhotoPackVol1Installed = false; }
             else { isHQPhotoPackVol1Installed = LBEditorHelper.IsProjectFolderAvailable("Assets/" + pathHQPhotoPackVol1); }
 
-            if (string.IsNullOrEmpty(pathHQPhotoPackVol2)) { pathRusticGrass = LBSavedData.GetHQPhotographicTexturesVol2DefaultPath; }
+            if (string.IsNullOrEmpty(pathHQPhotoPackVol2)) { pathHQPhotoPackVol2 = LBSavedData.GetHQPhotographicTexturesVol2DefaultPath; }
             if (string.IsNullOrEmpty(pathHQPhotoPackVol2)) { isHQPhotoPackVol2Installed = false; }
             else { isHQPhotoPackVol2Installed = LBEditorHelper.IsProjectFolderAvailable("Assets/" + pathHQPhotoPackVol2); }
 
@@ -18865,7 +19266,12 @@ namespace LandscapeBuilder
             groupsMemberObjPathToolbarContent[0] = groupsMemberDesignerToolbarGeneralContent;
             groupsMemberObjPathToolbarContent[1] = groupsMemberObjPathToolbarObjectsContent;
             groupsMemberObjPathToolbarContent[2] = groupsMemberObjPathToolbarPointsContent;
-            groupsMemberObjPathToolbarContent[3] = groupsMemberObjPathToolbarSurfaceContent;       
+            groupsMemberObjPathToolbarContent[3] = groupsMemberObjPathToolbarSurfaceContent;
+
+            // Advanced tab toolbar
+            advancedToolbarContent[0] = advancedToolbarOptionsContent;
+            advancedToolbarContent[1] = advancedToolbarToolsContent;
+            advancedToolbarContent[2] = advancedToolbarIntegrationContent;
 
 #if UNITY_2019_1_OR_NEWER
             SceneView.duringSceneGui -= SceneGUI;
@@ -18958,6 +19364,17 @@ namespace LandscapeBuilder
 
             displayLabelColor = Handles.color;
             displayLabelColor.a = 1f;
+
+            // Force styles to get updated on next Editor window redraw
+            versionBox = null;
+            labelFieldHeaderBox = null;
+            labelFieldRichTextCentred = null;
+
+            // Set the default highlighter colour
+            if (volumeHighlighterColour == Color.clear)
+            {
+                volumeHighlighterColour = LBLandscape.GetDefaultMeshVolumeHighlighterColour();
+            }
 
             CheckInstalledRenderPipelines();
         }
@@ -19784,6 +20201,11 @@ namespace LandscapeBuilder
             terrainCustomMaterial = landscape.GetLandscapeTerrainCustomMaterial();
 
             //if (terrainCustomMaterial != null) { Debug.Log("GetLandscapeTerrainSettings terrainCustomMaterial: " + terrainCustomMaterial.name + " shader: " + terrainCustomMaterial.shader.name); }
+            
+            #if CTS_PRESENT
+            // Force GetTerrainMaterialType() to check the terrain material shader
+            if (landscape.useCTS2019 && terrainMaterialType != LBLandscape.TerrainMaterialType.CTS) { landscape.terrainCustomMaterial = null; }
+            #endif
 
             terrainMaterialType = landscape.GetTerrainMaterialType();
 

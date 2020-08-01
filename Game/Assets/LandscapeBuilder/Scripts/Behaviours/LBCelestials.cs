@@ -4,6 +4,7 @@ using System.Collections;
 using UnityEditor;
 #endif
 
+// Landscape Builder. Copyright (c) 2016-2020 SCSM Pty Ltd. All rights reserved.
 namespace LandscapeBuilder
 {
     [ExecuteInEditMode]

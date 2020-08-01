@@ -1,4 +1,4 @@
-﻿// Landscape Builder. Copyright (c) 2016-2019 SCSM Pty Ltd. All rights reserved.
+﻿// Landscape Builder. Copyright (c) 2016-2020 SCSM Pty Ltd. All rights reserved.
 #pragma kernel TopoPerlin
 #pragma kernel TopoImage
 #pragma kernel TopoImageModifier
@@ -60,6 +60,8 @@ bool mapInverse;
 // Image Modifier layer variables
 StructuredBuffer<uint> rawHeightData;
 bool useBlending;
+float blendingCentreSize;
+float blendingFillCorners;
 int modifierMode;
 bool modifierInvert;
 
@@ -544,6 +546,11 @@ void TopoImageModifier(uint3 id : SV_DispatchThreadID)
 		float xDistToCentre = (pos2DMod.x - 0.5) * 2.0;
 		float yDistToCentre = (pos2DMod.y - 0.5) * 2.0;
 		float distToCentre = ((xDistToCentre * xDistToCentre) + (yDistToCentre * yDistToCentre) - 0.5) * 2.0;
+
+		distToCentre = (pow(abs(xDistToCentre), (blendingFillCorners * 2.0) + 2.0) +
+			pow(abs(yDistToCentre), (blendingFillCorners * 2.0) + 2.0) -
+			(blendingCentreSize*blendingCentreSize)) / (1.0 - (blendingCentreSize*blendingCentreSize));
+
 		// Add domain warping to the distance to hide the circular shape
 		distToCentre += LBPerlinFractalNoise(pos2DMod.x * 5.0, pos2DMod.y * 5.0, int(3)) * 1.0;
 		// If (adjusted) distance to centre is positive, use blending

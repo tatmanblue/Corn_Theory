@@ -22,6 +22,21 @@ namespace LandscapeBuilder
             HeightInclinationCurvature = 6,
             Imported = 20
         }
+
+        // Except for Auto this is a subset from LBCurve.FilterCurvePreset
+        // BlendMinMaxValues = WideRange
+        // NoBlending = Flat
+        // BlendMinValues = WideRangeLeftOnly
+        // BlendMaxValues = WideRangeRightOnly
+        public enum BlendCurveMode
+        {
+            Auto = 0,
+            BlendMinMaxValues = 1,
+            NoBlending = 4,
+            BlendMinValues = 5,
+            BlendMaxValues = 6
+        }
+
         #endregion
 
         #region Variables and Properties
@@ -42,8 +57,11 @@ namespace LandscapeBuilder
         public float metallic;
         public float smoothness;
 
+        // Range 0.0-1.0
         public float minHeight;
         public float maxHeight;
+
+        // Range 0.0-90.0
         public float minInclination;
         public float maxInclination;
         public float strength;
@@ -112,6 +130,10 @@ namespace LandscapeBuilder
 
         // Added v2.0.0
         public string GUID;
+
+        // Added 2.2.4
+        // Default to Wide curve
+        public BlendCurveMode blendCurveMode;
 
         #endregion
 
@@ -195,6 +217,9 @@ namespace LandscapeBuilder
             // Added v2.0.0
             // Assign a unique identifier
             GUID = System.Guid.NewGuid().ToString();
+
+            // Added v2.2.4
+            blendCurveMode = BlendCurveMode.BlendMinMaxValues;
         }
 
         /// <summary>
@@ -257,6 +282,8 @@ namespace LandscapeBuilder
             if (lbTerrainTexture.lbTerrainDataList == null) { this.lbTerrainDataList = null; }
             else { this.lbTerrainDataList = new List<LBTerrainData>(lbTerrainTexture.lbTerrainDataList); }
 
+            lbTerrainTexture.blendCurveMode = BlendCurveMode.Auto;
+
             this.GUID = lbTerrainTexture.GUID;
         }
 
@@ -310,6 +337,48 @@ namespace LandscapeBuilder
                 // If tinted AND rotated it still could be the same texture
                 return (compareTo.width == tempTexture.width && compareTo.height == tempTexture.height && compareTo.name == tempTexture.name);
             }
+        }
+
+        /// <summary>
+        /// Get the actual blend curve mode to apply. If not set to 
+        /// auto, simply return the blend curve mode already set.
+        /// When the blend curve doesn't apply, return BlendMinMaxValues (Wide Range curve)
+        /// </summary>
+        /// <returns></returns>
+        public BlendCurveMode GetActualBlendCurveMode()
+        {
+            if (blendCurveMode == BlendCurveMode.Auto)
+            {
+                int texModeInt = (int)texturingMode;
+
+                // Check Height rules
+                if (texModeInt == 0)
+                {
+                    if (minHeight == 0f && maxHeight == 1f) { return BlendCurveMode.NoBlending; }
+                    else if (minHeight == 0f) { return BlendCurveMode.BlendMaxValues; }
+                    else if (maxHeight == 1f) { return BlendCurveMode.BlendMinValues; }
+                    else { return BlendCurveMode.BlendMinMaxValues; }
+                }
+                // Check Inclination rules
+                else if (texModeInt == 1)
+                {
+                    if (minInclination == 0f && maxInclination == 90f) { return BlendCurveMode.NoBlending; }
+                    else if (minInclination == 0f) { return BlendCurveMode.BlendMaxValues; }
+                    else if (maxInclination == 90f) { return BlendCurveMode.BlendMinValues; }
+                    else { return BlendCurveMode.BlendMinMaxValues; }
+                }
+                // Check height and inclination rules
+                else if (texModeInt == 2 || texModeInt == 5 || texModeInt == 6)
+                {
+                    if ((minHeight == 0f || minInclination == 0f) && (maxHeight == 1f || maxInclination == 90f)) { return BlendCurveMode.NoBlending; }
+                    else if (minHeight == 0f || minInclination == 0f) { return BlendCurveMode.BlendMaxValues; }
+                    else if (maxHeight == 1f || maxInclination == 90f) { return BlendCurveMode.BlendMinValues; }
+                    else { return BlendCurveMode.BlendMinMaxValues; }
+                }
+                // If blending doesn't apply return the default (Wide Range curve)
+                else { return BlendCurveMode.BlendMinMaxValues; }
+            }
+            else { return blendCurveMode; }
         }
 
         /// <summary>
@@ -400,6 +469,7 @@ namespace LandscapeBuilder
             sb.Append("\t" + texInst + ".showTexture = " + showTexture.ToString().ToLower() + "; " + eol);
             sb.Append("\t" + texInst + ".noiseOffset = " + noiseOffset + "f; " + eol);
             sb.Append("\t" + texInst + ".GUID = " + (string.IsNullOrEmpty(GUID) ? "\"\"" : "\"" + GUID + "\"") + "; " + eol);
+            sb.Append("\t" + texInst + ".blendCurveMode = LBTerrainTexture.BlendCurveMode." + blendCurveMode + "; " + eol);
 
             sb.Append("\t" + texInst + ".filterList = new List<LBTextureFilter>(); " + eol);
             if (filterList != null)

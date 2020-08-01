@@ -1,5 +1,5 @@
 ﻿#if UNITY_EDITOR
-// Landscape Builder. Copyright (c) 2016-2019 SCSM Pty Ltd. All rights reserved.
+// Landscape Builder. Copyright (c) 2016-2020 SCSM Pty Ltd. All rights reserved.
 using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
@@ -34,6 +34,9 @@ namespace LandscapeBuilder
         public static string scriptsBehavioursFolder = "Assets/LandscapeBuilder/scripts/behaviours";
         public static string scriptsClassesFolder = "Assets/LandscapeBuilder/scripts/classes";
         public static string scriptsDesignersFolder = "Assets/LandscapeBuilder/scripts/designers";
+
+        // If this file is present in the LB folder outside the assets folder, don't create the Unity Layer
+        public static string noCelestialsFile = "LandscapeBuilder/LB_NO_CELESTIALS.dat";
         #endregion
 
         #region Private Static variables
@@ -52,7 +55,10 @@ namespace LandscapeBuilder
 
             FindTagAndLayerManager();
             CreateTags(tagsToAdd);
-            CreateLayers(layersToAdd, layerNumbersToAdd);
+            if (!File.Exists(noCelestialsFile))
+            {
+                CreateLayers(layersToAdd, layerNumbersToAdd);
+            }
             CreateFolders();
             SetupGrass();
             DefineSymbols();
@@ -71,11 +77,20 @@ namespace LandscapeBuilder
         {
             // Move materials into a resources folders so that they are found in runtime generation
             LBEditorHelper.MoveAsset("LBSetup.UpgradeProject", materialsFolder, materialsFolder + "/Resources", "LBMoon.mat");
-            LBEditorHelper.MoveAsset("LBSetup.UpgradeProject", materialsFolder, materialsFolder + "/Resources", "LBStar.mat");
             LBEditorHelper.MoveAsset("LBSetup.UpgradeProject", materialsFolder, materialsFolder + "/Resources", "LBTerrain.mat");
 
+            #if SCSM_SSC
+            // If Sci-Fi Ship Controller is installed first, LBStar.mat exists in a non-resource folder in SSC.
+            LBEditorHelper.MoveAsset("LBSetup.UpgradeProject", "Assets/SCSM/SciFiShipController/Demos/Materials/Environment", materialsFolder + "/Resources", "LBStar.mat");
+            // Move stars into resources folder so that celestials get built at runtime correctly
+            LBEditorHelper.CheckFolder(modelsFolder);
+            LBEditorHelper.MoveAsset("LBSetup.UpgradeProject", "Assets/SCSM/SciFiShipController/Demos/Models/Environment", modelsFolder + "/Resources", "StarLowPolyFBX.fbx");
+            #else
+            LBEditorHelper.MoveAsset("LBSetup.UpgradeProject", materialsFolder, materialsFolder + "/Resources", "LBStar.mat");
             // Move stars into resources folder so that celestials get built at runtime correctly
             LBEditorHelper.MoveAsset("LBSetup.UpgradeProject", modelsFolder, modelsFolder + "/Resources", "StarLowPolyFBX.fbx");
+            #endif
+
 
             // Move the shaders into a resources folder
             LBEditorHelper.MoveAsset("LBSetup.UpgradeProject", shadersFolder, shadersFolder + "/Resources", "LBTerrain-Base.shader");

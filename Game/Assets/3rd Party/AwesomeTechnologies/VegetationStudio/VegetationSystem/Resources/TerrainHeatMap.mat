@@ -4,8 +4,9 @@
 Material:
   serializedVersion: 6
   m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
   m_Name: TerrainHeatMap
   m_Shader: {fileID: 4800000, guid: a74118ac2827ff9498adedd46ab5cb0d, type: 3}
   m_ShaderKeywords: _USECURVES_ON
@@ -90,8 +91,8 @@ Material:
     - _SmoothnessTextureChannel: 0
     - _SpecularHighlights: 1
     - _SrcBlend: 1
-    - _TerrainMaxHeight: 301.56262
-    - _TerrainMinHeight: 30.5
+    - _TerrainMaxHeight: 349.8138
+    - _TerrainMinHeight: 0
     - _TerrainYPosition: 0
     - _UVSec: 0
     - _UseCurves: 1

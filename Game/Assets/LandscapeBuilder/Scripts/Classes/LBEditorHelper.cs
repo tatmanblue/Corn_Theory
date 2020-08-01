@@ -1,5 +1,5 @@
 ﻿#if UNITY_EDITOR
-// Landscape Builder. Copyright (c) 2016-2019 SCSM Pty Ltd. All rights reserved.
+// Landscape Builder. Copyright (c) 2016-2020 SCSM Pty Ltd. All rights reserved.
 using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
@@ -78,6 +78,26 @@ namespace LandscapeBuilder
         public static string GetDefaultTexturesFolder { get { return "Assets/LandscapeBuilder/Textures"; } }
         public static string GetDefaultHeightmapFolder { get { return "Assets/LandscapeBuilder/Heightmaps"; } }
         public static string GetDefaultEditorTexturesFolder { get { return "Assets/LandscapeBuilder/Editor/Textures/"; } }
+
+        #endregion
+
+        #region Heading or Info Methods
+
+        /// <summary>
+        /// Display one of two technical preview messages in the editor
+        /// </summary>
+        /// <param name="radicalChangePossible"></param>
+        public static void InTechPreview(bool radicalChangePossible = false)
+        {
+            if (radicalChangePossible)
+            {
+                EditorGUILayout.HelpBox("This feature is in technical preview and could radically change without notice.", MessageType.Warning);
+            }
+            else
+            {
+                EditorGUILayout.HelpBox("This feature is currently in technical preview", MessageType.Warning);
+            }
+        }
 
         #endregion
 
@@ -1000,6 +1020,75 @@ namespace LandscapeBuilder
             }
         }
 
+        /// <summary>
+        /// A texture may be missing if the textureName is set but the texture field is null.
+        /// </summary>
+        /// <param name="lbTerrainTexture"></param>
+        public static void RelinkTerrainTexture(LBTerrainTexture lbTerrainTexture)
+        {
+            if (lbTerrainTexture != null)
+            {
+                if (lbTerrainTexture.texture == null && !string.IsNullOrEmpty(lbTerrainTexture.textureName))
+                {
+                    Texture2D texture = FindTexture(lbTerrainTexture.textureName);
+                    if (texture != null) { lbTerrainTexture.texture = texture; }
+                }
+
+                if (lbTerrainTexture.normalMap == null && !string.IsNullOrEmpty(lbTerrainTexture.normalMapName))
+                {
+                    Texture2D texture = FindTexture(lbTerrainTexture.normalMapName);
+                    if (texture != null) { lbTerrainTexture.normalMap = texture; }
+                }
+            }
+        }
+
+        /// <summary>
+        /// Find the first texture in Assets that matches the textureName supplied.
+        /// The file extension is ignored.
+        /// </summary>
+        /// <param name="textureName"></param>
+        /// <returns></returns>
+        public static Texture2D FindTexture(string textureName)
+        {
+            Texture2D texture = null;
+
+            if (!string.IsNullOrEmpty(textureName))
+            {
+                string pathToTexture2D = string.Empty;
+
+                // Find all the texture assets that contain the name of the texture.
+                string[] textureGUIDArray = AssetDatabase.FindAssets(textureName + " t:texture2D");
+
+                if (textureGUIDArray != null)
+                {
+                    foreach (string guidstr in textureGUIDArray)
+                    {
+                        pathToTexture2D = AssetDatabase.GUIDToAssetPath(guidstr);
+                        if (!string.IsNullOrEmpty(pathToTexture2D))
+                        {
+                            // strip off the file type
+                            int lIdx = pathToTexture2D.LastIndexOf(".");
+                            if (lIdx >= 0) { pathToTexture2D = pathToTexture2D.Substring(0, lIdx); }
+
+                            // strip off the path
+                            lIdx = pathToTexture2D.LastIndexOf("/");
+                            if (lIdx >= 0 && pathToTexture2D.Length > lIdx+1) { pathToTexture2D = pathToTexture2D.Substring(lIdx+1); }
+
+                            //Debug.Log("[DEBUG] file: " + pathToTexture2D);
+
+                            if (textureName.ToLower() == pathToTexture2D.ToLower())
+                            {
+                                texture = (Texture2D)AssetDatabase.LoadAssetAtPath(AssetDatabase.GUIDToAssetPath(guidstr), typeof(Texture2D));
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+
+            return texture;
+        }
+
         #endregion
 
         #region Material Helper Methods
@@ -1694,12 +1783,17 @@ namespace LandscapeBuilder
 
         /// <summary>
         /// Get the System.Type of the internal Editor ProgressBar
-        /// This bar is displayed in bottom right corner of main Unity Editor window
+        /// This bar is displayed in bottom right corner of main Unity Editor window.
+        /// NOTE: Currently the editor progress bar is not supported in U2020.1+ in LB.
         /// </summary>
         /// <returns></returns>
         public static System.Type GetEditorProgressBarType()
         {
+            #if UNITY_2020_1_OR_NEWER
+            return null;
+            #else
             return LBIntegration.GetClassTypeFromFullName("UnityEditor.AsyncProgressBar, UnityEditor", true);
+            #endif
         }
 
         /// <summary>
@@ -1753,7 +1847,7 @@ namespace LandscapeBuilder
             }
         }
 
-        #endregion
+#endregion
 
         #region Layer Methods
 
@@ -2039,7 +2133,7 @@ namespace LandscapeBuilder
             // Make sure it was a prefab and not a simple gameobject like a fbx file etc.
             if (prefab != null)
             {
-                #if UNITY_2018_3_OR_NEWER
+#if UNITY_2018_3_OR_NEWER
                 PrefabAssetType prefabAssetType = PrefabUtility.GetPrefabAssetType(prefab);
 
                 // NotAPrefab, Regular = User created prefab, Model = imported 3D model asset, Variant = Prefab Variant, MissingAsset (unknown prefab type)
@@ -2048,7 +2142,7 @@ namespace LandscapeBuilder
                     if (isShowInfoMsg) { Debug.Log("INFO: Landscape Builder - Only user defined, variant or imported 3D asset prefabs are permitted. Ensure you are adding a prefab. " + prefab.name); }
                 }
                 else { isPrefab = true; }
-                #else
+#else
                 PrefabType prefabType = PrefabUtility.GetPrefabType(prefab);
 
                 // Preb = User created prefab. ModelPrefab = imported 3D model asset
@@ -2057,7 +2151,7 @@ namespace LandscapeBuilder
                     if (isShowInfoMsg) { Debug.Log("INFO: Landscape Builder - Only user defined or imported 3D asset prefabs are permitted. Ensure you are adding a prefab. " + prefab.name); }
                 }
                 else { isPrefab = true; }
-                #endif
+#endif
             }
             return isPrefab;
         }
@@ -2076,7 +2170,7 @@ namespace LandscapeBuilder
             // Make sure it was a prefab and not a simple gameobject like a fbx file etc.
             if (prefab != null)
             {
-                #if UNITY_2018_3_OR_NEWER
+#if UNITY_2018_3_OR_NEWER
                 PrefabAssetType prefabAssetType = PrefabUtility.GetPrefabAssetType(prefab);
 
                 // NotAPrefab, Regular = User created prefab, Model = imported 3D model asset, Variant = Prefab Variant, MissingAsset (unknown prefab type)
@@ -2085,7 +2179,7 @@ namespace LandscapeBuilder
                     if (isShowInfoMsg) { Debug.Log("INFO: Landscape Builder - Only user defined, variant or imported 3D asset prefabs are permitted. Ensure you are adding a prefab. " + prefab.name); }
                 }
                 else { isPrefab = true; }
-                #else
+#else
                 PrefabType prefabType = PrefabUtility.GetPrefabType(prefab);
 
                 // Preb = User created prefab in Project. ModelPrefab = imported 3D model asset in Project
@@ -2095,7 +2189,7 @@ namespace LandscapeBuilder
                     if (isShowInfoMsg) { Debug.Log("INFO: Landscape Builder - Only user defined or imported 3D asset prefabs in the scene are permitted. Ensure you are adding a prefab from the scene. " + prefab.name); }
                 }
                 else { isPrefab = true; }
-                #endif
+#endif
             }
             return isPrefab;
         }
@@ -2111,11 +2205,11 @@ namespace LandscapeBuilder
 
             if (prefab != null)
             {
-                #if UNITY_2018_2_OR_NEWER
+#if UNITY_2018_2_OR_NEWER
                 prefabSource = (GameObject)UnityEditor.PrefabUtility.GetCorrespondingObjectFromSource(prefab);
-                #else
+#else
                 prefabSource = (GameObject)UnityEditor.PrefabUtility.GetPrefabParent(prefab);
-                #endif
+#endif
             }
 
             return prefabSource;

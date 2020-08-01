@@ -1,10 +1,16 @@
-﻿// Landscape Builder. Copyright (c) 2016-2019 SCSM Pty Ltd. All rights reserved.
+﻿// Landscape Builder. Copyright (c) 2016-2020 SCSM Pty Ltd. All rights reserved.
 using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
 
 namespace LandscapeBuilder
 {
+    /// <summary>
+    /// Dependencies include LBCelestials, LBLighting, LBImageFX, LBWeatherState,
+    /// LBTemplateStencil, LBPath, LBTerrainTree, LBLayer, LBTerrainTexture,
+    /// LBTerrainGrass, LBLayer, LBLandscapeMesh, LBGroup, LBWater,
+    /// TerrainMaterialType, LBLandscape, LBFilter etc.
+    /// </summary>
     [System.Serializable]
     public class LBTemplate : MonoBehaviour
     {
@@ -289,6 +295,10 @@ namespace LandscapeBuilder
         [HideInInspector] public bool useVegetationSystemTextures = false;
         #endregion
 
+        #region CTS
+        [HideInInspector] public bool useCTS2019 = false;
+        #endregion
+
         #region Landscape Extension
         [HideInInspector] public bool useLandscapeExtension = false;
         public LBLandscapeExtension lbLandscapeExtension;
@@ -359,12 +369,28 @@ namespace LandscapeBuilder
                     newTerrain.detailObjectDensity = detailDensity;
                     newTerrain.treeCrossFadeLength = treeFadeDistance;
                     newTerrain.name = "LandscapeTerrain" + index.ToString("0000");
+
+                    #if !UNITY_2019_2_OR_NEWER
+                    newTerrain.legacySpecular = terrainLegacySpecular;
+                    newTerrain.legacyShininess = terrainLegacyShininess;
+                    #endif
+
+                    newTerrain.drawInstanced = useTerrainDrawInstanced;
+                    newTerrain.groupingID = terrainGroupingID;
+                    newTerrain.allowAutoConnect = terrainAutoConnect;
+
                     TerrainCollider newTerrainCol = newTerrainObj.AddComponent<TerrainCollider>();
                     TerrainData newTerrainData = new TerrainData();
                     newTerrainData.heightmapResolution = heightmapResolution;
                     newTerrainData.size = new Vector3(terrainWidth, terrainHeight, terrainWidth);
                     newTerrainData.SetDetailResolution(1024, 16);
                     newTerrainData.name = "LandscapeTerrain" + index.ToString("0000");
+
+                    newTerrainData.wavingGrassSpeed = grassWindSpeed;
+                    newTerrainData.wavingGrassAmount = grassWindRippleSize;
+                    newTerrainData.wavingGrassStrength = grassWindBending;
+                    newTerrainData.wavingGrassTint = grassWindTint;
+
                     newTerrain.terrainData = newTerrainData;
                     newTerrainCol.terrainData = newTerrainData;
                     index++;
@@ -540,10 +566,10 @@ namespace LandscapeBuilder
                                 terrain.legacySpecular = this.terrainLegacySpecular;
                                 terrain.legacyShininess = this.terrainLegacyShininess;
                                 #endif
-                                #if UNITY_2018_3_OR_NEWER
+                                terrain.groupingID = this.terrainGroupingID;
+                                terrain.allowAutoConnect = this.terrainAutoConnect;
                                 // Currently doesn't work when set on a new terrain in a build
                                 terrain.drawInstanced = Application.isEditor ? this.useTerrainDrawInstanced : false;
-                                #endif
                                 
                                  //Debug.Log("terrain mat type: " + this.terrainMaterialType.ToString());
                                 landscape.SetTerrainMaterial(terrain, terrainIndex, (terrainIndex == numTerrains - 1), terrainSize.x, ref this.pixelError, (LBLandscape.TerrainMaterialType)this.terrainMaterialType);
@@ -666,6 +692,9 @@ namespace LandscapeBuilder
                         // Vegetation System integration
                         landscape.useVegetationSystem = useVegetationSystem;
                         landscape.useVegetationSystemTextures = useVegetationSystemTextures;
+
+                        // Complete Terrain Shader CTS
+                        landscape.useCTS2019 = useCTS2019;
 
                         // Landscape Extension
                         landscape.useLandscapeExtension = useLandscapeExtension;
@@ -1123,6 +1152,8 @@ namespace LandscapeBuilder
         /// Create new paths in the scene based on the LBTemplate
         /// Adds it under the landscape gameobject.
         /// If vertices etc. data exists for a MapPath, set rebuildMesh to add mesh to scene
+        /// Will add a default CameraAnimator for the first CameraPath. The camera animator
+        /// settings are NOT included with the template.
         /// </summary>
         /// <param name="landscape"></param>
         /// <param name="isRemoveExisting"></param>

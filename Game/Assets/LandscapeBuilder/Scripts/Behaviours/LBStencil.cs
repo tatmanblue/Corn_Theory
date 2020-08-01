@@ -7,6 +7,7 @@ using UnityEditor;
 using UnityEditor.SceneManagement;
 #endif
 
+// Landscape Builder. Copyright (c) 2016-2020 SCSM Pty Ltd. All rights reserved.
 namespace LandscapeBuilder
 {
     [System.Serializable]
@@ -1461,10 +1462,17 @@ namespace LandscapeBuilder
                                     EnableBrushPainter(false);
                                 }
 
+                                GUI.FocusControl(null);
                                 stencilLayerListProp.arraySize -= 1;
 
+                                serializedObject.ApplyModifiedProperties();
+
                                 // Do we need to clean up the scene and update the position of remaining layers?
-                                if (showStencilInSceneProp.boolValue) { refreshLayersInSceneRequired = true; }
+                                if (showStencilInSceneProp.boolValue) { RefreshLayers(); }
+
+                                // In U2019.4+, avoid EndLayoutGroup: BeginLayoutGroup must be called first.
+                                GUIUtility.ExitGUI();
+
                             }
                         }
                     }
@@ -1557,6 +1565,7 @@ namespace LandscapeBuilder
                             // Move Down
                             if (GUILayout.Button(moveLayerDownContent, buttonCompact, GUILayout.Width(20f)))
                             {
+                                GUI.FocusControl(null);
                                 moveLayerPos = layerIndex;
                                 if (stencilLayerListProp.arraySize > 1)
                                 {
@@ -1591,22 +1600,7 @@ namespace LandscapeBuilder
                         {
                             if (GUILayout.Button("X", buttonCompact, GUILayout.MaxWidth(20f)))
                             {
-                                if (EditorUtility.DisplayDialog("Delete Stencil Layer?", "Deleting " + layerNameProp.stringValue + " is final and cannot be undone.", "Delete Now", "Cancel"))
-                                {
-                                    // If painting, save the current layer and turn off painting before deleting a layer
-                                    if (lbStencil.activeStencilLayer != null && lbStencil.brushEnabled)
-                                    {
-                                        lbStencil.activeStencilLayer.CompressFromUShort();
-                                        EnableBrushPainter(false);
-                                    }
-
-                                    // Can't seem to remove the last array once we've fetched it above
-                                    if (layerIndex < stencilLayerListProp.arraySize - 1) { stencilLayerListProp.DeleteArrayElementAtIndex(layerIndex); }
-                                    else { removeLayerPos = layerIndex; }
-
-                                    // Do we need to clean up the scene and update the position of remaining layers?
-                                    if (showStencilInSceneProp.boolValue) { refreshLayersInSceneRequired = true; }
-                                }
+                                removeLayerPos = layerIndex;
                             }
                         }
                         #endregion
@@ -1804,6 +1798,8 @@ namespace LandscapeBuilder
                 LBStencilLayer insertedLayer = new LBStencilLayer(lbStencil.stencilLayerList[insertLayerPos], true, false, false);
                 if (insertedLayer != null)
                 {
+                    GUI.FocusControl(null);
+
                     insertedLayer.GUID = System.Guid.NewGuid().ToString();
                     insertedLayer.LayerName += " (dup)";
                     // Show the new duplicate, and hide the original
@@ -1822,10 +1818,34 @@ namespace LandscapeBuilder
                 if (showStencilInSceneProp.boolValue) { refreshLayersInSceneRequired = true; }
             }
 
-            // If required, attempt to remove the last layer
-            if (removeLayerPos == stencilLayerListProp.arraySize - 1)
+            else if (removeLayerPos >= 0)
             {
-                if (stencilLayerListProp.arraySize > 0) { stencilLayerListProp.arraySize -= 1; }
+                stencilLayerProp = stencilLayerListProp.GetArrayElementAtIndex(removeLayerPos);
+                layerNameProp = stencilLayerProp.FindPropertyRelative("LayerName");
+
+                // In U2019.4 and U2020.1 DisplayDialog calls OnInspectorGUI again when user closes dialog box.
+                // Remember the layer to delete before the refresh sets it back to -1.
+                int _layerIdx = removeLayerPos;
+
+                if (EditorUtility.DisplayDialog("Delete Stencil Layer?", "Deleting " + layerNameProp.stringValue + " is final and cannot be undone.", "Delete Now", "Cancel"))
+                {
+                    GUI.FocusControl(null);
+
+                    // If painting, save the current layer and turn off painting before deleting a layer
+                    if (lbStencil.activeStencilLayer != null && lbStencil.brushEnabled)
+                    {
+                        serializedObject.ApplyModifiedProperties();
+                        lbStencil.activeStencilLayer.CompressFromUShort();
+                        EnableBrushPainter(false);
+                        serializedObject.Update();
+                    }
+
+                    // Retrieving array element that was out of bounds in U201941, U202010
+                    stencilLayerListProp.DeleteArrayElementAtIndex(_layerIdx);
+
+                    // Do we need to clean up the scene and update the position of remaining layers?
+                    if (showStencilInSceneProp.boolValue) { refreshLayersInSceneRequired = true; }
+                }
             }
             #endregion
 

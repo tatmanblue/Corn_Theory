@@ -1,7 +1,7 @@
 ﻿#define _OBJ_PATH_DEBUG_MODE
 
 #if UNITY_EDITOR
-// Landscape Builder. Copyright (c) 2016-2019 SCSM Pty Ltd. All rights reserved.
+// Landscape Builder. Copyright (c) 2016-2020 SCSM Pty Ltd. All rights reserved.
 using UnityEngine;
 using UnityEditor;
 using System.Collections.Generic;

@@ -3,9 +3,10 @@
 --- !u!1 &128464
 GameObject:
   m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 100100000}
-  serializedVersion: 5
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
   m_Component:
   - component: {fileID: 493528}
   - component: {fileID: 11483048}
@@ -18,9 +19,10 @@ GameObject:
   m_IsActive: 1
 --- !u!4 &493528
 Transform:
-  m_ObjectHideFlags: 1
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 100100000}
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 128464}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
@@ -31,9 +33,10 @@ Transform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &11483048
 MonoBehaviour:
-  m_ObjectHideFlags: 1
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 100100000}
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 128464}
   m_Enabled: 1
   m_EditorHideFlags: 0
@@ -362,6 +365,8 @@ MonoBehaviour:
     isBelowSeaLevelDataIncluded: 0
     modifierAddInvert: 0
     modifierUseBlending: 0
+    modifierBlendingCentreSize: 0.71
+    modifierBlendingFillCorners: 0
     areaRectRotation: 0
     modifierMode: 5
     modifierRAWFile:
@@ -381,7 +386,7 @@ MonoBehaviour:
       waterPrefabPath: 
       waterLevel: 0
       name: secondary water
-      GUID: ab179347-dc16-4851-85a7-b5c1e03d6b00
+      GUID: 418ad1a7-7d66-42b6-ad9d-dd5e4d06c1b6
       meshBoundsRect:
         serializedVersion: 2
         x: 0
@@ -503,7 +508,8 @@ MonoBehaviour:
     showTexture: 0
     filterList: []
     lbTerrainDataList: []
-    GUID: c2ce8c87-13cb-44e3-9e9c-8f0ee9b15495
+    GUID: a5f2f735-8a69-400d-88ea-41ff025c8231
+    blendCurveMode: 1
   - texture: {fileID: 2800000, guid: c6e0767b1f8c34890ac245217f4b9731, type: 3}
     normalMap: {fileID: 2800000, guid: d514aabbca730458b9ef7aca670552f0, type: 3}
     heightMap: {fileID: 0}
@@ -585,7 +591,8 @@ MonoBehaviour:
     showTexture: 0
     filterList: []
     lbTerrainDataList: []
-    GUID: 43c1ceb2-8f29-4cfd-a073-ee5a09870ada
+    GUID: 2a5ac67b-4d04-4126-a881-d3b17ac164d4
+    blendCurveMode: 1
   - texture: {fileID: 2800000, guid: 18214e9d6af6248559d501391856f1c7, type: 3}
     normalMap: {fileID: 2800000, guid: 127ebf74cc9174990bb2e3ea765097f8, type: 3}
     heightMap: {fileID: 0}
@@ -667,7 +674,8 @@ MonoBehaviour:
     showTexture: 0
     filterList: []
     lbTerrainDataList: []
-    GUID: e65ccecb-9183-4e79-8f28-c121e283e0d4
+    GUID: 3cb281c9-b864-45b0-84da-f57e91a78f48
+    blendCurveMode: 1
   - texture: {fileID: 2800000, guid: 440eb36db91ca410f800ff3cfe43572f, type: 3}
     normalMap: {fileID: 2800000, guid: 68aa7fb3a02884731bd8079d87c84094, type: 3}
     heightMap: {fileID: 0}
@@ -749,7 +757,8 @@ MonoBehaviour:
     showTexture: 0
     filterList: []
     lbTerrainDataList: []
-    GUID: 805eab41-aa7c-4e59-a75e-2ad606a49c14
+    GUID: 217ed19d-7f7a-486a-862a-ea2252be4f1c
+    blendCurveMode: 1
   - texture: {fileID: 2800000, guid: 51933586d3f594db593e2a127141dc58, type: 3}
     normalMap: {fileID: 2800000, guid: 5f6e4b1e4e24f4f5aa5526e4863e8fd8, type: 3}
     heightMap: {fileID: 0}
@@ -831,7 +840,8 @@ MonoBehaviour:
     showTexture: 0
     filterList: []
     lbTerrainDataList: []
-    GUID: 472a7c96-fc4f-437c-acf5-734cd880d000
+    GUID: ea548522-2923-4ec2-a7bf-8130117498ca
+    blendCurveMode: 1
   - texture: {fileID: 2800000, guid: 7247856ec89ad441d897e188c0c3c9eb, type: 3}
     normalMap: {fileID: 2800000, guid: a66d816fde35a4b36b239d4be6154296, type: 3}
     heightMap: {fileID: 0}
@@ -913,11 +923,13 @@ MonoBehaviour:
     showTexture: 0
     filterList: []
     lbTerrainDataList: []
-    GUID: c2d9b554-2e64-43a8-87fa-69af83c8b00e
+    GUID: 0eb6590b-b933-4d63-892f-53f5c0fd2379
+    blendCurveMode: 1
   terrainTreesList:
   - maxTreesPerSqrKm: 250
     bendFactor: 0.5
-    prefab: {fileID: 122034, guid: 89115865b9bfb4eca8ac51eef4a50fea, type: 2}
+    prefab: {fileID: 3025512539234439298, guid: e9df1c50c794dbe4497f5b415e734922,
+      type: 3}
     minScale: 1
     maxScale: 3
     treeScalingMode: 1
@@ -981,9 +993,9 @@ MonoBehaviour:
     maxTintStrength: 0.2
     tintColour: {r: 0, g: 1, b: 0, a: 1}
     lbTerrainDataList: []
-    prefabName: 
+    prefabName: LB_Tree4
     showPrefabPreview: 0
-    GUID: cb158d02-d579-40d0-8c98-866872f28897
+    GUID: 251e4f06-ddf7-49c1-b74e-e1f41c840977
   terrainGrassList: []
   landscapeMeshList: []
   lbGroupList: []
@@ -1512,7 +1524,7 @@ MonoBehaviour:
   useWeather: 1
   isHDREnabled: 0
   rainParticleSystemPrefab: {fileID: 477038, guid: 8c029d12358244f03b3dfa1109063299,
-    type: 2}
+    type: 3}
   hailParticleSystemPrefab: {fileID: 0}
   snowParticleSystemPrefab: {fileID: 0}
   useClouds: 1
@@ -1696,6 +1708,7 @@ MonoBehaviour:
   autoRefreshGroupDesigner: 1
   useVegetationSystem: 0
   useVegetationSystemTextures: 0
+  useCTS2019: 0
   useLandscapeExtension: 0
   lbLandscapeExtension:
     heightOffset: 0
@@ -1713,14 +1726,3 @@ MonoBehaviour:
   isUndoTopographyDisabled: 0
   isPopulateLandscape: 0
   debugMode: 0
---- !u!1001 &100100000
-Prefab:
-  m_ObjectHideFlags: 1
-  serializedVersion: 2
-  m_Modification:
-    m_TransformParent: {fileID: 0}
-    m_Modifications: []
-    m_RemovedComponents: []
-  m_ParentPrefab: {fileID: 0}
-  m_RootGameObject: {fileID: 128464}
-  m_IsPrefabParent: 1

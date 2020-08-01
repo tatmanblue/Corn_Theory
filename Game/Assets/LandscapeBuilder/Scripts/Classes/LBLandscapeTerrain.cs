@@ -2,7 +2,7 @@
 
 // If changing LB_COMPUTE, also change in LBGroupVariables.cs
 
-// Landscape Builder. Copyright (c) 2016-2019 SCSM Pty Ltd. All rights reserved.
+// Landscape Builder. Copyright (c) 2016-2020 SCSM Pty Ltd. All rights reserved.
 using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
@@ -218,6 +218,8 @@ namespace LandscapeBuilder
         // Compute shader image modifier layer variable names
         private static readonly string CSrawHeightData = "rawHeightData";
         private static readonly string CSuseBlending = "useBlending";
+        private static readonly string CSblendingCentreSize = "blendingCentreSize";
+        private static readonly string CSblendingFillCorners = "blendingFillCorners";
         private static readonly string CSmodifierMode = "modifierMode";
         private static readonly string CSmodifierInvert = "modifierInvert";
         #endregion
@@ -360,6 +362,7 @@ namespace LandscapeBuilder
             public int isStencilLayerFiltersToApply;
             public int importedTexArrayIdx;
             public uint importedTexWidth;
+            public Vector4 blendCurveMode;
         }
         #endregion
 
@@ -3732,8 +3735,10 @@ namespace LandscapeBuilder
                                                 shaderTopo.SetFloat(CSaddHeightN, layer.floorOffsetY);
                                                 // Set additive/subtractive amount
                                                 shaderTopo.SetFloat(CSaddsubAmount, layer.additiveAmount);
-                                                // Modifier mode can be Add (0) or Set (5).
                                                 shaderTopo.SetBool(CSuseBlending, layer.modifierUseBlending);
+                                                shaderTopo.SetFloat(CSblendingCentreSize, layer.modifierBlendingCentreSize);
+                                                shaderTopo.SetFloat(CSblendingFillCorners, layer.modifierBlendingFillCorners);
+                                                // Modifier mode can be Add (0) or Set (5).
                                                 shaderTopo.SetInt(CSmodifierMode, (int)layer.modifierMode);
                                                 shaderTopo.SetBool(CSmodifierInvert, layer.modifierAddInvert);
                                                 // Set terrain variables
@@ -3798,6 +3803,9 @@ namespace LandscapeBuilder
                                     float previousHeight = 0f;
                                     float blendFactor = 0f;
                                     float xDistToCentre, yDistToCentre, distToCentre;
+                                    float blendFillCorners = layer.modifierBlendingFillCorners; // Default 0.0
+                                    // Centre Size 0->0.9. Default 0.71
+                                    float blendCentreSizeSqr = layer.modifierBlendingCentreSize * layer.modifierBlendingCentreSize;
 
                                     for (x = 0; x < heightmapResolution; x++)
                                     {
@@ -3849,12 +3857,27 @@ namespace LandscapeBuilder
 
                                             if (layer.modifierUseBlending)
                                             {
+                                                //// Calculate blending factor
+                                                //// Get the square distance to the centre of the modifier
+                                                //// 0.5 is subtracted so that central region isn't blended
+                                                //xDistToCentre = (xPos - 0.5f) * 2f;
+                                                //yDistToCentre = (yPos - 0.5f) * 2f;
+                                                //distToCentre = ((xDistToCentre * xDistToCentre) + (yDistToCentre * yDistToCentre) - 0.5f) * 2f;
+                                                //// Add domain warping to the distance to hide the circular shape
+                                                //distToCentre += LBNoise.PerlinFractalNoise(xPos * 5f, yPos * 5f, 3) * 1f;
+                                                //// If (adjusted) distance to centre is positive, use blending
+                                                //blendFactor = Mathf.Clamp01(distToCentre);
+
                                                 // Calculate blending factor
-                                                // Get the square distance to the centre of the modifier
-                                                // 0.5 is subtracted so that central region isn't blended
+                                                // Calculate a modified distance to the centre of the modifier using
+                                                // a superellipse formula
+                                                // An amount is subtracted from the distance (with the remaining distance scaled)
+                                                // in order to preserve the central region
                                                 xDistToCentre = (xPos - 0.5f) * 2f;
                                                 yDistToCentre = (yPos - 0.5f) * 2f;
-                                                distToCentre = ((xDistToCentre * xDistToCentre) + (yDistToCentre * yDistToCentre) - 0.5f) * 2f;
+                                                distToCentre = (Mathf.Pow(xDistToCentre > 0f ? xDistToCentre : -xDistToCentre, (blendFillCorners * 2f) + 2f) +
+                                                    Mathf.Pow(yDistToCentre > 0f ? yDistToCentre : -yDistToCentre, (blendFillCorners * 2f) + 2f) - 
+                                                    blendCentreSizeSqr) / (1f - blendCentreSizeSqr);
                                                 // Add domain warping to the distance to hide the circular shape
                                                 distToCentre += LBNoise.PerlinFractalNoise(xPos * 5f, yPos * 5f, 3) * 1f;
                                                 // If (adjusted) distance to centre is positive, use blending
@@ -4018,8 +4041,10 @@ namespace LandscapeBuilder
                                                 shaderTopo.SetFloat(CSaddHeightN, floorOffsetN);
                                                 // Set additive/subtractive amount
                                                 shaderTopo.SetFloat(CSaddsubAmount, layer.additiveAmount);
-                                                // Modifier mode can be Add (0) or Set (5).
                                                 shaderTopo.SetBool(CSuseBlending, layer.modifierUseBlending);
+                                                shaderTopo.SetFloat(CSblendingCentreSize, layer.modifierBlendingCentreSize);
+                                                shaderTopo.SetFloat(CSblendingFillCorners, layer.modifierBlendingFillCorners);
+                                                // Modifier mode can be Add (0) or Set (5).
                                                 shaderTopo.SetInt(CSmodifierMode, (int)layer.modifierMode);
                                                 shaderTopo.SetBool(CSmodifierInvert, layer.modifierAddInvert);
                                                 // Set terrain variables
@@ -8202,6 +8227,13 @@ namespace LandscapeBuilder
                     // We calc this inside the compute shader, so don't actually require it when compute is enabled.
                     AnimationCurve texturingCurve = LBCurve.SetCurveFromPreset(LBCurve.FilterCurvePreset.WideRange);
 
+                    AnimationCurve[] texturingCurves = new AnimationCurve[4];
+                    texturingCurves[0] = LBCurve.SetCurveFromPreset(LBCurve.FilterCurvePreset.WideRange);
+                    texturingCurves[1] = LBCurve.SetCurveFromPreset(LBCurve.FilterCurvePreset.Flat);
+                    texturingCurves[2] = LBCurve.SetCurveFromPreset(LBCurve.FilterCurvePreset.WideRangeLeftOnly);
+                    texturingCurves[3] = LBCurve.SetCurveFromPreset(LBCurve.FilterCurvePreset.WideRangeRightOnly);
+                    LBTerrainTexture.BlendCurveMode blendCurveMode = LBTerrainTexture.BlendCurveMode.BlendMinMaxValues;
+
                     #region Are there any Area LBTextureFilter's applied?
                     // NOTE: giving an array a capacity of 0 is ok
                     bool[] isAreaFiltersToApply = new bool[enabledTextures];
@@ -8886,6 +8918,14 @@ namespace LandscapeBuilder
                                             lbcsTexture.isAreaFiltersToApply = isAreaFiltersToApply[smTexIdx] ? 1 : 0;
                                             lbcsTexture.isStencilLayerFiltersToApply = isStencilLayerFiltersToApply[smTexIdx] ? 1 : 0;
 
+                                            blendCurveMode = lbTerrainTexture.GetActualBlendCurveMode();
+
+                                            // The blendCurveMode is passed as a float4 and must match the order in LBSCTex.compute shader
+                                            lbcsTexture.blendCurveMode = new Vector4(blendCurveMode == LBTerrainTexture.BlendCurveMode.BlendMinMaxValues ? 1f : 0f,
+                                                                                     blendCurveMode == LBTerrainTexture.BlendCurveMode.NoBlending ? 1f : 0f,
+                                                                                     blendCurveMode == LBTerrainTexture.BlendCurveMode.BlendMinValues ? 1f : 0f,
+                                                                                     blendCurveMode == LBTerrainTexture.BlendCurveMode.BlendMaxValues ? 1f : 0f);
+
                                             // Is this Map or Height, Inclination & Map?
                                             // Only LBTerrainTextures with a Map are stored in the Texture2DArray
                                             if (((int)lbTerrainTexture.texturingMode == 4 || (int)lbTerrainTexture.texturingMode == 5) && lbTerrainTexture.map != null)
@@ -9121,8 +9161,29 @@ namespace LandscapeBuilder
 
                                 heightN = height / terrainHeight;
 
+                                // With the default wide range blend curve (default) values taper off close
+                                // to the extents of the range. Flat, WideRangeLeft/Right only help with this problem.
                                 for (int smTexIdx = 0; smTexIdx < numSplatTextures; smTexIdx++)
                                 {
+                                    // This could be a little slow
+                                    switch (terrainTexturesListNoDisabled[smTexIdx].GetActualBlendCurveMode())
+                                    {
+                                        case LBTerrainTexture.BlendCurveMode.BlendMinMaxValues:
+                                            texturingCurve = texturingCurves[0];
+                                            break;
+                                        case LBTerrainTexture.BlendCurveMode.NoBlending:
+                                            texturingCurve = texturingCurves[1];
+                                            break;
+                                        case LBTerrainTexture.BlendCurveMode.BlendMinValues:
+                                            texturingCurve = texturingCurves[2];
+                                            break;
+                                        case LBTerrainTexture.BlendCurveMode.BlendMaxValues:
+                                            texturingCurve = texturingCurves[3];
+                                            break;
+                                        default:
+                                            break;
+                                    }
+
                                     // Set blend weight for each texture
                                     #region Height Rule
                                     if (terrainTexturesListNoDisabled[smTexIdx].texturingMode == LBTerrainTexture.TexturingMode.Height)
@@ -13943,7 +14004,7 @@ namespace LandscapeBuilder
         private static void ProcessGroup(int activeGpIdx, int parentGpIdx, int parentGpMbrIdx, bool isChildGroup, LBGroupVariables gVars)
         {
             // Get out if basic validation fails
-            if (gVars == null || gVars.numActiveGroups < 1 || gVars.numActiveGroups <= activeGpIdx) { return; }
+            if (activeGpIdx < 0 || gVars == null || gVars.numActiveGroups < 1 || gVars.numActiveGroups <= activeGpIdx) { return; }
 
             string methodName = "LBLandscapeTerrain.ProcessGroup";
 

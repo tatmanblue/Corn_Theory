@@ -105,6 +105,9 @@ public class RuntimeSample04 : MonoBehaviour
                 newTerrain.detailObjectDistance = 150f;
                 newTerrain.treeCrossFadeLength = 25f;
 
+                newTerrain.groupingID = 100; // default is 0
+                newTerrain.allowAutoConnect = true;
+
                 // Set terrain data settings (same as above comment)
                 TerrainData newTerrainData = new TerrainData();
 
