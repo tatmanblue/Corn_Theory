@@ -13,7 +13,7 @@ game/*.psd
 game/*.psd.meta
 _TerrainAutoUpgrade/
 VegetationStudioDemo/
-game/LandscapeBuilder/Undo/*
+game/LandscapeBuilder/Undo/
 
 # Visual Studio cache directory
 .vs/
