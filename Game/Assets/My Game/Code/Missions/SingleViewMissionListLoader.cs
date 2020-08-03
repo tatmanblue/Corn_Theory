@@ -100,7 +100,6 @@ namespace CornTheory.Missions
 
         private void SetIndicators()
         {
-            print("SetIndicators()");
             GameObject uiElement = GameObject.Find("Complete Image");
 
             // TODO: setting color does not work
