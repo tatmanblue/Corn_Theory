@@ -1,0 +1,5 @@
+# Websites to keep in mind
+
+## assets
+https://opengameart.org/
+https://cosminmirza.bandcamp.com/album/free-random-music-pack4
