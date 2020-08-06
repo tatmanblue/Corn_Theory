@@ -7,8 +7,8 @@ namespace CornTheory
 {
     public interface IMission
     {
-        int Parent { get; set; }
-        int Id { get; set; }
+        decimal Parent { get; set; }
+        decimal Id { get; set; }
         string Name { get; set; }
         string Description { get; set; }
         MissionState State { get; set; }
@@ -24,8 +24,8 @@ namespace CornTheory
 
         // these methods are used by NPCS in the game to 
         // change mission states
-        void ActivateMission(int missionId);
-        void CompleteMission(int missionId);
+        void ActivateMission(decimal missionId);
+        void CompleteMission(decimal missionId);
 
     }
 }

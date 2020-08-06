@@ -2,7 +2,9 @@
 using System.Collections;
 using System.Collections.Generic;
 using CornTheory.Missions;
+using CornTheory.Utility;
 using UnityEngine;
+using UnityEngine.UI;
 
 namespace CornTheory.Player
 {
@@ -11,6 +13,7 @@ namespace CornTheory.Player
     /// </summary>
     public class PlayerState
     {
+        // TODO when/where does this get loaded from data
         private static PlayerState DATA_INSTANCE = new PlayerState();
         public static PlayerState Instance
         {
@@ -34,10 +37,22 @@ namespace CornTheory.Player
         public int MaxStamina { get; private set; }
         public int CurrentStamina { get; private set; }
         public GameUIState GameState { get; set; }
-
+        public string Stuff { get; set; }
         // TODO this should be data driven
         public void LoadMissions()
         {
+            /*
+             * Temporary documentation on this
+             * MissionMaster.txt is a comma delimited list of missions
+             * id,filename (sans extension)
+             * 
+             * Any given mission is stored as Json.
+             */
+            string missionMasterJson = Resources.Load<TextAsset>("Missions/MissionMaster").ToString();
+            Stuff = missionMasterJson;
+
+            var indexes = JsonTools.ArrayFromJson<MissionIndex>(missionMasterJson);
+
             GameObject missionManager = GameObject.Find(Constants.MissionMananger);
             MissionManager instance = missionManager.GetComponent<MissionManager>();
 

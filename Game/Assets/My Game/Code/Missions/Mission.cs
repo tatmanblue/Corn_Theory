@@ -6,6 +6,13 @@ using UnityEngine;
 namespace CornTheory.Missions
 {
     [Serializable]
+    public class MissionIndex
+    {
+        public decimal id;
+        public string file;
+    }
+
+    [Serializable]
     public class Mission : IMission
     {
         public Mission()
@@ -13,8 +20,8 @@ namespace CornTheory.Missions
             Parent = -1;
         }
 
-        public int Parent { get; set; }
-        public int Id { get; set; }
+        public decimal Parent { get; set; }
+        public decimal Id { get; set; }
         public string Name { get; set; }
         public string Description { get; set; }
         // [Newtonsoft.Json.JsonConverter(typeof(Newtonsoft.Json.Converters.StringEnumConverter))]

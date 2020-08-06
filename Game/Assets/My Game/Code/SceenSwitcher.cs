@@ -6,6 +6,7 @@ using CornTheory.Player;
 
 namespace CornTheory
 {
+    // TODO: fix misspelling!!!!
     public class SceenSwitcher : MonoBehaviour
     {
         [SerializeField] Texture2D defaultCursor = null;

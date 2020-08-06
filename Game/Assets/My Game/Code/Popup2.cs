@@ -54,7 +54,6 @@ namespace CornTheory
         {
             if (Input.GetKeyDown(KeyCode.Escape))
             {
-                print("Popup got escape key");
                 Close();
             }
         }

@@ -27,7 +27,7 @@ namespace CornTheory.Missions
             } 
         }
 
-        public void ActivateMission(int missionId)
+        public void ActivateMission(decimal missionId)
         {
             lock (Missions)
             {
@@ -52,7 +52,7 @@ namespace CornTheory.Missions
             Missions.Add(mission);
         }
 
-        public void CompleteMission(int missionId)
+        public void CompleteMission(decimal missionId)
         {
             lock (Missions)
             {
@@ -73,6 +73,7 @@ namespace CornTheory.Missions
             if (scene.name == Constants.MainWorldScene || scene.name == Constants.DevPlayArenaScene || scene.name == Constants.MainWorldSceneExperimental)
             {
                 PlayerState.Instance.LoadMissions();
+                print("more file reading stuff: '" + PlayerState.Instance.Stuff + "'");
                 popupHandler.Invoke("ShowMissions", 0f);
             }
         }
