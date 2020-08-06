@@ -41,6 +41,9 @@ ExportedObj/
 # Unity3D Generated File On Crash Reports
 sysinfo.txt
 
+# because of JsonDotNet package
+*.zip
+
 # Builds
 *.apk
 *.unitypackage
