@@ -81,6 +81,8 @@ namespace CornTheory.Missions
         private void SetMissionTitle()
         {
             GameObject uiElement = GameObject.Find("Mission Header Text");
+            // TODO It is a programming bug if SingleViewMissionListLoader is called with
+            // no activeMission set.  Need to decide what to do
             uiElement.GetComponent<UnityEngine.UI.Text>().text = activeMission.Name;
         }
 

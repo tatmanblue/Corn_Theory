@@ -1,0 +1,9 @@
+{
+	"Id": 1.0,
+	"Name": "This is your first mission.",
+	"Description": "Missions earn you coin and other items that help you.   Missions also help you learn new information and skills so that you can succeed. \r\n\r\nFind the farmer working in the corn field and speak to him.",
+	"State": "OnGoing",
+	"Parent": -1,
+	"Type": "Main",
+	"CoinReward": 10
+}

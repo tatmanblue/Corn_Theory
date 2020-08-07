@@ -1,0 +1,9 @@
+{
+	"Id": 2.0,
+	"Name": "Find the bus stop.",
+	"Description": "The farmer suggested to get to the bus stop at the top of the hill.  Find the bus stop and look around.  Maybe you will meet someone that can help you.",
+	"State": "NotStarted",
+	"Parent": -1,
+	"Type": "Main",
+	"CoinReward": 10
+}

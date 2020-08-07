@@ -3,6 +3,8 @@ using System.Collections;
 using System.Collections.Generic;
 using CornTheory.Missions;
 using CornTheory.Utility;
+using Language.Lua;
+using Newtonsoft.Json;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -38,61 +40,23 @@ namespace CornTheory.Player
         public int CurrentStamina { get; private set; }
         public GameUIState GameState { get; set; }
         public string Stuff { get; set; }
-        // TODO this should be data driven
+
         public void LoadMissions()
         {
-            /*
-             * Temporary documentation on this
-             * MissionMaster.txt is a comma delimited list of missions
-             * id,filename (sans extension)
-             * 
-             * Any given mission is stored as Json.
-             */
-            string missionMasterJson = Resources.Load<TextAsset>("Missions/MissionMaster").ToString();
-            Stuff = missionMasterJson;
-
-            var indexes = JsonTools.ArrayFromJson<MissionIndex>(missionMasterJson);
-
             GameObject missionManager = GameObject.Find(Constants.MissionMananger);
             MissionManager instance = missionManager.GetComponent<MissionManager>();
 
-            instance.AddNewMission(new Mission()
+            // TODO: if this fails, the system is no longer functional.  Why would if fail?
+            // what should we do about it
+            List<MissionIndex> items = JsonTools.LoadFromResource<List<MissionIndex>>("Missions/MissionMaster");
+
+            foreach(MissionIndex index in items)
             {
-                Id = 1,
-                Name = "This is your first mission.",
-                Description = "Missions earn you coin and other items that help you.   Missions also help you learn new information and skills so that you can succeed. \r\n\r\nFind the farmer working in the corn field and speak to him.",
-                State = MissionState.OnGoing,
-                Parent = -1,
-                Type = MissionType.Main,
-                CoinReward = 10
-            }, true);
-
-            instance.AddNewMission(new Mission()
-            {
-                Id = 2,
-                Name = "Find the bus stop",
-                Description = "The farmer suggested to get to the bus stop at the top of the hill.  Find the bus stop and look around.  Maybe you will meet someone that can help you.",
-                State = MissionState.NotStarted,
-                Parent = -1,
-                Type = MissionType.Main,
-                CoinReward = 10
-            });
-
-            instance.AddNewMission(new Mission()
-            {
-                Id = 3,
-                Name = "Walk to town.",
-                Description = "Walk across the bridge into town.",
-                State = MissionState.NotStarted,
-                Parent = -1,
-                Type = MissionType.Main,
-                CoinReward = 10
-            });
-
-
+                Mission mission = JsonTools.LoadFromResource<Mission>(string.Format("Missions/{0}", index.File));
+                instance.AddNewMission(mission, mission.Id == 1.0M ? true : false);
+            }
 
             IsReady = true;
         }
-
     }
 }

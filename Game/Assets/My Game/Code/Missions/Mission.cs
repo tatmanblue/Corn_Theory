@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -8,8 +9,9 @@ namespace CornTheory.Missions
     [Serializable]
     public class MissionIndex
     {
-        public decimal id;
-        public string file;
+        public decimal Id { get; set; }
+
+        public string File { get; set; }
     }
 
     [Serializable]
@@ -24,9 +26,9 @@ namespace CornTheory.Missions
         public decimal Id { get; set; }
         public string Name { get; set; }
         public string Description { get; set; }
-        // [Newtonsoft.Json.JsonConverter(typeof(Newtonsoft.Json.Converters.StringEnumConverter))]
+        [JsonConverter(typeof(Newtonsoft.Json.Converters.StringEnumConverter))]
         public MissionState State { get; set; }
-        // [Newtonsoft.Json.JsonConverter(typeof(Newtonsoft.Json.Converters.StringEnumConverter))]
+        [JsonConverter(typeof(Newtonsoft.Json.Converters.StringEnumConverter))]
         public MissionType Type { get; set; }
         public IMissionStateCheck Check { get; set; }
         public int CoinReward { get; set; }

@@ -1,0 +1,9 @@
+{
+	"Id": 3.0,
+	"Name": "Get to town.",
+	"Description": "Follow the road into town.  Feel free to stop and explore as you come across things that look interesting.",
+	"State": "NotStarted",
+	"Parent": -1,
+	"Type": "Main",
+	"CoinReward": 10
+}
