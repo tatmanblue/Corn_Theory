@@ -79,7 +79,7 @@ namespace CornTheory.Inventory
 
             bool mouseIsOnSelf = IsMouseOnSelf();
 
-            if (Input.GetMouseButtonDown(0))
+            if (Input.GetMouseButtonDown(0) && false == isMouseDown)
             {
                 if (true == mouseIsOnSelf)
                 {
